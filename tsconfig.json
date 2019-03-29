@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "dist/",
+    "declaration": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "strict": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "moduleResolution": "node",
+    "lib": ["es2015"],
+    "jsx": "react",
+    "target": "es5"
+  },
+  "include": ["src", "demo", "test"]
+}

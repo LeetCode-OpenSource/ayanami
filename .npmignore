@@ -1,0 +1,13 @@
+node_modules
+.idea
+/src
+/demo
+/test
+.prettierrc
+tsconfig.json
+tsconfig.build.json
+tslint.json
+yarn.lock
+*.tgz
+.cache
+jest.config.js
