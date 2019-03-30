@@ -16,7 +16,7 @@
     "build": "rm -rf ./dist && tsc -p ./tsconfig.build.json",
     "prettier": "prettier '@(src|demo)/**/*.@(ts|tsx|html|less)' --write",
     "lint": "tslint -p tsconfig.json --fix",
-    "test": "jest"
+    "test": "jest --collectCoverage"
   },
   "husky": {
     "hooks": {
