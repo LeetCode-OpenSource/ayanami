@@ -12,25 +12,26 @@ import {
   effectSymbols,
 } from './actions'
 
-type ConstructorOfAyanami<M extends Ayanami<any>> = ConstructorOf<M> & typeof Ayanami
+type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
 
 export abstract class Ayanami<State> {
   static useHooks<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    const sharedInstance = (this as ConstructorOfAyanami<M>).shared()
+    const sharedInstance = (this as ConstructorOfAyanami<M, S>).shared()
     return useAyanami<M>(sharedInstance)
   }
 
-  static getInstance<M extends Ayanami<any>>(this: ConstructorOfAyanami<M>): M {
-    return new this()
-  }
+  static shared<M extends Ayanami<any>>(this: ConstructorOf<M>): M {
+    const THIS = this as ConstructorOfAyanami<M, any>
+    const ayanami = THIS.getInstance()
 
-  private static shared<M extends Ayanami<any>>(this: ConstructorOfAyanami<M>): M {
-    const ayanami = this.getInstance()
-    this.shared = () => ayanami
-
+    THIS.shared = () => ayanami
     ayanami.setup()
 
     return ayanami
+  }
+
+  static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {
+    return new this()
   }
 
   abstract defaultState: State
@@ -53,21 +54,18 @@ export abstract class Ayanami<State> {
     const effect$ = setupEffectActions(this, internalState$)
     const reducer$ = setupReducerActions(this, getState)
 
-    Object.defineProperty(this, 'state$', {
-      value: merge(effect$, reducer$).pipe(
-        scan<Partial<State>, State>(
-          (state, nextState) => ({ ...state, ...nextState }),
-          this.defaultState,
-        ),
-        distinctUntilChanged(shallowequal),
-        tap(setState),
-        share(),
+    const state$ = merge(effect$, reducer$).pipe(
+      scan<Partial<State>, State>(
+        (state, nextState) => ({ ...state, ...nextState }),
+        this.defaultState,
       ),
-    })
+      distinctUntilChanged(shallowequal),
+      tap(setState),
+      share(),
+    )
 
-    Object.defineProperty(this, 'getState', {
-      value: getState,
-    })
+    Object.defineProperty(this, 'state$', { value: state$ })
+    Object.defineProperty(this, 'getState', { value: getState })
 
     this.setup = () => {}
   }
