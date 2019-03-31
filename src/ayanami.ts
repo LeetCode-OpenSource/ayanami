@@ -55,7 +55,7 @@ export abstract class Ayanami<State> {
     return getAllActionFactories(this)
   }
 
-  protected setup() {
+  setup() {
     const { state$: internalState$, getState, setState } = createState(this.defaultState)
 
     const effect$ = setupEffectActions(this, internalState$)
