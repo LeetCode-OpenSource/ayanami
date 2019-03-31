@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { BehaviorSubject, Observable, merge, NEVER } from 'rxjs'
+import { BehaviorSubject, Observable, merge } from 'rxjs'
 import { distinctUntilChanged, scan, tap, share } from 'rxjs/operators'
 import shallowequal from 'shallowequal'
 
@@ -13,6 +13,9 @@ import {
 } from './actions'
 
 type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
+
+const createSetupError = (className: string) =>
+  new Error(`Get state failed. call ${className}'s .setup(defaultState) first`)
 
 export abstract class Ayanami<State> {
   static useHooks<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
@@ -36,10 +39,14 @@ export abstract class Ayanami<State> {
 
   abstract defaultState: State
 
-  readonly state$: Observable<Readonly<State>> = NEVER
+  get state$(): Observable<Readonly<State>> {
+    return new Observable((observer) => {
+      observer.error(createSetupError(this.constructor.name))
+    })
+  }
 
   getState(): Readonly<State> {
-    throw new Error(`Get state failed. call ${this.constructor.name}'s .setup(defaultState) first`)
+    throw createSetupError(this.constructor.name)
   }
 
   getActions<M extends Ayanami<any>>(
