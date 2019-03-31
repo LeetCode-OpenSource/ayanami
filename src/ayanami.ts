@@ -1,9 +1,8 @@
 import 'reflect-metadata'
-import { BehaviorSubject, Observable, merge } from 'rxjs'
-import { distinctUntilChanged, scan, tap, share } from 'rxjs/operators'
-import shallowequal from 'shallowequal'
+import { Observable } from 'rxjs'
 
 import { EffectAction, ConstructorOf, ActionOfAyanami } from './types'
+import { createState } from './basic-state'
 import { useAyanami } from './hooks'
 import {
   setupEffectActions,
@@ -56,23 +55,13 @@ export abstract class Ayanami<State> {
   }
 
   setup() {
-    const { state$: internalState$, getState, setState } = createState(this.defaultState)
+    const basicState = createState(this.defaultState)
 
-    const effect$ = setupEffectActions(this, internalState$)
-    const reducer$ = setupReducerActions(this, getState)
+    setupEffectActions(this, basicState)
+    setupReducerActions(this, basicState)
 
-    const state$ = merge(effect$, reducer$).pipe(
-      scan<Partial<State>, State>(
-        (state, nextState) => ({ ...state, ...nextState }),
-        this.defaultState,
-      ),
-      distinctUntilChanged(shallowequal),
-      tap(setState),
-      share(),
-    )
-
-    Object.defineProperty(this, 'state$', { value: state$ })
-    Object.defineProperty(this, 'getState', { value: getState })
+    Object.defineProperty(this, 'state$', { value: basicState.state$ })
+    Object.defineProperty(this, 'getState', { value: basicState.getState })
 
     this.setup = () => {}
   }
@@ -83,21 +72,5 @@ export abstract class Ayanami<State> {
       actionName: effectSymbols.setStateAction,
       params: state,
     }
-  }
-}
-
-function createState<State>(defaultState: State) {
-  const state$ = new BehaviorSubject<State>(defaultState)
-
-  const setState = (state: State) => {
-    state$.next(state)
-  }
-
-  const getState = () => state$.getValue()
-
-  return {
-    state$: state$.asObservable(),
-    setState,
-    getState,
   }
 }

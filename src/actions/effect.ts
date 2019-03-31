@@ -1,10 +1,11 @@
-import { merge, Subject, Observable, NEVER } from 'rxjs'
+import { Subject, Observable, NEVER } from 'rxjs'
 import { tap, map, groupBy, mergeMap, switchMapTo } from 'rxjs/operators'
 
 import { EffectAction } from '../types'
 import { effectSymbols } from './symbols'
 import { createActionDecorator, getActionNames, updateActions, getAllActions } from './utils'
 import { Ayanami } from '../ayanami'
+import { BasicState } from '../basic-state'
 
 export const Effect = createActionDecorator(effectSymbols)
 
@@ -15,24 +16,24 @@ enum ActionGroup {
 
 export const setupEffectActions = <M extends Ayanami<S>, S>(
   ayanami: M,
-  state$: Observable<S>,
-): Observable<Partial<S>> =>
-  merge(
-    ...getActionNames<M>(effectSymbols, ayanami.constructor).map((methodName) => {
-      const payload$ = new Subject<any>()
-      const effect$: Observable<EffectAction<M>> = (ayanami[methodName] as Function).call(
-        ayanami,
-        payload$,
-        state$,
-      )
+  state: BasicState<S>,
+): void => {
+  getActionNames<M>(effectSymbols, ayanami.constructor).forEach((methodName) => {
+    const payload$ = new Subject<any>()
+    const effect$: Observable<EffectAction<M>> = (ayanami[methodName] as Function).call(
+      ayanami,
+      payload$,
+      state.state$,
+    )
 
-      updateActions(effectSymbols, ayanami, {
-        [methodName](payload: any) {
-          payload$.next(payload)
-        },
-      })
+    updateActions(effectSymbols, ayanami, {
+      [methodName](payload: any) {
+        payload$.next(payload)
+      },
+    })
 
-      return effect$.pipe(
+    effect$
+      .pipe(
         groupBy(
           ({ actionName }): ActionGroup =>
             actionName === effectSymbols.setStateAction ? ActionGroup.setState : ActionGroup.normal,
@@ -52,5 +53,7 @@ export const setupEffectActions = <M extends Ayanami<S>, S>(
           }
         }),
       )
-    }),
-  )
+      // TODO - able to unsubscribe?
+      .subscribe(state.setState)
+  })
+}
