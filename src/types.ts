@@ -31,9 +31,15 @@ type UnpackPayloadWithoutState<F, S> = F extends (payload: infer Payload) => inf
     : (ReturnState extends Partial<S> ? Payload : never)
   : never
 
-type UnpackPayload<F, S> = UnpackPayloadWithState<F, S> extends never
-  ? UnpackPayloadWithoutState<F, S>
-  : UnpackPayloadWithState<F, S>
+type UnpackPayloadWithoutStateAndPayload<F, S> = F extends () => infer ReturnState
+  ? (ReturnState extends Partial<S> ? void : never)
+  : never
+
+type UnpackPayload<F, S> = UnpackPayloadWithoutStateAndPayload<F, S> extends never
+  ? UnpackPayloadWithoutState<F, S> extends never
+    ? UnpackPayloadWithState<F, S>
+    : UnpackPayloadWithoutState<F, S>
+  : UnpackPayloadWithoutStateAndPayload<F, S>
 
 export type ActionMethodOfAyanami<M, S> = {
   [key in Exclude<keyof M, keyof Ayanami<S>>]: UnpackPayload<M[key], S> extends never
