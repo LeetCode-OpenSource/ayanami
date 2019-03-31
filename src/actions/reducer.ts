@@ -1,5 +1,5 @@
 import { Ayanami } from '../ayanami'
-import { BasicState } from '../basic-state'
+import { BasicState } from '../state'
 import { reducerSymbols } from './symbols'
 import { createActionDecorator, getActionNames, updateActions } from './utils'
 

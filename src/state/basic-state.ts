@@ -24,7 +24,3 @@ export class BasicState<S> {
     )
   }
 }
-
-export function createState<S>(defaultState: S) {
-  return new BasicState(defaultState)
-}

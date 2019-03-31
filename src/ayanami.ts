@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { Observable } from 'rxjs'
 
 import { EffectAction, ConstructorOf, ActionOfAyanami } from './types'
-import { createState } from './basic-state'
+import { createState } from './state'
 import { useAyanami } from './hooks'
 import {
   setupEffectActions,

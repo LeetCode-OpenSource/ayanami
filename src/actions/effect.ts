@@ -2,10 +2,10 @@ import { Subject, Observable, NEVER } from 'rxjs'
 import { tap, map, groupBy, mergeMap, switchMapTo } from 'rxjs/operators'
 
 import { EffectAction } from '../types'
+import { Ayanami } from '../ayanami'
+import { BasicState } from '../state'
 import { effectSymbols } from './symbols'
 import { createActionDecorator, getActionNames, updateActions, getAllActions } from './utils'
-import { Ayanami } from '../ayanami'
-import { BasicState } from '../basic-state'
 
 export const Effect = createActionDecorator(effectSymbols)
 
