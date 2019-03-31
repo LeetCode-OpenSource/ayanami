@@ -1,7 +1,8 @@
-import { Subject, Observable, NEVER } from 'rxjs'
-import { tap, map, groupBy, mergeMap, switchMapTo } from 'rxjs/operators'
+import { Subject, Observable } from 'rxjs'
+import { tap, groupBy, mergeMap } from 'rxjs/operators'
 
 import { EffectAction } from '../types'
+import { logStateAction } from '../dev-helper'
 import { Ayanami } from '../ayanami'
 import { BasicState } from '../state'
 import { effectSymbols } from './symbols'
@@ -16,14 +17,14 @@ enum ActionGroup {
 
 export const setupEffectActions = <M extends Ayanami<S>, S>(
   ayanami: M,
-  state: BasicState<S>,
+  basicState: BasicState<S>,
 ): void => {
   getActionNames<M>(effectSymbols, ayanami.constructor).forEach((methodName) => {
     const payload$ = new Subject<any>()
     const effect$: Observable<EffectAction<M>> = (ayanami[methodName] as Function).call(
       ayanami,
       payload$,
-      state.state$,
+      basicState.state$,
     )
 
     updateActions(effectSymbols, ayanami, {
@@ -41,19 +42,33 @@ export const setupEffectActions = <M extends Ayanami<S>, S>(
         mergeMap((action$) => {
           switch (action$.key) {
             case ActionGroup.setState:
-              return action$.pipe(map(({ params: state }) => state))
+              return action$.pipe(
+                tap(({ params }) => {
+                  logStateAction(ayanami, {
+                    params,
+                    actionName: `@Effect/${methodName}/@setStateAction`,
+                    state: params,
+                  })
+
+                  basicState.setState(params)
+                }),
+              )
             case ActionGroup.normal:
               return action$.pipe(
-                tap(({ ayanami, actionName, params }) => {
-                  const actions: any = getAllActions(ayanami)
+                tap(({ ayanami: currentAyanami, actionName, params }) => {
+                  logStateAction(currentAyanami, {
+                    params,
+                    actionName: `@Effect/${methodName}/${actionName}`,
+                  })
+
+                  const actions: any = getAllActions(currentAyanami)
                   actions[actionName as string](params)
                 }),
-                switchMapTo(NEVER),
               )
           }
         }),
       )
       // TODO - able to unsubscribe?
-      .subscribe(state.setState)
+      .subscribe()
   })
 }

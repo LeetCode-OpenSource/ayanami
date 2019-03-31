@@ -1,3 +1,4 @@
+import { logStateAction } from '../dev-helper'
 import { Ayanami } from '../ayanami'
 import { BasicState } from '../state'
 import { reducerSymbols } from './symbols'
@@ -16,6 +17,11 @@ export const setupReducerActions = <M extends Ayanami<S>, S>(
       [methodName](payload: any) {
         const nextState = reducer.call(ayanami, payload, basicState.getState())
         basicState.setState(nextState)
+        logStateAction(ayanami, {
+          actionName: `@Reducer/${methodName}`,
+          params: payload,
+          state: nextState,
+        })
       },
     })
   })
