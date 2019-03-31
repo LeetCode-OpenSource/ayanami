@@ -32,6 +32,7 @@ interface CountState {
 enum CountAction {
   ADD = 'add',
   MINUS = 'minus',
+  ERROR = 'error',
 }
 
 class Count extends Ayanami<CountState> {
@@ -68,6 +69,15 @@ class Count extends Ayanami<CountState> {
       ),
     )
   }
+
+  @Effect()
+  error(payload$: Observable<void>) {
+    return payload$.pipe(
+      map(() => {
+        throw new Error('error!')
+      }),
+    )
+  }
 }
 
 function EffectDemo() {
@@ -76,6 +86,7 @@ function EffectDemo() {
 
   const add = (count: number) => () => actions.add(count)
   const minus = (count: number) => () => actions.minus(count)
+  const throwError = () => actions.error()
 
   return (
     <div>
@@ -86,6 +97,9 @@ function EffectDemo() {
       </button>
       <button id={CountAction.MINUS} onClick={minus(1)}>
         minus one
+      </button>
+      <button id={CountAction.ERROR} onClick={throwError}>
+        error
       </button>
     </div>
   )
@@ -114,6 +128,16 @@ describe('Effect spec:', () => {
       click(CountAction.MINUS)
       expect(count()).toBe(0)
       expect(tips()).toBe('minus 1')
+    })
+  })
+
+  describe('Error handles', () => {
+    it(`Error won't affect the main state$`, () => {
+      click(CountAction.ERROR)
+      click(CountAction.ADD)
+      click(CountAction.MINUS)
+      click(CountAction.MINUS)
+      expect(count()).toBe(-1)
     })
   })
 })
