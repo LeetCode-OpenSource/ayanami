@@ -41,7 +41,7 @@ jobs:
       - run: yarn test
       - run:
           name: report-coverage
-          command: codecov -f coverage/*.json
+          command: npx codecov -f coverage/*.json
 
   deploy:
     <<: *defaults
