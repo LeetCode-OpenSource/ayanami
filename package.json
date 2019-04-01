@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "A better way to react with state",
   "main": "./dist/index.js",
+  "module": "./esm/index.js",
+  "esnext": "./esnext/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LeetCode-OpenSource/ayanami.git"
@@ -13,8 +16,12 @@
   },
   "homepage": "https://github.com/LeetCode-OpenSource/ayanami#readme",
   "scripts": {
+    "check_circular_dependencies": "madge esm/index.js --circular --warning",
     "demo": "parcel ./demo/index.html",
-    "build": "rm -rf ./dist && tsc -p ./tsconfig.build.json",
+    "build": "npm-run-all -p build:es5 build:esm build:next",
+    "build:es5": "shx rm -rf ./dist && tsc -p ./tsconfig.build.json",
+    "build:esm": "shx rm -rf ./esm && tsc -p ./tsconfig.build.json -m esnext --outDir esm",
+    "build:next": "shx rm -rf ./esnext && tsc -p ./tsconfig.build.json --target esnext --outDir esnext",
     "prettier": "prettier '@(src|demo)/**/*.@(ts|tsx|html|less)' --write",
     "lint": "tslint -p tsconfig.json --fix",
     "test": "jest --collectCoverage"
@@ -59,23 +66,27 @@
     "@types/react-dom": "^16.8.3",
     "@types/react-test-renderer": "^16.8.1",
     "@types/shallowequal": "^1.1.1",
+    "codecov": "^3.2.0",
     "husky": "^1.3.1",
     "jest": "^24.5.0",
     "lint-staged": "^8.1.5",
+    "madge": "^3.4.4",
+    "npm-run-all": "^4.1.5",
     "parcel": "^1.12.3",
     "prettier": "^1.16.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-test-renderer": "^16.8.6",
-    "ts-jest": "^24.0.0",
+    "shx": "^0.3.2",
+    "ts-jest": "^24.0.1",
     "tslib": "^1.9.3",
     "tslint": "^5.14.0",
     "tslint-eslint-rules": "^5.4.0",
     "tslint-react": "^4.0.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.3.4000"
+    "typescript": "^3.4.1"
   },
   "peerDependencies": {
-    "react": "^16.8.1"
+    "react": "^16.8.6"
   }
 }

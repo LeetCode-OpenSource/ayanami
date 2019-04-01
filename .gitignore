@@ -5,3 +5,5 @@ dist/
 .cache
 *.tgz
 .DS_Store
+esm
+esnext
