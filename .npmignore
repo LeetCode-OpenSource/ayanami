@@ -12,3 +12,4 @@ yarn.lock
 *.tgz
 .cache
 jest.config.js
+.git/
