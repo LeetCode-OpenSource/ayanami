@@ -69,6 +69,10 @@ export const setupEffectActions = <M extends Ayanami<S>, S>(
         }),
       )
       // TODO - able to unsubscribe?
-      .subscribe()
+      .subscribe({
+        error(e) {
+          console.error(e)
+        },
+      })
   })
 }
