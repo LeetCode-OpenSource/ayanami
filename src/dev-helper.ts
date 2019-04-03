@@ -11,7 +11,13 @@ interface GlobalState {
   [modelName: string]: object
 }
 
-const withDevTools = typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__
+const FakeReduxDevTools = {
+  connect: (_config: object) => ({ send: noop, init: noop }),
+}
+
+const ReduxDevTools =
+  (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) ||
+  FakeReduxDevTools
 
 const noop = () => {}
 
@@ -25,17 +31,11 @@ const getDevTools = (() => {
   let devTools: DevTools
 
   return (): DevTools => {
-    if (devTools) {
-      return devTools
-    } else {
-      if (withDevTools) {
-        devTools = withDevTools.connect({ name: `Ayanami` })
-        devTools.init({})
-      } else {
-        devTools = { send: noop, init: noop }
-      }
-      return devTools
+    if (!devTools) {
+      devTools = ReduxDevTools.connect({ name: `Ayanami` })
+      devTools.init({})
     }
+    return devTools
   }
 })()
 
