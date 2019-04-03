@@ -1,6 +1,6 @@
 import { Ayanami } from './ayanami'
 import { ConstructorOf, ConstructorOfAyanami } from './types'
-import { getAllActions } from './actions'
+import { getAllActions } from './actions/utils'
 
 interface DevTools {
   send(action: { type: string }, state?: Partial<GlobalState>): void
