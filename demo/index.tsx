@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
-import { map, mergeMap, withLatestFrom } from 'rxjs/operators'
+import { mergeMap } from 'rxjs/operators'
 
 import { Ayanami, Effect, EffectAction, Reducer } from '../src'
 
@@ -19,13 +19,8 @@ class Tips extends Ayanami<TipsState> {
   }
 
   @Reducer()
-  showTipsWithReducer(tips: string) {
+  showTips(tips: string) {
     return { tips }
-  }
-
-  @Effect()
-  showTipsWithEffectAction(tips$: Observable<string>): Observable<EffectAction> {
-    return tips$.pipe(map((tips) => this.getActions().showTipsWithReducer(tips)))
   }
 }
 
@@ -40,15 +35,14 @@ class Count extends Ayanami<State> {
   }
 
   @Effect()
-  minus(count$: Observable<number>, state$: Observable<State>): Observable<EffectAction> {
+  minus(count$: Observable<number>): Observable<EffectAction> {
     return count$.pipe(
-      withLatestFrom(state$),
-      mergeMap(([subCount, state]) =>
+      mergeMap((subCount) =>
         of(
-          this.setStateAction({ count: state.count - subCount }),
+          this.getActions().add(-subCount),
           Tips.shared()
             .getActions()
-            .showTipsWithEffectAction(`click minus button at ${Date.now()}`),
+            .showTips(`click minus button at ${Date.now()}`),
         ),
       ),
     )

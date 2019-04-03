@@ -32,13 +32,18 @@ class Count extends Ayanami<CountState> {
     count: 0,
   }
 
+  @Reducer()
+  setCount(count: number) {
+    return { count }
+  }
+
   @Effect()
   add(count$: Observable<number>, state$: Observable<CountState>): Observable<EffectAction> {
     return count$.pipe(
       withLatestFrom(state$),
       mergeMap(([addCount, state]) =>
         of(
-          this.setStateAction({ count: state.count + addCount }),
+          this.getActions().setCount(state.count + addCount),
           Tips.shared()
             .getActions()
             .showTipsWithReducer(`add ${addCount}`),
@@ -53,7 +58,7 @@ class Count extends Ayanami<CountState> {
       withLatestFrom(state$),
       mergeMap(([subCount, state]) =>
         of(
-          this.setStateAction({ count: state.count - subCount }),
+          this.getActions().setCount(state.count - subCount),
           Tips.shared()
             .getActions()
             .showTipsWithEffectAction(`minus ${subCount}`),

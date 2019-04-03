@@ -24,11 +24,16 @@ class Count extends Ayanami<State> {
     return { count: state.count + count }
   }
 
+  @Reducer()
+  setCount(count: number) {
+    return { count }
+  }
+
   @Effect()
   minus(count$: Observable<number>, state$: Observable<State>): Observable<EffectAction> {
     return count$.pipe(
       withLatestFrom(state$),
-      map(([subCount, state]) => this.setStateAction({ count: state.count - subCount })),
+      map(([subCount, state]) => this.getActions().setCount(state.count - subCount)),
     )
   }
 }

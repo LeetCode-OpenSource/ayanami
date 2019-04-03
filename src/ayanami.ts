@@ -1,15 +1,10 @@
 import 'reflect-metadata'
 import { Observable } from 'rxjs'
 
-import { EffectAction, ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
+import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
 import { createState } from './state'
 import { useAyanami } from './hooks'
-import {
-  setupEffectActions,
-  setupReducerActions,
-  getAllActionFactories,
-  effectSymbols,
-} from './actions'
+import { setupEffectActions, setupReducerActions, getAllActionFactories } from './actions'
 
 const createSetupError = (className: string) =>
   new Error(`Get state failed. call ${className}'s .setup(defaultState) first`)
@@ -62,13 +57,5 @@ export abstract class Ayanami<State> {
     Object.defineProperty(this, 'getState', { value: basicState.getState })
 
     this.setup = () => {}
-  }
-
-  protected setStateAction(state: Partial<State>): EffectAction<this> {
-    return {
-      ayanami: this,
-      actionName: effectSymbols.setStateAction,
-      params: state,
-    }
   }
 }

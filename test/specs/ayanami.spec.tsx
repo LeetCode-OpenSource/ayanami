@@ -1,7 +1,4 @@
-import { Observable } from 'rxjs'
-import { map, withLatestFrom } from 'rxjs/operators'
-
-import { Ayanami, Effect, EffectAction, Reducer } from '../../src'
+import { Ayanami } from '../../src'
 
 interface CountState {
   count: number
@@ -10,19 +7,6 @@ interface CountState {
 class Count extends Ayanami<CountState> {
   defaultState = {
     count: 0,
-  }
-
-  @Reducer()
-  add(count: number, state: CountState) {
-    return { count: state.count + count }
-  }
-
-  @Effect()
-  minus(count$: Observable<number>, state$: Observable<CountState>): Observable<EffectAction> {
-    return count$.pipe(
-      withLatestFrom(state$),
-      map(([subCount, state]) => this.setStateAction({ count: state.count - subCount })),
-    )
   }
 }
 
