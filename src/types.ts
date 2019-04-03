@@ -8,6 +8,8 @@ export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
 
+export type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
+
 export interface EffectAction<M = Ayanami<any>> {
   readonly ayanami: M
   readonly actionName: string | Symbol

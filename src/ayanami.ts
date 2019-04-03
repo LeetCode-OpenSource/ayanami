@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { Observable } from 'rxjs'
 
-import { EffectAction, ConstructorOf, ActionOfAyanami } from './types'
+import { EffectAction, ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
 import { createState } from './state'
 import { useAyanami } from './hooks'
 import {
@@ -10,8 +10,6 @@ import {
   getAllActionFactories,
   effectSymbols,
 } from './actions'
-
-type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
 
 const createSetupError = (className: string) =>
   new Error(`Get state failed. call ${className}'s .setup(defaultState) first`)
