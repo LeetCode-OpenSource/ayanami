@@ -15,7 +15,7 @@ const noop = () => {}
 
 const STATE: GlobalState = {}
 
-function getName(ayanami: Ayanami<any>): string {
+export function getName(ayanami: Ayanami<any>): string {
   return ayanami.constructor.name
 }
 

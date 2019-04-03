@@ -18,7 +18,7 @@ export const setupReducerActions = <M extends Ayanami<S>, S>(
         const nextState = reducer.call(ayanami, payload, basicState.getState())
         basicState.setState(nextState)
         logStateAction(ayanami, {
-          actionName: `@Reducer/${methodName}`,
+          actionName: methodName,
           params: payload,
           state: nextState,
         })
