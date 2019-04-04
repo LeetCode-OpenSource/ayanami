@@ -14,9 +14,9 @@ export const setupEffectActions = <M extends Ayanami<S>, S>(
   ayanami: M,
   basicState: BasicState<S>,
 ): void => {
-  getActionNames<M>(effectSymbols, ayanami.constructor).forEach((methodName) => {
+  getActionNames(effectSymbols, ayanami.constructor).forEach((methodName) => {
     const payload$ = new Subject<any>()
-    const effect$: Observable<EffectAction<M>> = (ayanami[methodName] as Function).call(
+    const effect$: Observable<EffectAction<M>> = ((ayanami as any)[methodName] as Function).call(
       ayanami,
       payload$,
       basicState.state$,

@@ -33,7 +33,7 @@ class Count extends Ayanami<State> {
   minus(count$: Observable<number>, state$: Observable<State>): Observable<EffectAction> {
     return count$.pipe(
       withLatestFrom(state$),
-      map(([subCount, state]) => this.getActions().setCount(state.count - subCount)),
+      map(([subCount, state]) => Count.getActions().setCount(state.count - subCount)),
     )
   }
 }

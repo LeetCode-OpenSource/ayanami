@@ -39,10 +39,8 @@ class Count extends Ayanami<State> {
     return count$.pipe(
       mergeMap((subCount) =>
         of(
-          this.getActions().add(-subCount),
-          Tips.shared()
-            .getActions()
-            .showTips(`click minus button at ${Date.now()}`),
+          Count.getActions().add(-subCount),
+          Tips.getActions().showTips(`click minus button at ${Date.now()}`),
         ),
       ),
     )

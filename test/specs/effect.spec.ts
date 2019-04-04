@@ -19,7 +19,7 @@ class Tips extends Ayanami<TipsState> {
 
   @Effect()
   showTipsWithEffectAction(tips$: Observable<string>): Observable<EffectAction> {
-    return tips$.pipe(map((tips) => this.getActions().showTipsWithReducer(tips)))
+    return tips$.pipe(map((tips) => Tips.getActions().showTipsWithReducer(tips)))
   }
 }
 
@@ -43,10 +43,8 @@ class Count extends Ayanami<CountState> {
       withLatestFrom(state$),
       mergeMap(([addCount, state]) =>
         of(
-          this.getActions().setCount(state.count + addCount),
-          Tips.shared()
-            .getActions()
-            .showTipsWithReducer(`add ${addCount}`),
+          Count.getActions().setCount(state.count + addCount),
+          Tips.getActions().showTipsWithReducer(`add ${addCount}`),
         ),
       ),
     )
@@ -58,10 +56,8 @@ class Count extends Ayanami<CountState> {
       withLatestFrom(state$),
       mergeMap(([subCount, state]) =>
         of(
-          this.getActions().setCount(state.count - subCount),
-          Tips.shared()
-            .getActions()
-            .showTipsWithEffectAction(`minus ${subCount}`),
+          Count.getActions().setCount(state.count - subCount),
+          Tips.getActions().showTipsWithEffectAction(`minus ${subCount}`),
         ),
       ),
     )
@@ -80,8 +76,8 @@ class Count extends Ayanami<CountState> {
 describe('Effect spec:', () => {
   const countActions = getAllActionsForTest(Count)
 
-  const count = () => Count.shared().getState().count
-  const tips = () => Tips.shared().getState().tips
+  const count = () => Count.getState().count
+  const tips = () => Tips.getState().tips
 
   describe('Emitted EffectAction will trigger corresponding Action', () => {
     it('Reducer Action', () => {

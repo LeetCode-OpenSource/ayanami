@@ -10,8 +10,8 @@ export const setupReducerActions = <M extends Ayanami<S>, S>(
   ayanami: M,
   basicState: BasicState<S>,
 ): void => {
-  getActionNames<M>(reducerSymbols, ayanami.constructor).forEach((methodName) => {
-    const reducer = ayanami[methodName] as Function
+  getActionNames(reducerSymbols, ayanami.constructor).forEach((methodName) => {
+    const reducer = (ayanami as any)[methodName] as Function
 
     updateActions(reducerSymbols, ayanami, {
       [methodName](payload: any) {

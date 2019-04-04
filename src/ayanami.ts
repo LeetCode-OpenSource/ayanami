@@ -1,28 +1,26 @@
 import 'reflect-metadata'
 import { Observable } from 'rxjs'
 
-import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import { createState } from './state'
+import { ConstructorOf, ActionOfAyanami, StateOfAyanami } from './types'
 import { useAyanami } from './hooks'
-import { setupEffectActions, setupReducerActions, getAllActionFactories } from './actions'
-
-const createSetupError = (className: string) =>
-  new Error(`Get state failed. call ${className}'s .setup(defaultState) first`)
+import { getAllActionFactories } from './actions'
+import { shared } from './utils'
 
 export abstract class Ayanami<State> {
-  static useHooks<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    const sharedInstance = (this as ConstructorOfAyanami<M, S>).shared()
-    return useAyanami<M>(sharedInstance)
+  static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
+    return useAyanami<M, StateOfAyanami<M>>(this)
   }
 
-  static shared<M extends Ayanami<any>>(this: ConstructorOf<M>): M {
-    const THIS = this as ConstructorOfAyanami<M, any>
-    const ayanami = THIS.getInstance()
+  static getState<M extends Ayanami<any>>(this: ConstructorOf<M>) {
+    return shared(this).getState<M, StateOfAyanami<M>>()
+  }
 
-    THIS.shared = () => ayanami
-    ayanami.setup()
+  static getState$<M extends Ayanami<any>>(this: ConstructorOf<M>) {
+    return shared(this).getState$<M, StateOfAyanami<M>>()
+  }
 
-    return ayanami
+  static getActions<M extends Ayanami<any>>(this: ConstructorOf<M>) {
+    return shared(this).getActions<M, StateOfAyanami<M>>()
   }
 
   static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {
@@ -31,31 +29,11 @@ export abstract class Ayanami<State> {
 
   abstract defaultState: State
 
-  get state$(): Observable<Readonly<State>> {
-    return new Observable((observer) => {
-      observer.error(createSetupError(this.constructor.name))
-    })
-  }
+  private getState$!: <M extends Ayanami<S>, S>(this: M) => Observable<Readonly<S>>
 
-  getState(): Readonly<State> {
-    throw createSetupError(this.constructor.name)
-  }
+  private getState!: <M extends Ayanami<S>, S>(this: M) => Readonly<S>
 
-  getActions<M extends Ayanami<any>>(
-    this: M,
-  ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : never {
+  private getActions<M extends Ayanami<S>, S>(this: M): ActionOfAyanami<M, S> {
     return getAllActionFactories(this)
-  }
-
-  setup() {
-    const basicState = createState(this.defaultState)
-
-    setupEffectActions(this, basicState)
-    setupReducerActions(this, basicState)
-
-    Object.defineProperty(this, 'state$', { value: basicState.state$ })
-    Object.defineProperty(this, 'getState', { value: basicState.getState })
-
-    this.setup = () => {}
   }
 }

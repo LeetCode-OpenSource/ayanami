@@ -18,10 +18,7 @@ export function addActionName(symbols: ActionSymbols, constructor: Function, act
   Reflect.defineMetadata(symbols.decorator, [...decoratedActionNames, actionName], constructor)
 }
 
-export function getActionNames<M>(
-  symbols: ActionSymbols,
-  constructor: Function,
-): M extends Ayanami<any> ? (keyof M)[] : string[] {
+export function getActionNames(symbols: ActionSymbols, constructor: Function): string[] {
   return Reflect.getMetadata(symbols.decorator, constructor) || []
 }
 
