@@ -28,11 +28,11 @@ export abstract class Ayanami<State> {
 
   abstract defaultState: State
 
-  private getState$!: <M extends Ayanami<S>, S>(this: M) => Observable<Readonly<S>>
+  getState$!: <M extends Ayanami<S>, S>(this: M) => Observable<Readonly<S>>
 
-  private getState!: <M extends Ayanami<S>, S>(this: M) => Readonly<S>
+  getState!: <M extends Ayanami<S>, S>(this: M) => Readonly<S>
 
-  private getActions<M extends Ayanami<S>, S>(this: M): ActionOfAyanami<M, S> {
+  getActions<M extends Ayanami<S>, S>(this: M): ActionOfAyanami<M, S> {
     return getAllActionFactories(this)
   }
 }
