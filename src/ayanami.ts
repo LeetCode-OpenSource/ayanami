@@ -11,15 +11,15 @@ export abstract class Ayanami<State> {
   }
 
   static getState<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return shared(this).getState<M, StateOfAyanami<M>>()
+    return shared(this).getState<M>()
   }
 
   static getState$<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return shared(this).getState$<M, StateOfAyanami<M>>()
+    return shared(this).getState$<M>()
   }
 
   static getActions<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return shared(this).getActions<M, StateOfAyanami<M>>()
+    return shared(this).getActions<M>()
   }
 
   static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {
@@ -28,11 +28,15 @@ export abstract class Ayanami<State> {
 
   abstract defaultState: State
 
-  getState$!: <M extends Ayanami<S>, S>(this: M) => Observable<Readonly<S>>
+  getState$!: <M extends Ayanami<any>>(
+    this: M,
+  ) => M extends Ayanami<infer S> ? Observable<Readonly<S>> : never
 
-  getState!: <M extends Ayanami<S>, S>(this: M) => Readonly<S>
+  getState!: <M extends Ayanami<any>>(this: M) => M extends Ayanami<infer S> ? Readonly<S> : never
 
-  getActions<M extends Ayanami<S>, S>(this: M): ActionOfAyanami<M, S> {
+  getActions<M extends Ayanami<any>>(
+    this: M,
+  ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : never {
     return getAllActionFactories(this)
   }
 }
