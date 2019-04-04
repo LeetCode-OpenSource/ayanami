@@ -1,7 +1,4 @@
 import { Ayanami } from './ayanami'
-import { ConstructorOf } from './types'
-import { getAllActions } from './actions/utils'
-import { shared } from './utils'
 
 interface DevTools {
   send(action: { type: string }, state?: Partial<GlobalState>): void
@@ -54,10 +51,4 @@ export function logStateAction(
   }
 
   getDevTools().send(action, STATE)
-}
-
-export function getAllActionsForTest<A extends Ayanami<S>, S>(
-  ayanamiConstructor: ConstructorOf<A>,
-) {
-  return getAllActions<A, S>(shared(ayanamiConstructor))
 }

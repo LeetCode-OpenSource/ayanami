@@ -1,7 +1,7 @@
 import { ConstructorOf, ConstructorOfAyanami } from './types'
 import { Ayanami } from './ayanami'
 import { createState } from './state'
-import { setupEffectActions, setupReducerActions } from './actions'
+import { getAllActions, setupEffectActions, setupReducerActions } from './actions'
 
 const sharedInstanceSymbol = Symbol('shared:instance')
 
@@ -28,4 +28,10 @@ function setup<M extends Ayanami<S>, S>(ayanami: M): void {
 
   Object.defineProperty(ayanami, 'getState$', { value: () => basicState.state$ })
   Object.defineProperty(ayanami, 'getState', { value: basicState.getState })
+}
+
+export function getAllActionsForTest<A extends Ayanami<S>, S>(
+  ayanamiConstructor: ConstructorOf<A>,
+) {
+  return getAllActions<A, S>(shared(ayanamiConstructor))
 }
