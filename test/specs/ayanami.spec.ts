@@ -37,11 +37,12 @@ describe('Ayanami specs:', () => {
 
     const callback = jest.fn()
 
-    actions.setCount(44)
-
     count$.subscribe(callback)
 
-    expect(callback.mock.calls.length).toBe(1)
-    expect(callback.mock.calls[0][0]).toEqual({ count: 44 })
+    actions.setCount(44)
+
+    expect(callback.mock.calls.length).toBe(2)
+    expect(callback.mock.calls[0][0]).toEqual({ count: 0 })
+    expect(callback.mock.calls[1][0]).toEqual({ count: 44 })
   })
 })
