@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 
-import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami } from '../types'
-import { Ayanami } from '../ayanami'
-import { getAllActions } from '../actions'
-import { shared } from '../utils'
+import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami } from './types'
+import { Ayanami } from './ayanami'
+import { shared, getAllActions } from './utils'
 
 export function useAyanami<M extends Ayanami<S>, S>(
   ayanamiConstructor: ConstructorOf<M>,

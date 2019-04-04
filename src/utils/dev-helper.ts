@@ -1,4 +1,4 @@
-import { Ayanami } from './ayanami'
+import { Ayanami } from '../ayanami'
 
 interface DevTools {
   send(action: { type: string }, state?: Partial<GlobalState>): void

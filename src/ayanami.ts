@@ -3,8 +3,7 @@ import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, StateOfAyanami } from './types'
 import { useAyanami } from './hooks'
-import { getAllActionFactories } from './actions'
-import { shared } from './utils'
+import { shared, getAllActionFactories } from './utils'
 
 export abstract class Ayanami<State> {
   static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {

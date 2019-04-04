@@ -1,4 +1,7 @@
-import { ActionSymbols } from './utils'
+export interface ActionSymbols {
+  decorator: Symbol
+  actions: Symbol
+}
 
 type EffectSymbols = ActionSymbols & {
   setStateAction: Symbol
@@ -16,3 +19,5 @@ export const reducerSymbols: ActionSymbols = {
 }
 
 export const allActionSymbols = [effectSymbols, reducerSymbols]
+
+export const sharedInstanceSymbol = Symbol('shared:instance')

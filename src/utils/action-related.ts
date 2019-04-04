@@ -1,11 +1,6 @@
 import { ActionMethod, ActionMethodOfAyanami, EffectAction } from '../types'
 import { Ayanami } from '../ayanami'
-import { allActionSymbols } from './symbols'
-
-export interface ActionSymbols {
-  decorator: Symbol
-  actions: Symbol
-}
+import { allActionSymbols, ActionSymbols } from '../symbols'
 
 export function createActionDecorator(symbols: ActionSymbols) {
   return () => ({ constructor }: any, propertyKey: string) => {
