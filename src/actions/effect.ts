@@ -2,7 +2,7 @@ import { Subject, Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 
 import { EffectAction } from '../types'
-import { logStateAction, getName } from '../dev-helper'
+import { logStateAction, getAyanamiName } from '../dev-helper'
 import { Ayanami } from '../ayanami'
 import { BasicState } from '../state'
 import { effectSymbols } from './symbols'
@@ -33,7 +33,7 @@ export const setupEffectActions = <M extends Ayanami<S>, S>(
         tap(({ ayanami: currentAyanami, actionName, params }) => {
           logStateAction(ayanami, {
             params,
-            actionName: `${methodName}/👉${getName(currentAyanami)}/️${actionName}`,
+            actionName: `${methodName}/👉${getAyanamiName(currentAyanami)}/️${actionName}`,
           })
 
           const actions: any = getAllActions(currentAyanami)

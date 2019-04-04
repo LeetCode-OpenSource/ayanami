@@ -24,7 +24,7 @@ const noop = () => {}
 
 const STATE: GlobalState = {}
 
-export function getName(ayanami: Ayanami<any>): string {
+export function getAyanamiName(ayanami: Ayanami<any>): string {
   return ayanami.constructor.name
 }
 
@@ -45,12 +45,12 @@ export function logStateAction(
   infos: { actionName: string; params: string; state?: any },
 ) {
   const action = {
-    type: `${getName(ayanami)}/${infos.actionName}`,
+    type: `${getAyanamiName(ayanami)}/${infos.actionName}`,
     params: infos.params,
   }
 
   if (infos.state) {
-    STATE[getName(ayanami)] = infos.state
+    STATE[getAyanamiName(ayanami)] = infos.state
   }
 
   getDevTools().send(action, STATE)
