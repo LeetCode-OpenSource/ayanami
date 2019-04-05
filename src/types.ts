@@ -16,32 +16,21 @@ export interface EffectAction<M = Ayanami<any>> {
   readonly params: any
 }
 
-type UnpackPayloadWithState<F, S> = F extends (
-  payload: infer Payload,
-  state: infer State,
-) => infer ReturnState
-  ? Payload extends Observable<infer P>
-    ? (State extends Observable<S>
-        ? (ReturnState extends Observable<EffectAction> ? P : never)
-        : never)
-    : (State extends S ? (ReturnState extends Partial<S> ? Payload : never) : never)
-  : never
-
-type UnpackPayloadWithoutState<F, S> = F extends (payload: infer Payload) => infer ReturnState
-  ? Payload extends Observable<infer P>
+type UnpackPayload<F, S> = F extends () => Partial<S>
+  ? void
+  : F extends (payload: infer OP) => any
+  ? OP extends Observable<infer P>
     ? P
-    : (ReturnState extends Partial<S> ? Payload : never)
+    : OP
+  : F extends (payload: infer P, state: S) => any
+  ? P
+  : F extends (payload$: infer OP, state$: infer OS) => any
+  ? OP extends Observable<infer P>
+    ? OS extends Observable<S>
+      ? P
+      : never
+    : never
   : never
-
-type UnpackPayloadWithoutStateAndPayload<F, S> = F extends () => infer ReturnState
-  ? (ReturnState extends Partial<S> ? void : never)
-  : never
-
-type UnpackPayload<F, S> = UnpackPayloadWithoutStateAndPayload<F, S> extends never
-  ? UnpackPayloadWithoutState<F, S> extends never
-    ? UnpackPayloadWithState<F, S>
-    : UnpackPayloadWithoutState<F, S>
-  : UnpackPayloadWithoutStateAndPayload<F, S>
 
 export type ActionMethodOfAyanami<M, S> = {
   [key in Exclude<keyof M, keyof Ayanami<S>>]: UnpackPayload<M[key], S> extends never
