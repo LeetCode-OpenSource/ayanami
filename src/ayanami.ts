@@ -1,11 +1,17 @@
 import 'reflect-metadata'
+import { ComponentType } from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, StateOfAyanami } from './types'
-import { useAyanami } from './hooks'
 import { shared, getAllActionFactories } from './utils'
+import { useAyanami } from './hooks'
+import { connectAyanami } from './connect'
 
 export abstract class Ayanami<State> {
+  static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
+    return connectAyanami<M, StateOfAyanami<M>, P>(this, Component)
+  }
+
   static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
     return useAyanami<M, StateOfAyanami<M>>(this)
   }
