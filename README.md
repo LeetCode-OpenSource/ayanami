@@ -28,24 +28,29 @@
 </p>
 
 ## Highlights
+
 - No extra configuration, everything is out of the box
-- Define state and actions in a __predictable__ and __type-safe__ way
-- Use __[`RxJS`](https://rxjs-dev.firebaseapp.com)__ to create side effects and more
-- __Single source of truth__: The model that extends from `Ayanami` is a singleton
-- __Debuggable__: Inspect actions and state changes via [`redux-devtools-extension`](https://github.com/zalmoxisus/redux-devtools-extension)
+- Define state and actions in a **predictable** and **type-safe** way
+- Use **[`RxJS`](https://rxjs-dev.firebaseapp.com)** to create side effects and more
+- **Single source of truth**: The model that extends from `Ayanami` is a singleton
+- **Debuggable**: Inspect actions and state changes via [`redux-devtools-extension`](https://github.com/zalmoxisus/redux-devtools-extension)
 
 ## Installation
+
 ##### Using [yarn](https://yarnpkg.com/en/package/ayanami):
+
 ```bash
 yarn add ayanami
 ```
 
 ##### Or via [npm](https://www.npmjs.com/package/ayanami):
+
 ```bash
 npm install ayanami
 ```
 
 ## Examples
-- [Simple demo](https://codesandbox.io/s/8111031lml)
-- [Interact with other model](https://codesandbox.io/s/7jy59q34rj)
 
+- [Simple demo with **useHooks**](https://codesandbox.io/s/8111031lml)
+- [Simple demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)
+- [Interact with other Ayanami](https://codesandbox.io/s/7jy59q34rj)
