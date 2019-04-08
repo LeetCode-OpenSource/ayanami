@@ -4,15 +4,17 @@ import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami } from './ty
 import { Ayanami } from './ayanami'
 import { shared, getAllActions } from './utils'
 
-export function useAyanami<M extends Ayanami<S>, S>(
+export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
+
+export function useAyanami<M extends Ayanami<State>, State>(
   ayanamiConstructor: ConstructorOf<M>,
-): [Readonly<S>, ActionMethodOfAyanami<M, S>] {
-  const Constructor = ayanamiConstructor as ConstructorOfAyanami<M, S>
-  const actions: ActionMethodOfAyanami<M, S> = getAllActions(shared(Constructor))
-  const [state, setState] = useState<S>(Constructor.getState())
+): HooksResult<M, State> {
+  const Constructor = ayanamiConstructor as ConstructorOfAyanami<M, State>
+  const actions: ActionMethodOfAyanami<M, State> = getAllActions(shared(Constructor))
+  const [state, setState] = useState<State>(Constructor.getState<M, State>())
 
   useEffect(() => {
-    const subscription = Constructor.getState$().subscribe(setState)
+    const subscription = Constructor.getState$().subscribe(setState as any)
     return () => subscription.unsubscribe()
   }, [])
 
