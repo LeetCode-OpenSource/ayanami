@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 
-import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami } from './types'
-import { Ayanami } from './ayanami'
-import { sharedAyanami, getAllActions } from './utils'
+import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami } from '../types'
+import { Ayanami } from '../ayanami'
+
+import { sharedAyanami } from './shared-ayanami'
+import { getAllActions } from './action-related'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 

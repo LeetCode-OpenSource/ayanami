@@ -3,9 +3,14 @@ import { ComponentType } from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami } from './types'
-import { sharedAyanami, getAllActionFactories } from './utils'
-import { HooksResult, useAyanami } from './hooks'
-import { ComponentConnectedWithAyanami, connectAyanami } from './connect'
+import {
+  sharedAyanami,
+  getAllActionFactories,
+  useAyanami,
+  connectAyanami,
+  HooksResult,
+  ComponentConnectedWithAyanami,
+} from './utils'
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
