@@ -1,3 +1,3 @@
 export * from './shared'
-export * from './dev-helper'
+export * from './test-helper'
 export * from './action-related'
