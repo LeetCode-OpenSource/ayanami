@@ -14,13 +14,11 @@ import {
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
-    return connectAyanami(this, Component) as M extends Ayanami<infer S>
-      ? ComponentConnectedWithAyanami<M, S, P>
-      : never
+    return sharedAyanami(this).connect(Component)
   }
 
   static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return useAyanami(this) as M extends Ayanami<infer S> ? HooksResult<M, S> : never
+    return sharedAyanami(this).useHooks()
   }
 
   static getState<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
@@ -53,5 +51,17 @@ export abstract class Ayanami<State> {
     this: M,
   ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
     return getAllActionFactories(this)
+  }
+
+  useHooks<M extends Ayanami<State>>(this: M) {
+    return useAyanami(this) as M extends Ayanami<infer S>
+      ? HooksResult<M, S>
+      : HooksResult<M, State>
+  }
+
+  connect<M extends Ayanami<State>, P>(this: M, Component: ComponentType<P>) {
+    return connectAyanami(this, Component) as M extends Ayanami<infer S>
+      ? ComponentConnectedWithAyanami<M, S, P>
+      : ComponentConnectedWithAyanami<M, State, P>
   }
 }
