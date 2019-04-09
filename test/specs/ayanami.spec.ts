@@ -1,36 +1,39 @@
-import { Ayanami, Reducer, getAllActionsForTest, copyAyanami } from '../../src'
+import { Ayanami, Reducer, getAllActionsForTest } from '../../src'
 
 interface CountState {
   count: number
 }
 
-class CountModel extends Ayanami<CountState> {
-  defaultState = { count: 0 }
-
-  @Reducer()
-  setCount(count: number): Partial<CountState> {
-    return { count }
-  }
-}
-
 describe('Ayanami specs:', () => {
-  let countModel: CountModel
-
-  beforeEach(() => {
-    countModel = copyAyanami(CountModel)
-  })
-
   it('getState', () => {
-    const actions = getAllActionsForTest(countModel)
+    class CountModel extends Ayanami<CountState> {
+      defaultState = { count: 0 }
 
-    expect(countModel.getState()).toEqual({ count: 0 })
+      @Reducer()
+      setCount(count: number): Partial<CountState> {
+        return { count }
+      }
+    }
+
+    const actions = getAllActionsForTest(CountModel)
+
+    expect(CountModel.getState()).toEqual({ count: 0 })
     actions.setCount(10)
-    expect(countModel.getState()).toEqual({ count: 10 })
+    expect(CountModel.getState()).toEqual({ count: 10 })
   })
 
   it('getState$', () => {
-    const actions = getAllActionsForTest(countModel)
-    const count$ = countModel.getState$()
+    class CountModel extends Ayanami<CountState> {
+      defaultState = { count: 0 }
+
+      @Reducer()
+      setCount(count: number): Partial<CountState> {
+        return { count }
+      }
+    }
+
+    const actions = getAllActionsForTest(CountModel)
+    const count$ = CountModel.getState$()
 
     const callback = jest.fn()
 
