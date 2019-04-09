@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
-import { Ayanami, Reducer, Effect, EffectAction } from '../../src'
-import { sharedAyanami, copyAyanami, getAllActionsForTest } from '../../src/utils'
+import { Ayanami, Reducer, Effect, EffectAction, getAllActionsForTest } from '../../src'
+import { sharedAyanami, copyAyanami } from '../../src/utils'
 
 interface CountState {
   count: number
