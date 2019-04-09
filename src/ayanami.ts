@@ -3,7 +3,7 @@ import { ComponentType } from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami } from './types'
-import { shared, getAllActionFactories } from './utils'
+import { sharedAyanami, getAllActionFactories } from './utils'
 import { HooksResult, useAyanami } from './hooks'
 import { ComponentConnectedWithAyanami, connectAyanami } from './connect'
 
@@ -19,15 +19,15 @@ export abstract class Ayanami<State> {
   }
 
   static getState<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return shared(this).getState<M>()
+    return sharedAyanami(this).getState<M>()
   }
 
   static getState$<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return shared(this).getState$<M>()
+    return sharedAyanami(this).getState$<M>()
   }
 
   static getActions<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return shared(this).getActions<M>()
+    return sharedAyanami(this).getActions<M>()
   }
 
   static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {

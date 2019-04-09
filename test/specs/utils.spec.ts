@@ -1,5 +1,5 @@
 import { Ayanami } from '../../src'
-import { shared } from '../../src/utils'
+import { sharedAyanami } from '../../src/utils'
 
 interface CountState {
   count: number
@@ -12,7 +12,7 @@ class Count extends Ayanami<CountState> {
 }
 
 describe('utils specs:', () => {
-  it('shared: always return same instance', () => {
-    expect(shared(Count)).toBe(shared(Count))
+  it('sharedAyanami: always return same instance', () => {
+    expect(sharedAyanami(Count)).toBe(sharedAyanami(Count))
   })
 })
