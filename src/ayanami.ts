@@ -53,15 +53,18 @@ export abstract class Ayanami<State> {
     return getAllActionFactories(this)
   }
 
-  useHooks<M extends Ayanami<State>>(this: M) {
-    return useAyanami(this) as M extends Ayanami<infer S>
-      ? HooksResult<M, S>
-      : HooksResult<M, State>
+  useHooks<M extends Ayanami<State>>(
+    this: M,
+  ): M extends Ayanami<infer S> ? HooksResult<M, S> : HooksResult<M, State> {
+    return useAyanami(this) as any
   }
 
-  connect<M extends Ayanami<State>, P>(this: M, Component: ComponentType<P>) {
-    return connectAyanami(this, Component) as M extends Ayanami<infer S>
-      ? ComponentConnectedWithAyanami<M, S, P>
-      : ComponentConnectedWithAyanami<M, State, P>
+  connect<M extends Ayanami<State>, P>(
+    this: M,
+    Component: ComponentType<P>,
+  ): M extends Ayanami<infer S>
+    ? ComponentConnectedWithAyanami<M, S, P>
+    : ComponentConnectedWithAyanami<M, State, P> {
+    return connectAyanami(this, Component) as any
   }
 }
