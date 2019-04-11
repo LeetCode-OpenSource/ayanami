@@ -34,6 +34,11 @@ class Count extends Ayanami<State> {
     return { count: state.count + count }
   }
 
+  @Reducer()
+  reset() {
+    return { count: 0 }
+  }
+
   @Effect()
   minus(count$: Observable<number>): Observable<EffectAction> {
     return count$.pipe(
@@ -58,12 +63,9 @@ function CountComponent() {
     <div>
       <p>count: {count}</p>
       <p>tips: {tips}</p>
-      <button id="add" onClick={add(1)}>
-        add one
-      </button>
-      <button id="minus" onClick={minus(1)}>
-        minus one
-      </button>
+      <button onClick={add(1)}>add one</button>
+      <button onClick={minus(1)}>minus one</button>
+      <button onClick={actions.reset}>reset to zero</button>
     </div>
   )
 }
