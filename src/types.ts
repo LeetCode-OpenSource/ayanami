@@ -2,7 +2,14 @@ import { Observable } from 'rxjs'
 
 import { Ayanami } from './ayanami'
 
-export type ActionMethod<T, R = void> = (params: T) => R
+// https://stackoverflow.com/questions/55541275/typescript-check-for-the-any-type
+type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
+
+type IsAny<T> = IfAny<T, true, false>
+
+type IsVoid<T> = IsAny<T> extends true ? false : [T] extends [void] ? true : false
+
+export type ActionMethod<T, R = void> = IsVoid<T> extends true ? () => R : (params: T) => R
 
 export interface ConstructorOf<T> {
   new (...args: any[]): T
@@ -59,5 +66,3 @@ export type ActionOfAyanami<M, S> = {
     ? never
     : ActionMethod<UnpackPayload<M[key], S>, EffectAction<M>>
 }
-
-export type StateOfAyanami<M> = M extends Ayanami<infer State> ? State : never
