@@ -1,6 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs'
-import { share, distinctUntilChanged } from 'rxjs/operators'
-import shallowequal from 'shallowequal'
+import * as shallowequal from 'shallowequal'
 
 export class BasicState<S> {
   readonly state$: Observable<S>
@@ -15,12 +14,14 @@ export class BasicState<S> {
     this.getState = () => state$.getValue()
 
     this.setState = (state: Partial<S>) => {
-      state$.next({ ...this.getState(), ...state })
+      const currentState = this.getState()
+      const nextState = { ...currentState, ...state }
+
+      if (!shallowequal(currentState, nextState)) {
+        state$.next(nextState)
+      }
     }
 
-    this.state$ = state$.pipe(
-      distinctUntilChanged(shallowequal),
-      share(),
-    )
+    this.state$ = state$.asObservable()
   }
 }
