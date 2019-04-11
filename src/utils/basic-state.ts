@@ -1,5 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs'
-import * as shallowequal from 'shallowequal'
+
+const shallowequal = require('shallowequal')
 
 export class BasicState<S> {
   readonly state$: Observable<S>
