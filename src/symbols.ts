@@ -13,6 +13,11 @@ export const reducerSymbols: ActionSymbols = {
   actions: Symbol('actions:reducer'),
 }
 
-export const allActionSymbols = [effectSymbols, reducerSymbols]
+export const defineActionSymbols: ActionSymbols = {
+  decorator: Symbol('decorator:defineAction'),
+  actions: Symbol('actions:defineAction'),
+}
+
+export const allActionSymbols = [effectSymbols, reducerSymbols, defineActionSymbols]
 
 export const sharedInstanceSymbol = Symbol('shared:instance')

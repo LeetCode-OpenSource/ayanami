@@ -51,8 +51,12 @@ type UnpackReducerPayload<Func, State> = Func extends () => Partial<State>
     : never
   : never
 
+type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? P : never
+
 type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
-  ? UnpackReducerPayload<F, S>
+  ? UnpackReducerPayload<F, S> extends never
+    ? UnpackDefineActionPayload<F>
+    : UnpackReducerPayload<F, S>
   : UnpackEffectPayload<F, S>
 
 export type ActionMethodOfAyanami<M, S> = {

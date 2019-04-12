@@ -1,5 +1,5 @@
 export * from './ayanami'
+export * from './decorators'
 export { EffectAction, ActionMethodOfAyanami } from './types'
-export { Effect, Reducer } from './decorators'
 export { copyAyanami } from './utils'
 export { getAllActionsForTest } from './test-helper'
