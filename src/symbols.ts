@@ -3,14 +3,9 @@ export interface ActionSymbols {
   actions: Symbol
 }
 
-type EffectSymbols = ActionSymbols & {
-  setStateAction: Symbol
-}
-
-export const effectSymbols: EffectSymbols = {
+export const effectSymbols: ActionSymbols = {
   decorator: Symbol('decorator:effect'),
   actions: Symbol('actions:effect'),
-  setStateAction: Symbol('actions:setState'),
 }
 
 export const reducerSymbols: ActionSymbols = {
