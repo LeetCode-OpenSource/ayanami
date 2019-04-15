@@ -56,6 +56,7 @@
   "author": "LeetCode front-end team",
   "license": "MIT",
   "dependencies": {
+    "@asuka/di": "^0.1.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.4.0",
     "shallowequal": "^1.1.0"

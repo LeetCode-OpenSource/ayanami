@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import { ComponentType } from 'react'
 import { Observable } from 'rxjs'
+import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf, ActionOfAyanami } from './types'
 import {
@@ -34,7 +35,8 @@ export abstract class Ayanami<State> {
   }
 
   static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {
-    return new this()
+    InjectableFactory.addProviders(this)
+    return InjectableFactory.getInstance(this)
   }
 
   abstract defaultState: State

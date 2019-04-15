@@ -2,6 +2,15 @@
 # yarn lockfile v1
 
 
+"@asuka/di@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.1.3.tgz#a1a8a904a1c9ff2d838093a1fc3382038920aa49"
+  integrity sha512-NWh7K6OjTKDpORWv8Q9hvcvgpCK3YASEHgShcEHqX5kIKRNA5DJdKIDB676y9SD/2wBvEOPst98Bwed5jI5vKw==
+  dependencies:
+    injection-js "^2.2.1"
+  optionalDependencies:
+    reflect-metadata "^0.1.13"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.0.0 <7.4.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.0.0.tgz#06e2ab19bdb535385559aabb5ba59729482800f8"
@@ -3526,6 +3535,11 @@ ini@^1.3.4, ini@~1.3.0:
   version "1.3.5"
   resolved "https://registry.npmjs.org/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
   integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+
+injection-js@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/injection-js/-/injection-js-2.2.1.tgz#a8d6a085b2f0b8d8650f6f4487f6abb8cc0d67ce"
+  integrity sha512-zHI+E+dM0PXix5FFTO1Y4/UOyAzE7zG1l/QwAn4jchTThOoBq+UYRFK4AVG7lQgFL+go62SbrzSsjXy9DFEZUg==
 
 interpret@^1.0.0:
   version "1.2.0"
