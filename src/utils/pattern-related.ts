@@ -7,7 +7,7 @@ import { patternSymbol } from '../symbols'
 import { copyAyanami } from './copy-ayanami'
 
 export function createPatternDecorator(pattern: Pattern) {
-  return (config?: { providers: Provider[] }) => (target: Ayanami<any>) => {
+  return (config?: { providers: Provider[] }) => (target: any) => {
     Reflect.defineMetadata(patternSymbol, pattern, target)
     Injectable(config)(target)
   }

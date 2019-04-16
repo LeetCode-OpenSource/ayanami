@@ -20,6 +20,8 @@ export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
 
+export type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
+
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 
 export interface EffectAction<M = Ayanami<any>> {

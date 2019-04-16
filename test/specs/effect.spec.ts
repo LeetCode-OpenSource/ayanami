@@ -1,6 +1,5 @@
 import { Observable, of } from 'rxjs'
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators'
-import { Injectable } from '@asuka/di'
 
 import {
   Ayanami,
@@ -9,13 +8,14 @@ import {
   Reducer,
   getAllActionsForTest,
   copyAyanami,
+  Singleton,
 } from '../../src'
 
 interface TipsState {
   tips: string
 }
 
-@Injectable()
+@Singleton()
 class Tips extends Ayanami<TipsState> {
   defaultState = {
     tips: '',
@@ -36,7 +36,7 @@ interface CountState {
   count: number
 }
 
-@Injectable()
+@Singleton()
 class Count extends Ayanami<CountState> {
   defaultState = {
     count: 0,

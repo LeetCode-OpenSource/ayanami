@@ -1,10 +1,9 @@
-import { Injectable } from '@asuka/di'
-
 import {
   Ayanami,
   Reducer,
   getAllActionsForTest,
   copyAyanami,
+  Singleton,
   ActionMethodOfAyanami,
 } from '../../src'
 
@@ -12,7 +11,7 @@ interface CountState {
   count: number
 }
 
-@Injectable()
+@Singleton()
 class CountModel extends Ayanami<CountState> {
   defaultState = { count: 0 }
 

@@ -1,7 +1,7 @@
-import { ComponentType } from 'react'
+import * as React from 'react'
 import { Observable } from 'rxjs'
 
-import { ConstructorOf, ActionOfAyanami } from './types'
+import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
 import {
   getAllActionFactories,
   useAyanami,
@@ -13,12 +13,28 @@ import {
 import { combineWithIkari, destroyIkariFrom } from './ikari'
 
 export abstract class Ayanami<State> {
-  static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
-    return getAyanamiInstance(this).connect(Component)
+  static connect<M extends Ayanami<State>, State, P>(
+    this: ConstructorOf<M>,
+    Component: React.ComponentType<P>,
+  ) {
+    return connectAyanami(this, Component) as M extends Ayanami<infer S>
+      ? ComponentConnectedWithAyanami<M, S, P>
+      : ComponentConnectedWithAyanami<M, State, P>
   }
 
-  static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return getAyanamiInstance(this).useHooks()
+  static useHooks<M extends Ayanami<State>, State>(this: ConstructorOf<M>) {
+    const ayanami = React.useMemo(
+      () => (this as ConstructorOfAyanami<M, State>).getInstance<M>(),
+      [],
+    )
+
+    return useAyanami(ayanami) as M extends Ayanami<infer S>
+      ? HooksResult<M, S>
+      : HooksResult<M, State>
+  }
+
+  static getInstance<M extends Ayanami<any>>(this: ConstructorOf<M>): M {
+    return getAyanamiInstance(this)
   }
 
   abstract defaultState: State
@@ -43,20 +59,5 @@ export abstract class Ayanami<State> {
     this: M,
   ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
     return getAllActionFactories(this)
-  }
-
-  useHooks<M extends Ayanami<State>>(
-    this: M,
-  ): M extends Ayanami<infer S> ? HooksResult<M, S> : HooksResult<M, State> {
-    return useAyanami(this) as any
-  }
-
-  connect<M extends Ayanami<State>, P>(
-    this: M,
-    Component: ComponentType<P>,
-  ): M extends Ayanami<infer S>
-    ? ComponentConnectedWithAyanami<M, S, P>
-    : ComponentConnectedWithAyanami<M, State, P> {
-    return connectAyanami(this, Component) as any
   }
 }

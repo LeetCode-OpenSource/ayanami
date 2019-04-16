@@ -2,9 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
-import { Injectable } from '@asuka/di'
 
-import { Ayanami, Effect, EffectAction, Reducer } from '../src'
+import { Ayanami, Effect, EffectAction, Reducer, Singleton } from '../src'
 
 interface State {
   count: number
@@ -14,7 +13,7 @@ interface TipsState {
   tips: string
 }
 
-@Injectable()
+@Singleton()
 class Tips extends Ayanami<TipsState> {
   defaultState = {
     tips: '',
@@ -26,7 +25,7 @@ class Tips extends Ayanami<TipsState> {
   }
 }
 
-@Injectable()
+@Singleton()
 class Count extends Ayanami<State> {
   defaultState = {
     count: 0,

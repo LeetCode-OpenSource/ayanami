@@ -1,9 +1,7 @@
 import * as React from 'react'
 
-import { ActionMethodOfAyanami, Omit } from '../types'
+import { ActionMethodOfAyanami, ConstructorOf, ConstructorOfAyanami, Omit } from '../types'
 import { Ayanami } from '../ayanami'
-
-import { useAyanami } from './hooks'
 
 type ConnectedComponent<P, S, A> = React.FunctionComponent<Omit<P, keyof S | keyof A>>
 
@@ -24,16 +22,16 @@ export interface ComponentConnectedWithAyanami<M extends Ayanami<S>, S, P> {
 }
 
 export function connectAyanami<M extends Ayanami<S>, S, P>(
-  ayanami: M,
+  ayanami: ConstructorOf<M>,
   Component: React.ComponentType<P>,
 ) {
   return ((
     mapStateToProps?: (props: S) => Partial<P>,
     mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
   ) => (props: P) => {
-    const [state, action] = useAyanami<M, S>(ayanami)
+    const [state, action] = (ayanami as ConstructorOfAyanami<M, S>).useHooks<M, S>()
     const mappedState = mapStateToProps ? mapStateToProps(state) : state
-    const mappedAction = mapActionsToProps ? mapActionsToProps(action) : action
+    const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
 
     return <Component {...mappedState} {...mappedAction} {...props} />
   }) as ComponentConnectedWithAyanami<M, S, P>
