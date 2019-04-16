@@ -79,7 +79,7 @@ export class Ikari<State> {
 
   triggerActions: TriggerActions = {}
 
-  private subscription = new Subscription()
+  subscription = new Subscription()
 
   private isSetup: boolean = false
 
