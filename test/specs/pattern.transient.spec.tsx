@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
-import { Observable } from 'rxjs'
-import { map, withLatestFrom } from 'rxjs/operators'
+import { Observable, timer } from 'rxjs'
+import { map, mapTo, switchMap, tap, withLatestFrom } from 'rxjs/operators'
+import { noop } from 'lodash'
 
 import { Ayanami, Effect, EffectAction, Reducer, Transient } from '../../src'
 
@@ -27,19 +28,39 @@ class Count extends Ayanami<CountState> {
       map(([addCount, state]) => this.getActions().setCount(state.count + addCount)),
     )
   }
+
+  @Effect()
+  autoAdd(payload$: Observable<Observable<number>>): Observable<EffectAction> {
+    return payload$.pipe(
+      switchMap((ob$) => ob$),
+      map(this.getActions().add),
+    )
+  }
 }
 
-function CountComponent() {
+function CountComponent({ autoAddCallback = noop }: { autoAddCallback?: () => void }) {
   const [state, actions] = Count.useHooks()
 
   const add = (count: number) => () => actions.add(count)
+  const autoAdd = () =>
+    actions.autoAdd(
+      timer(0, 1000).pipe(
+        tap(autoAddCallback),
+        mapTo(1),
+      ),
+    )
 
   return (
     <div>
       <p>
         current count is <span>{state.count}</span>
       </p>
-      <button onClick={add(1)}>add one</button>
+      <button id="add" onClick={add(1)}>
+        add one
+      </button>
+      <button id="autoAdd" onClick={autoAdd}>
+        auto add
+      </button>
     </div>
   )
 }
@@ -47,29 +68,64 @@ function CountComponent() {
 describe('Transient Pattern spec:', () => {
   it('getInstance always return new instance', () => {
     const count = Count.getInstance()
-
     expect(count).toBeInstanceOf(Count)
     expect(count === Count.getInstance()).toBeFalsy()
   })
 
-  it('Hooks is isolated', () => {
-    const renderer1 = create(<CountComponent />)
-    const renderer2 = create(<CountComponent />)
-
+  describe('Hooks', () => {
     const count = (which: ReactTestRenderer) => which.root.findByType('span').children[0]
-    const click = (which: ReactTestRenderer) =>
-      act(() => which.root.findByType('button').props.onClick())
+    const add = (which: ReactTestRenderer) =>
+      act(() => which.root.findByProps({ id: 'add' }).props.onClick())
+    const autoAdd = (which: ReactTestRenderer) =>
+      act(() => which.root.findByProps({ id: 'autoAdd' }).props.onClick())
 
-    // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
-    renderer1.update(<CountComponent />)
-    renderer2.update(<CountComponent />)
+    it('state is isolated', () => {
+      const renderer1 = create(<CountComponent />)
+      const renderer2 = create(<CountComponent />)
 
-    click(renderer1)
-    expect(count(renderer1)).toBe('1')
-    expect(count(renderer2)).toBe('0')
+      // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+      renderer1.update(<CountComponent />)
+      renderer2.update(<CountComponent />)
 
-    click(renderer2)
-    expect(count(renderer1)).toBe('1')
-    expect(count(renderer2)).toBe('1')
+      add(renderer1)
+      expect(count(renderer1)).toBe('1')
+      expect(count(renderer2)).toBe('0')
+
+      add(renderer2)
+      expect(count(renderer1)).toBe('1')
+      expect(count(renderer2)).toBe('1')
+    })
+
+    it('ayanami is persistent', () => {
+      jest.useFakeTimers()
+
+      const autoAddCallback = jest.fn()
+      const renderer = create(<CountComponent autoAddCallback={autoAddCallback} />)
+
+      // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+      renderer.update(<CountComponent autoAddCallback={autoAddCallback} />)
+
+      autoAdd(renderer)
+
+      act(() => {
+        jest.advanceTimersByTime(0)
+      })
+
+      expect(autoAddCallback.mock.calls.length).toBe(1)
+
+      act(() => {
+        jest.advanceTimersByTime(1000)
+      })
+
+      expect(autoAddCallback.mock.calls.length).toBe(2)
+
+      renderer.unmount()
+
+      act(() => {
+        jest.advanceTimersByTime(1000)
+      })
+
+      expect(autoAddCallback.mock.calls.length).toBe(2)
+    })
   })
 })

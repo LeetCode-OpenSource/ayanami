@@ -7,6 +7,7 @@ import {
   useAyanami,
   connectAyanami,
   getAyanamiInstance,
+  isTransient,
   HooksResult,
   ComponentConnectedWithAyanami,
 } from './utils'
@@ -25,6 +26,15 @@ export abstract class Ayanami<State> {
   static useHooks<M extends Ayanami<State>, State>(this: ConstructorOf<M>) {
     const ayanami = React.useMemo(
       () => (this as ConstructorOfAyanami<M, State>).getInstance<M>(),
+      [],
+    )
+
+    React.useEffect(
+      () => () => {
+        if (isTransient(this)) {
+          ayanami.destroy()
+        }
+      },
       [],
     )
 
