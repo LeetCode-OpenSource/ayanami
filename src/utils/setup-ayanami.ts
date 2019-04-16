@@ -3,7 +3,7 @@ import { tap } from 'rxjs/operators'
 
 import { EffectAction } from '../types'
 import { Ayanami } from '../ayanami'
-import { effectSymbols, reducerSymbols, defineActionSymbols } from '../symbols'
+import { effectSymbols, reducerSymbols, defineActionSymbols, setupInstanceSymbol } from '../symbols'
 
 import { BasicState } from './basic-state'
 import { getActionNames, getAllActions, updateActions } from './action-related'
@@ -86,6 +86,10 @@ const setupDefineActions = <M extends Ayanami<S>, S>(ayanami: M): void => {
 }
 
 export function setup<M extends Ayanami<S>, S>(ayanami: M): void {
+  if (Reflect.hasMetadata(setupInstanceSymbol, ayanami)) {
+    return
+  }
+
   const basicState = new BasicState(ayanami.defaultState)
 
   setupDefineActions(ayanami)
@@ -94,4 +98,6 @@ export function setup<M extends Ayanami<S>, S>(ayanami: M): void {
 
   Object.defineProperty(ayanami, 'getState$', { value: () => basicState.state$ })
   Object.defineProperty(ayanami, 'getState', { value: basicState.getState })
+
+  Reflect.defineMetadata(setupInstanceSymbol, true, ayanami)
 }

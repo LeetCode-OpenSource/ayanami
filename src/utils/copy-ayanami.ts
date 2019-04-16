@@ -1,11 +1,19 @@
+import { Injectable, Inject, InjectableFactory, InjectionToken } from '@asuka/di'
+
 import { Ayanami } from '../ayanami'
-import { ConstructorOf, ConstructorOfAyanami } from '../types'
+import { ConstructorOf } from '../types'
 
 import { setup } from './setup-ayanami'
 
 export function copyAyanami<M extends Ayanami<any>>(ayanamiConstructor: ConstructorOf<M>) {
-  const Constructor = ayanamiConstructor as ConstructorOfAyanami<M, any>
-  const ayanami = Constructor.getInstance()
+  const token = new InjectionToken<Ayanami<any>>(`copied ${ayanamiConstructor.name}`)
+
+  @Injectable({ providers: [{ provide: token, useClass: ayanamiConstructor }] })
+  class CopiedAyanamiService {
+    constructor(@Inject(token) public ayanami: Ayanami<any>) {}
+  }
+
+  const ayanami = InjectableFactory.getInstance(CopiedAyanamiService).ayanami
 
   setup(ayanami)
 

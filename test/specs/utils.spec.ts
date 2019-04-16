@@ -1,13 +1,22 @@
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
+import { Injectable } from '@asuka/di'
 
-import { Ayanami, Reducer, Effect, EffectAction, getAllActionsForTest } from '../../src'
-import { sharedAyanami, copyAyanami, BasicState } from '../../src/utils'
+import {
+  Ayanami,
+  Reducer,
+  Effect,
+  EffectAction,
+  getAllActionsForTest,
+  copyAyanami,
+} from '../../src'
+import { BasicState } from '../../src/utils'
 
 interface CountState {
   count: number
 }
 
+@Injectable()
 class Count extends Ayanami<CountState> {
   defaultState = {
     count: 0,
@@ -60,12 +69,6 @@ describe('utils specs:', () => {
 
       expect(count1.getState()).toEqual({ count: 10 })
       expect(count2.getState()).toEqual({ count: 20 })
-    })
-  })
-
-  describe('sharedAyanami', () => {
-    it('always return same instance', () => {
-      expect(sharedAyanami(Count)).toBe(sharedAyanami(Count))
     })
   })
 

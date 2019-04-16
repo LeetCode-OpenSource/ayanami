@@ -1,9 +1,12 @@
+import { Injectable } from '@asuka/di'
+
 import { Ayanami, Reducer, getAllActionsForTest } from '../../src'
 
 interface TipsState {
   tips: string
 }
 
+@Injectable()
 class Tips extends Ayanami<TipsState> {
   defaultState = {
     tips: '',

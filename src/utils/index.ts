@@ -1,6 +1,5 @@
-export * from './copy-ayanami'
-export * from './shared-ayanami'
 export * from './action-related'
 export * from './hooks'
 export * from './connect'
 export * from './basic-state'
+export * from './setup-ayanami'

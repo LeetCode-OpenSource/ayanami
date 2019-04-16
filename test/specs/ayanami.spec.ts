@@ -1,3 +1,5 @@
+import { Injectable } from '@asuka/di'
+
 import { Ayanami, Reducer, getAllActionsForTest } from '../../src'
 
 interface CountState {
@@ -6,6 +8,7 @@ interface CountState {
 
 describe('Ayanami specs:', () => {
   it('getState', () => {
+    @Injectable()
     class CountModel extends Ayanami<CountState> {
       defaultState = { count: 0 }
 
@@ -23,6 +26,7 @@ describe('Ayanami specs:', () => {
   })
 
   it('getState$', () => {
+    @Injectable()
     class CountModel extends Ayanami<CountState> {
       defaultState = { count: 0 }
 

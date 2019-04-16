@@ -5,38 +5,33 @@ import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf, ActionOfAyanami } from './types'
 import {
-  sharedAyanami,
   getAllActionFactories,
   useAyanami,
   connectAyanami,
+  setup,
   HooksResult,
   ComponentConnectedWithAyanami,
 } from './utils'
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
-    return sharedAyanami(this).connect(Component)
+    return InjectableFactory.getInstance(this).connect(Component)
   }
 
   static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return sharedAyanami(this).useHooks()
+    return InjectableFactory.getInstance(this).useHooks()
   }
 
   static getState<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return sharedAyanami(this).getState<M>()
+    return InjectableFactory.getInstance(this).getState<M>()
   }
 
   static getState$<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return sharedAyanami(this).getState$<M>()
+    return InjectableFactory.getInstance(this).getState$<M>()
   }
 
   static getActions<M extends Ayanami<S>, S>(this: ConstructorOf<M>) {
-    return sharedAyanami(this).getActions<M>()
-  }
-
-  static getInstance<M extends Ayanami<S>, S>(this: ConstructorOf<M>): M {
-    InjectableFactory.addProviders(this)
-    return InjectableFactory.getInstance(this)
+    return InjectableFactory.getInstance(this).getActions<M>()
   }
 
   abstract defaultState: State
@@ -52,12 +47,14 @@ export abstract class Ayanami<State> {
   getActions<M extends Ayanami<State>>(
     this: M,
   ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
+    setup(this)
     return getAllActionFactories(this)
   }
 
   useHooks<M extends Ayanami<State>>(
     this: M,
   ): M extends Ayanami<infer S> ? HooksResult<M, S> : HooksResult<M, State> {
+    setup(this)
     return useAyanami(this) as any
   }
 
@@ -67,6 +64,7 @@ export abstract class Ayanami<State> {
   ): M extends Ayanami<infer S>
     ? ComponentConnectedWithAyanami<M, S, P>
     : ComponentConnectedWithAyanami<M, State, P> {
+    setup(this)
     return connectAyanami(this, Component) as any
   }
 }
