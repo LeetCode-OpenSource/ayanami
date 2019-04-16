@@ -20,6 +20,4 @@ export const defineActionSymbols: ActionSymbols = {
 
 export const allActionSymbols = [effectSymbols, reducerSymbols, defineActionSymbols]
 
-export const sharedInstanceSymbol = Symbol('shared:instance')
-
-export const setupInstanceSymbol = Symbol('setup:instance')
+export const patternSymbol = Symbol('ayanami:pattern')

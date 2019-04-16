@@ -1,24 +1,24 @@
 import { ComponentType } from 'react'
-import { InjectableFactory } from '@asuka/di'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami } from './types'
 import {
   getAllActionFactories,
   useAyanami,
-  HooksResult,
   connectAyanami,
+  getAyanamiInstance,
+  HooksResult,
   ComponentConnectedWithAyanami,
 } from './utils'
 import { combineWithIkari, destroyIkariFrom } from './ikari'
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<any>, P>(this: ConstructorOf<M>, Component: ComponentType<P>) {
-    return InjectableFactory.getInstance(this).connect(Component)
+    return getAyanamiInstance(this).connect(Component)
   }
 
   static useHooks<M extends Ayanami<any>>(this: ConstructorOf<M>) {
-    return InjectableFactory.getInstance(this).useHooks()
+    return getAyanamiInstance(this).useHooks()
   }
 
   abstract defaultState: State
