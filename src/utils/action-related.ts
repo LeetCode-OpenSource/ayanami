@@ -8,7 +8,7 @@ export function createActionDecorator(symbols: ActionSymbols) {
   }
 }
 
-export function addActionName(symbols: ActionSymbols, constructor: Function, actionName: string) {
+function addActionName(symbols: ActionSymbols, constructor: Function, actionName: string) {
   const decoratedActionNames = Reflect.getMetadata(symbols.decorator, constructor) || []
   Reflect.defineMetadata(symbols.decorator, [...decoratedActionNames, actionName], constructor)
 }
@@ -31,7 +31,7 @@ export function getAllActionFactories<M extends Ayanami<any>>(target: M) {
   )
 }
 
-export function getAllActionNames<M extends Ayanami<S>, S>(target: M) {
+function getAllActionNames<M extends Ayanami<S>, S>(target: M) {
   return allActionSymbols.reduce<string[]>(
     (result, symbols) => [...result, ...getActionNames(symbols, target.constructor)],
     [],
