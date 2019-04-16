@@ -1,9 +1,10 @@
-import { mapValues } from 'lodash'
 import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
-import { catchError } from 'rxjs/operators'
+import { map, catchError } from 'rxjs/operators'
+import { mapValues } from 'lodash'
 
 import {
   EffectAction,
+  ReducerAction,
   OriginalEffectActions,
   OriginalReducerActions,
   OriginalDefineActions,
@@ -11,12 +12,20 @@ import {
 } from './types'
 import { Ayanami } from './ayanami'
 import { BasicState, getOriginalFunctions } from './utils'
+import { getAyanamiName, logStateAction } from './redux-devtools-extension'
 
 interface Config<State> {
+  nameForLog: string
   defaultState: State
   effects: OriginalEffectActions<State>
   reducers: OriginalReducerActions<State>
   defineActions: OriginalDefineActions
+}
+
+interface Action<State> {
+  readonly effectAction?: EffectAction
+  readonly reducerAction?: ReducerAction<State>
+  readonly originalActionName: string
 }
 
 const ikariSymbol = Symbol('ikari')
@@ -40,6 +49,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
     Object.assign(ayanami, mapValues(defineActions, ({ observable }) => observable))
 
     return Ikari.createAt(ayanami, {
+      nameForLog: getAyanamiName(ayanami),
       defaultState: ayanami.defaultState,
       effects,
       reducers,
@@ -109,14 +119,16 @@ export class Ikari<State> {
     }
 
     this.subscription.add(
-      effectActions$.subscribe(({ ayanami, params, actionName }) => {
-        combineWithIkari(ayanami).triggerActions[actionName](params)
+      effectActions$.subscribe((action) => {
+        this.log(action)
+        this.handleAction(action)
       }),
     )
 
     this.subscription.add(
-      reducerActions$.subscribe((state) => {
-        this.state.setState(state)
+      reducerActions$.subscribe((action) => {
+        this.log(action)
+        this.handleAction(action)
       }),
     )
 
@@ -127,21 +139,61 @@ export class Ikari<State> {
     this.subscription.unsubscribe()
     this.triggerActions = {}
   }
+
+  private log = ({ originalActionName, effectAction, reducerAction }: Action<State>) => {
+    if (effectAction) {
+      logStateAction(this.config.nameForLog, {
+        params: effectAction.params,
+        actionName: `${originalActionName}/👉${getAyanamiName(effectAction.ayanami)}/️${
+          effectAction.actionName
+        }`,
+      })
+    }
+
+    if (reducerAction) {
+      logStateAction(this.config.nameForLog, {
+        params: reducerAction.params,
+        actionName: originalActionName,
+        state: reducerAction.nextState,
+      })
+    }
+  }
+
+  private handleAction = ({ effectAction, reducerAction }: Action<State>) => {
+    if (effectAction) {
+      const { ayanami, actionName, params } = effectAction
+      combineWithIkari(ayanami).triggerActions[actionName](params)
+    }
+
+    if (reducerAction) {
+      this.state.setState(reducerAction.nextState)
+    }
+  }
 }
 
 function setupEffectActions<State>(
   effectActions: OriginalEffectActions<State>,
   state$: Observable<State>,
-): [Observable<EffectAction>, TriggerActions] {
+): [Observable<Action<State>>, TriggerActions] {
   const actions: TriggerActions = {}
-  const effects: Observable<EffectAction>[] = []
+  const effects: Observable<Action<State>>[] = []
 
   Object.keys(effectActions).forEach((actionName) => {
     const payload$ = new Subject<any>()
     actions[actionName] = (payload: any) => payload$.next(payload)
 
     const effect$: Observable<EffectAction> = effectActions[actionName](payload$, state$)
-    effects.push(effect$.pipe(catchRxError()))
+    effects.push(
+      effect$.pipe(
+        map(
+          (effectAction): Action<State> => ({
+            effectAction,
+            originalActionName: actionName,
+          }),
+        ),
+        catchRxError(),
+      ),
+    )
   })
 
   return [merge(...effects), actions]
@@ -150,16 +202,29 @@ function setupEffectActions<State>(
 function setupReducerActions<State>(
   reducerActions: OriginalReducerActions<State>,
   getState: () => State,
-): [Observable<Partial<State>>, TriggerActions] {
+): [Observable<Action<State>>, TriggerActions] {
   const actions: TriggerActions = {}
-  const reducers: Observable<Partial<State>>[] = []
+  const reducers: Observable<Action<State>>[] = []
 
   Object.keys(reducerActions).forEach((actionName) => {
-    const reducer$ = new Subject<Partial<State>>()
+    const reducer$ = new Subject<Action<State>>()
     reducers.push(reducer$)
 
     const reducer = reducerActions[actionName]
-    actions[actionName] = (payload: any) => reducer$.next(reducer(payload, getState()))
+    actions[actionName] = (params: any) => {
+      const currentState = getState()
+      reducer$.next({
+        reducerAction: {
+          params,
+          actionName,
+          nextState: {
+            ...currentState,
+            ...reducer(params, currentState),
+          },
+        },
+        originalActionName: actionName,
+      })
+    }
   })
 
   return [merge(...reducers), actions]

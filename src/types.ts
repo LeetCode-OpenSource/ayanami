@@ -30,6 +30,12 @@ export interface EffectAction<M = Ayanami<any>> {
   readonly params: any
 }
 
+export interface ReducerAction<State> {
+  readonly actionName: string
+  readonly params: any
+  readonly nextState: State
+}
+
 type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectAction>
   ? void
   : Func extends (payload$: infer OP) => Observable<EffectAction>

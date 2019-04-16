@@ -1,4 +1,4 @@
-import { Ayanami } from '../ayanami'
+import { Ayanami } from './ayanami'
 
 interface DevTools {
   send(action: { type: string }, state?: Partial<GlobalState>): void
@@ -38,16 +38,16 @@ const getDevTools = (() => {
 })()
 
 export function logStateAction(
-  ayanami: Ayanami<any>,
+  namespace: string,
   infos: { actionName: string; params: string; state?: any },
 ) {
   const action = {
-    type: `${getAyanamiName(ayanami)}/${infos.actionName}`,
+    type: `${namespace}/${infos.actionName}`,
     params: infos.params,
   }
 
   if (infos.state) {
-    STATE[getAyanamiName(ayanami)] = infos.state
+    STATE[namespace] = infos.state
   }
 
   getDevTools().send(action, STATE)
