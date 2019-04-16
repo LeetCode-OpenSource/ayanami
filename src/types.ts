@@ -15,13 +15,11 @@ export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
 
-export type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
-
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 
 export interface EffectAction<M = Ayanami<any>> {
   readonly ayanami: M
-  readonly actionName: string | Symbol
+  readonly actionName: string
   readonly params: any
 }
 
@@ -70,3 +68,22 @@ export type ActionOfAyanami<M, S> = {
     ? never
     : ActionMethod<UnpackPayload<M[key], S>, EffectAction<M>>
 }
+
+export interface ObjectOf<T> {
+  [key: string]: T
+}
+
+export type OriginalEffectActions<State> = ObjectOf<
+  (payload$: Observable<any>, state: Observable<State>) => Observable<Readonly<EffectAction>>
+>
+
+export type OriginalReducerActions<State> = ObjectOf<
+  (payload: any, state: Readonly<State>) => Readonly<Partial<State>>
+>
+
+export type OriginalDefineActions = ObjectOf<{
+  next(params: any): void
+  observable: Observable<any>
+}>
+
+export type TriggerActions = ObjectOf<ActionMethod<any>>

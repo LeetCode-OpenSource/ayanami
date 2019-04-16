@@ -32,6 +32,10 @@ class Count extends Ayanami<State> {
     count: 0,
   }
 
+  constructor(private readonly tips: Tips) {
+    super()
+  }
+
   @Reducer()
   add(count: number, state: State) {
     return { count: state.count + count }
@@ -47,8 +51,8 @@ class Count extends Ayanami<State> {
     return count$.pipe(
       mergeMap((subCount) =>
         of(
-          Count.getActions().add(-subCount),
-          Tips.getActions().showTips(`click minus button at ${Date.now()}`),
+          this.getActions().add(-subCount),
+          this.tips.getActions().showTips(`click minus button at ${Date.now()}`),
         ),
       ),
     )

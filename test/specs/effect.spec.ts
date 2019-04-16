@@ -2,7 +2,14 @@ import { Observable, of } from 'rxjs'
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators'
 import { Injectable } from '@asuka/di'
 
-import { Ayanami, Effect, EffectAction, Reducer, getAllActionsForTest } from '../../src'
+import {
+  Ayanami,
+  Effect,
+  EffectAction,
+  Reducer,
+  getAllActionsForTest,
+  copyAyanami,
+} from '../../src'
 
 interface TipsState {
   tips: string
@@ -21,7 +28,7 @@ class Tips extends Ayanami<TipsState> {
 
   @Effect()
   showTipsWithEffectAction(tips$: Observable<string>): Observable<EffectAction> {
-    return tips$.pipe(map((tips) => Tips.getActions().showTipsWithReducer(tips)))
+    return tips$.pipe(map((tips) => this.getActions().showTipsWithReducer(tips)))
   }
 }
 
@@ -35,6 +42,10 @@ class Count extends Ayanami<CountState> {
     count: 0,
   }
 
+  constructor(public readonly tips: Tips) {
+    super()
+  }
+
   @Reducer()
   setCount(count: number) {
     return { count }
@@ -46,8 +57,8 @@ class Count extends Ayanami<CountState> {
       withLatestFrom(state$),
       mergeMap(([addCount, state]) =>
         of(
-          Count.getActions().setCount(state.count + addCount),
-          Tips.getActions().showTipsWithReducer(`add ${addCount}`),
+          this.getActions().setCount(state.count + addCount),
+          this.tips.getActions().showTipsWithReducer(`add ${addCount}`),
         ),
       ),
     )
@@ -59,8 +70,8 @@ class Count extends Ayanami<CountState> {
       withLatestFrom(state$),
       mergeMap(([subCount, state]) =>
         of(
-          Count.getActions().setCount(state.count - subCount),
-          Tips.getActions().showTipsWithEffectAction(`minus ${subCount}`),
+          this.getActions().setCount(state.count - subCount),
+          this.tips.getActions().showTipsWithEffectAction(`minus ${subCount}`),
         ),
       ),
     )
@@ -77,22 +88,24 @@ class Count extends Ayanami<CountState> {
 }
 
 describe('Effect spec:', () => {
-  const countActions = getAllActionsForTest(Count)
+  const count = copyAyanami(Count)
+  const tips = count.tips
+  const countActions = getAllActionsForTest(count)
 
-  const count = () => Count.getState().count
-  const tips = () => Tips.getState().tips
+  const getCount = () => count.getState().count
+  const getTips = () => tips.getState().tips
 
   describe('Emitted EffectAction will trigger corresponding Action', () => {
     it('Reducer Action', () => {
       countActions.add(1)
-      expect(count()).toBe(1)
-      expect(tips()).toBe('add 1')
+      expect(getCount()).toBe(1)
+      expect(getTips()).toBe('add 1')
     })
 
     it('Effect Action', () => {
       countActions.minus(1)
-      expect(count()).toBe(0)
-      expect(tips()).toBe('minus 1')
+      expect(getCount()).toBe(0)
+      expect(getTips()).toBe('minus 1')
     })
   })
 
@@ -102,7 +115,7 @@ describe('Effect spec:', () => {
       countActions.add(1)
       countActions.minus(1)
       countActions.minus(1)
-      expect(count()).toBe(-1)
+      expect(getCount()).toBe(-1)
     })
   })
 })

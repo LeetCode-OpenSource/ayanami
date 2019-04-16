@@ -1,9 +1,8 @@
 import { Injectable, Inject, InjectableFactory, InjectionToken } from '@asuka/di'
 
 import { Ayanami } from '../ayanami'
+import { combineWithIkari } from '../ikari'
 import { ConstructorOf } from '../types'
-
-import { setup } from './setup-ayanami'
 
 export function copyAyanami<M extends Ayanami<any>>(ayanamiConstructor: ConstructorOf<M>) {
   const token = new InjectionToken<Ayanami<any>>(`copied ${ayanamiConstructor.name}`)
@@ -15,7 +14,7 @@ export function copyAyanami<M extends Ayanami<any>>(ayanamiConstructor: Construc
 
   const ayanami = InjectableFactory.getInstance(CopiedAyanamiService).ayanami
 
-  setup(ayanami)
+  combineWithIkari(ayanami)
 
   return ayanami as M extends Ayanami<infer _S> ? M : never
 }

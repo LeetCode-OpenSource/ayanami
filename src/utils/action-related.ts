@@ -1,4 +1,4 @@
-import { ActionMethod, ActionMethodOfAyanami, EffectAction } from '../types'
+import { EffectAction } from '../types'
 import { Ayanami } from '../ayanami'
 import { allActionSymbols, ActionSymbols } from '../symbols'
 
@@ -15,28 +15,6 @@ export function addActionName(symbols: ActionSymbols, constructor: Function, act
 
 export function getActionNames(symbols: ActionSymbols, constructor: Function): string[] {
   return Reflect.getMetadata(symbols.decorator, constructor) || []
-}
-
-export function updateActions(
-  symbols: ActionSymbols,
-  target: Ayanami<any>,
-  actions: { [key: string]: ActionMethod<any> },
-) {
-  Reflect.defineMetadata(symbols.actions, { ...getActions(symbols, target), ...actions }, target)
-}
-
-export function getActions(
-  symbols: ActionSymbols,
-  target: Ayanami<any>,
-): { [key: string]: ActionMethod<any> } {
-  return Reflect.getMetadata(symbols.actions, target) || {}
-}
-
-export function getAllActions<M extends Ayanami<S>, S>(target: M) {
-  return allActionSymbols.reduce(
-    (result, symbols) => ({ ...result, ...getActions(symbols, target) }),
-    {},
-  ) as ActionMethodOfAyanami<M, S>
 }
 
 export function getAllActionFactories<M extends Ayanami<any>>(target: M) {

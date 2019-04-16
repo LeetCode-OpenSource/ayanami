@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 
 import { ActionMethodOfAyanami } from '../types'
 import { Ayanami } from '../ayanami'
-
-import { getAllActions } from './action-related'
+import { combineWithIkari } from '../ikari'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 
-export function useAyanami<M extends Ayanami<State>, State>(ayanami: M): HooksResult<M, State> {
-  const actions = getAllActions<M, State>(ayanami)
+export function useAyanami<M extends Ayanami<State>, State>(ayanami: M) {
+  const ikari = combineWithIkari(ayanami)
+  const actions = ikari.triggerActions
   const [state, setState] = useState<State>(ayanami.getState())
 
   useEffect(() => {
@@ -16,5 +16,5 @@ export function useAyanami<M extends Ayanami<State>, State>(ayanami: M): HooksRe
     return () => subscription.unsubscribe()
   }, [])
 
-  return [state, actions]
+  return [state, actions] as HooksResult<M, State>
 }

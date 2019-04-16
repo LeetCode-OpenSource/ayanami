@@ -1,6 +1,12 @@
 import { Injectable } from '@asuka/di'
 
-import { Ayanami, Reducer, getAllActionsForTest } from '../../src'
+import {
+  Ayanami,
+  Reducer,
+  getAllActionsForTest,
+  copyAyanami,
+  ActionMethodOfAyanami,
+} from '../../src'
 
 interface TipsState {
   tips: string
@@ -24,25 +30,33 @@ class Tips extends Ayanami<TipsState> {
 
   @Reducer()
   addTips(tips: string, state: TipsState) {
-    return { tips: state.tips + `\n${tips}` }
+    return { tips: `${state.tips} ${tips}` }
   }
 }
 
 describe('Reducer spec:', () => {
-  const tipsActions = getAllActionsForTest(Tips)
+  let tips: Tips
+  let actions: ActionMethodOfAyanami<Tips, TipsState>
+
+  beforeEach(() => {
+    tips = copyAyanami(Tips)
+    actions = getAllActionsForTest(tips)
+  })
 
   it('with payload', () => {
-    tipsActions.setTips('one')
-    expect(Tips.getState()).toEqual({ tips: 'one' })
+    actions.setTips('one')
+    expect(tips.getState()).toEqual({ tips: 'one' })
   })
 
   it('with payload and state', () => {
-    tipsActions.addTips('two')
-    expect(Tips.getState()).toEqual({ tips: 'one\ntwo' })
+    actions.setTips('two')
+    actions.addTips('three')
+    expect(tips.getState()).toEqual({ tips: 'two three' })
   })
 
   it('without payload and state', () => {
-    tipsActions.removeTips()
-    expect(Tips.getState()).toEqual({ tips: '' })
+    actions.setTips('one')
+    actions.removeTips()
+    expect(tips.getState()).toEqual({ tips: '' })
   })
 })
