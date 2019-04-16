@@ -43,7 +43,7 @@ describe('utils specs:', () => {
       expect(count).toBeInstanceOf(Count)
     })
 
-    it('Reducer should isolated from each copies', () => {
+    it('Reducer should isolated from each copies, pattern is irrelevant', () => {
       const count1 = copyAyanami(Count)
       const count2 = copyAyanami(Count)
 

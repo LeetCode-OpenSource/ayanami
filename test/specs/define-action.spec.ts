@@ -8,7 +8,6 @@ import {
   Reducer,
   DefineAction,
   getAllActionsForTest,
-  copyAyanami,
   Singleton,
 } from '../../src'
 
@@ -37,7 +36,7 @@ class Count extends Ayanami<CountState> {
 }
 
 describe('DefineAction spec:', () => {
-  const count = copyAyanami(Count)
+  const count = Count.getInstance()
   const countActions = getAllActionsForTest(count)
 
   const getCount = () => count.getState().count

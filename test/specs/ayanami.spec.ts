@@ -1,17 +1,10 @@
-import {
-  Ayanami,
-  Reducer,
-  getAllActionsForTest,
-  copyAyanami,
-  Singleton,
-  ActionMethodOfAyanami,
-} from '../../src'
+import { Ayanami, Reducer, getAllActionsForTest, Transient, ActionMethodOfAyanami } from '../../src'
 
 interface CountState {
   count: number
 }
 
-@Singleton()
+@Transient()
 class CountModel extends Ayanami<CountState> {
   defaultState = { count: 0 }
 
@@ -26,7 +19,7 @@ describe('Ayanami specs:', () => {
   let actions: ActionMethodOfAyanami<CountModel, CountState>
 
   beforeEach(() => {
-    countModel = copyAyanami(CountModel)
+    countModel = CountModel.getInstance()
     actions = getAllActionsForTest(countModel)
   })
 

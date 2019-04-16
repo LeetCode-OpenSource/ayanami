@@ -1,15 +1,7 @@
 import { Observable, of } from 'rxjs'
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators'
 
-import {
-  Ayanami,
-  Effect,
-  EffectAction,
-  Reducer,
-  getAllActionsForTest,
-  copyAyanami,
-  Singleton,
-} from '../../src'
+import { Ayanami, Effect, EffectAction, Reducer, getAllActionsForTest, Singleton } from '../../src'
 
 interface TipsState {
   tips: string
@@ -88,7 +80,7 @@ class Count extends Ayanami<CountState> {
 }
 
 describe('Effect spec:', () => {
-  const count = copyAyanami(Count)
+  const count = Count.getInstance()
   const tips = count.tips
   const countActions = getAllActionsForTest(count)
 
