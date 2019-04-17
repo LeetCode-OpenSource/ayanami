@@ -2,16 +2,10 @@ import * as React from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import {
-  getAllActionFactories,
-  useAyanami,
-  connectAyanami,
-  getAyanamiInstance,
-  isTransient,
-  HooksResult,
-  ComponentConnectedWithAyanami,
-} from './utils'
 import { combineWithIkari, destroyIkariFrom } from './ikari'
+import { getAllActionFactories, getAyanamiInstance, isTransient } from './utils'
+import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
+import { useAyanami, HooksResult } from './hooks'
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<State>, State, P>(

@@ -13,6 +13,7 @@ import {
 import { Ayanami } from './ayanami'
 import { BasicState, getOriginalFunctions } from './utils'
 import { getAyanamiName, logStateAction } from './redux-devtools-extension'
+import { ikariSymbol } from './symbols'
 
 interface Config<State> {
   nameForLog: string
@@ -27,8 +28,6 @@ interface Action<State> {
   readonly reducerAction?: ReducerAction<State>
   readonly originalActionName: string
 }
-
-const ikariSymbol = Symbol('ikari')
 
 function catchRxError() {
   return catchError<any, any>((err) => {

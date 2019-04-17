@@ -1,6 +1,4 @@
 export * from './action-related'
-export * from './hooks'
-export * from './connect'
 export * from './basic-state'
 export * from './get-original-functions'
 export * from './pattern-related'

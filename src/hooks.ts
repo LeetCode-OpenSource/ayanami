@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 
-import { ActionMethodOfAyanami } from '../types'
-import { Ayanami } from '../ayanami'
-import { combineWithIkari } from '../ikari'
+import { ActionMethodOfAyanami } from './types'
+import { Ayanami } from './ayanami'
+import { combineWithIkari } from './ikari'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 

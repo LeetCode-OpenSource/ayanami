@@ -1,7 +1,6 @@
 import { Injectable, Inject, InjectableFactory, InjectionToken } from '@asuka/di'
 
 import { Ayanami } from '../ayanami'
-import { combineWithIkari } from '../ikari'
 import { ConstructorOf } from '../types'
 
 export function copyAyanami<M extends Ayanami<any>>(ayanamiConstructor: ConstructorOf<M>) {
@@ -9,12 +8,10 @@ export function copyAyanami<M extends Ayanami<any>>(ayanamiConstructor: Construc
 
   @Injectable({ providers: [{ provide: token, useClass: ayanamiConstructor }] })
   class CopiedAyanamiService {
-    constructor(@Inject(token) public ayanami: Ayanami<any>) {}
+    constructor(@Inject(token) public ayanami: any) {}
   }
 
-  const ayanami = InjectableFactory.getInstance(CopiedAyanamiService).ayanami
-
-  combineWithIkari(ayanami)
-
-  return ayanami as M extends Ayanami<infer _S> ? M : never
+  return InjectableFactory.getInstance(CopiedAyanamiService).ayanami as M extends Ayanami<infer _S>
+    ? M
+    : never
 }
