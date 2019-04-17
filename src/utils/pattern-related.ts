@@ -1,4 +1,4 @@
-import { InjectableFactory, Injectable, Provider } from '@asuka/di'
+import { InjectableFactory, Injectable, InjectableConfig } from '@asuka/di'
 
 import { Pattern, ConstructorOf } from '../types'
 import { Ayanami } from '../ayanami'
@@ -7,7 +7,7 @@ import { patternSymbol } from '../symbols'
 import { copyAyanami } from './copy-ayanami'
 
 export function createPatternDecorator(pattern: Pattern) {
-  return (config?: { providers: Provider[] }) => (target: any) => {
+  return (config?: InjectableConfig) => (target: any) => {
     Reflect.defineMetadata(patternSymbol, pattern, target)
     Injectable(config)(target)
   }
