@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
+import { Injectable } from '@asuka/di'
 
 import {
   Ayanami,
@@ -16,10 +17,17 @@ interface CountState {
   count: number
 }
 
+@Injectable()
+class Tips {}
+
 @Singleton()
 class Count extends Ayanami<CountState> {
   defaultState = {
     count: 0,
+  }
+
+  constructor(public tips: Tips) {
+    super()
   }
 
   @Reducer()
@@ -41,6 +49,18 @@ describe('utils specs:', () => {
     it('should be the instance of Constructor', () => {
       const count = copyAyanami(Count)
       expect(count).toBeInstanceOf(Count)
+    })
+
+    it('always return new instance', () => {
+      const count = copyAyanami(Count)
+      expect(count === copyAyanami(Count)).toBeFalsy()
+    })
+
+    it('custom providers work properly', () => {
+      class NewTips {}
+
+      const count = copyAyanami(Count, { providers: [{ provide: Tips, useClass: NewTips }] })
+      expect(count.tips).toBeInstanceOf(NewTips)
     })
 
     it('Reducer should isolated from each copies, pattern is irrelevant', () => {
