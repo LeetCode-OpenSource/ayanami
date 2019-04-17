@@ -51,6 +51,6 @@ npm install ayanami
 
 ## Examples
 
-- [Simple demo with **useHooks**](https://codesandbox.io/s/8111031lml)
-- [Simple demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)
+- [Simple `Transient` demo with **useHooks**](https://codesandbox.io/s/8111031lml)
+- [Simple `Singleton` demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)
 - [Interact with other Ayanami](https://codesandbox.io/s/7jy59q34rj)
