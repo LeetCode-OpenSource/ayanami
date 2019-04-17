@@ -18,6 +18,7 @@ const getDefineAction = () => {
 }
 
 const createIkariConfig = () => ({
+  nameForLog: 'abc',
   defaultState: { count: 0 },
   effects: { never: () => NEVER },
   reducers: { setCount: (count: number) => ({ count }) },
