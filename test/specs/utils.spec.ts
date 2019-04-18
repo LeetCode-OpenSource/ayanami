@@ -10,8 +10,9 @@ import {
   getAllActionsForTest,
   copyAyanami,
   Singleton,
+  Transient,
 } from '../../src'
-import { BasicState } from '../../src/utils'
+import { BasicState, getAyanamiInstance } from '../../src/utils'
 
 interface CountState {
   count: number
@@ -89,6 +90,39 @@ describe('utils specs:', () => {
 
       expect(count1.getState()).toEqual({ count: 10 })
       expect(count2.getState()).toEqual({ count: 20 })
+    })
+  })
+
+  describe('getAyanamiInstance', () => {
+    it('for Singleton, always return same instance', () => {
+      @Singleton()
+      class A extends Ayanami<{}> {
+        defaultState = {}
+      }
+
+      const a1 = getAyanamiInstance(A)
+
+      expect(a1).toBeInstanceOf(A)
+
+      @Singleton()
+      // @ts-ignore make sure add new providers won't affect get same instance
+      // see https://github.com/LeetCode-OpenSource/asuka/pull/3
+      class B extends Ayanami<{}> {
+        defaultState = {}
+      }
+
+      expect(a1).toBe(getAyanamiInstance(A))
+    })
+
+    it('for Transient, always return new instance', () => {
+      @Transient()
+      class A extends Ayanami<{}> {
+        defaultState = {}
+      }
+
+      const a1 = getAyanamiInstance(A)
+      expect(a1).toBeInstanceOf(A)
+      expect(a1 === getAyanamiInstance(A)).toBeFalsy()
     })
   })
 
