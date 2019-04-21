@@ -17,10 +17,14 @@ export function isTransient<M extends Ayanami<S>, S>(ayanami: ConstructorOf<M>):
   return Reflect.getMetadata(patternSymbol, ayanami) === Pattern.Transient
 }
 
-export function getAyanamiInstance<M extends Ayanami<S>, S>(ayanami: ConstructorOf<M>): M {
+export function getAyanamiInstance<M extends Ayanami<S>, S>(
+  ayanami: ConstructorOf<M>,
+  config?: InjectableConfig,
+): M {
   if (isTransient(ayanami)) {
-    return copyAyanami(ayanami)
+    return copyAyanami(ayanami, config)
   } else {
-    return InjectableFactory.getInstance(ayanami)
+    const providers = config ? config.providers : []
+    return InjectableFactory.injector.resolveAndCreateChild(providers).get(ayanami)
   }
 }
