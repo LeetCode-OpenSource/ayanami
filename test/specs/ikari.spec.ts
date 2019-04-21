@@ -83,13 +83,21 @@ describe('Ikari spec:', () => {
 
     expect(ikari.subscription.closed).toBe(false)
 
-    ikari.destroy()
+    beforeEach(() => {
+      ikari.destroy()
+    })
 
     it('should remove all subscription', () => {
       expect(ikari.subscription.closed).toBe(true)
     })
 
     it('should remove all triggerActions', () => {
+      expect(ikari.triggerActions).toEqual({})
+    })
+
+    it('should not able to reactive', () => {
+      ikari.setup()
+      expect(ikari.subscription.closed).toBe(true)
       expect(ikari.triggerActions).toEqual({})
     })
   })
