@@ -47,7 +47,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
 
     Object.assign(ayanami, mapValues(defineActions, ({ observable }) => observable))
 
-    return Ikari.createAt(ayanami, {
+    return Ikari.createAndBindAt(ayanami, {
       nameForLog: getAyanamiName(ayanami),
       defaultState: ayanami.defaultState,
       effects,
@@ -67,7 +67,7 @@ export function destroyIkariFrom<S>(ayanami: Ayanami<S>): void {
 }
 
 export class Ikari<State> {
-  static createAt<S>(target: { defaultState: S }, config: Config<S>): Ikari<S> {
+  static createAndBindAt<S>(target: { defaultState: S }, config: Config<S>): Ikari<S> {
     const createdIkari = this.getFrom(target)
 
     if (createdIkari) {

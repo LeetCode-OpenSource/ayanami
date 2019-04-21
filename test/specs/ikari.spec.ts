@@ -29,12 +29,12 @@ const createIkari = () => new Ikari<State>(createIkariConfig())
 
 describe('Ikari spec:', () => {
   describe('static', () => {
-    describe('createAt', () => {
+    describe('createAndBindAt', () => {
       it('only create once if call multiple times', () => {
         const target = { defaultState: {} }
 
-        const ikari = Ikari.createAt(target, createIkariConfig())
-        expect(ikari).toBe(Ikari.createAt(target, createIkariConfig()))
+        const ikari = Ikari.createAndBindAt(target, createIkariConfig())
+        expect(ikari).toBe(Ikari.createAndBindAt(target, createIkariConfig()))
       })
     })
   })
