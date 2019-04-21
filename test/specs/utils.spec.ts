@@ -8,10 +8,10 @@ import {
   Effect,
   EffectAction,
   getAllActionsForTest,
-  copyAyanami,
   Singleton,
   Transient,
 } from '../../src'
+import { copyAyanami } from '../../src/utils/copy-ayanami'
 import { BasicState, getAyanamiInstance } from '../../src/utils'
 
 interface CountState {

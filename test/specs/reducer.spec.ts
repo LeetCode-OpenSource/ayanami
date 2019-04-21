@@ -1,11 +1,5 @@
-import {
-  Ayanami,
-  Reducer,
-  getAllActionsForTest,
-  copyAyanami,
-  Singleton,
-  ActionMethodOfAyanami,
-} from '../../src'
+import { Ayanami, Reducer, getAllActionsForTest, Singleton, ActionMethodOfAyanami } from '../../src'
+import { copyAyanami } from '../../src/utils/copy-ayanami'
 
 interface TipsState {
   tips: string
