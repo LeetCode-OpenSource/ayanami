@@ -9,7 +9,7 @@ export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfA
 export function useAyanami<M extends Ayanami<State>, State>(ayanami: M) {
   const ikari = combineWithIkari(ayanami)
   const actions = ikari.triggerActions
-  const [state, setState] = useState<State>(ayanami.getState())
+  const [state, setState] = useState<State>(() => ayanami.getState())
 
   useEffect(() => {
     const subscription = ayanami.getState$().subscribe(setState)
