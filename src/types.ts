@@ -18,22 +18,25 @@ type IsVoid<T> = IsAny<T> extends true ? false : [T] extends [void] ? true : fal
 // using class type to avoid conflict with user defined params
 class ArgumentsType<_Arguments extends Array<any>> {}
 
-export type ActionMethod<T, R = void> = IsVoid<T> extends true
-  ? () => R
-  : T extends ArgumentsType<infer Arguments>
-  ? (params: Exclude<Arguments[0], undefined> extends never ? void : Arguments[0]) => R
+export type ActionMethod<
+  T extends ArgumentsType<any[]> | never,
+  R = void
+> = T extends ArgumentsType<infer Arguments>
+  ? IsVoid<Arguments[0]> extends true
+    ? () => R
+    : (params: Arguments[0]) => R
   : (params: T) => R
 
 export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
 
-export type ConstructorOfAyanami<M extends Ayanami<S>, S> = ConstructorOf<M> & typeof Ayanami
+export type ConstructorOfAyanami<M extends Ayanami<any>> = ConstructorOf<M> & typeof Ayanami
 
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 
-export interface EffectAction<M = Ayanami<any>> {
-  readonly ayanami: M
+export interface EffectAction {
+  readonly ayanami: Ayanami<any>
   readonly actionName: string
   readonly params: any
 }
@@ -44,32 +47,38 @@ export interface ReducerAction<State> {
   readonly nextState: State
 }
 
-type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectAction>
-  ? void
-  : Func extends (payload$: infer OP) => Observable<EffectAction>
-  ? OP extends Observable<infer P>
-    ? P
-    : never
-  : Func extends (payload$: infer OP, state$: infer OS) => Observable<EffectAction>
-  ? OP extends Observable<infer P>
-    ? OS extends Observable<infer S>
-      ? S extends State
-        ? P
-        : never
-      : never
+type UnpackEffectFunctionArguments<T extends Function> = T extends (
+  ...payload: infer Arguments
+) => Observable<EffectAction>
+  ? Arguments[0] extends Observable<infer P>
+    ? ArgumentsType<[P]>
     : never
   : never
 
+type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectAction>
+  ? UnpackEffectFunctionArguments<Func> extends never
+    ? ArgumentsType<[void]>
+    : UnpackEffectFunctionArguments<Func>
+  : Func extends (payload$: Observable<any>) => Observable<EffectAction>
+  ? UnpackEffectFunctionArguments<Func>
+  : Func extends (payload$: Observable<any>, state$: Observable<State>) => Observable<EffectAction>
+  ? UnpackEffectFunctionArguments<Func>
+  : never
+
+type UnpackReducerFunctionArguments<T extends Function> = T extends (
+  ...payload: infer Arguments
+) => any
+  ? ArgumentsType<Arguments>
+  : never
+
 type UnpackReducerPayload<Func, State> = Func extends () => Partial<State>
-  ? Func extends (...payload: infer Arguments) => Partial<State>
-    ? ArgumentsType<Arguments> // using array type to avoid get `{}` when payload is undefined
-    : void
-  : Func extends (payload: infer P) => Partial<State>
-  ? P
-  : Func extends (payload: infer P, state: infer S) => Partial<State>
-  ? S extends State
-    ? P
-    : never
+  ? UnpackReducerFunctionArguments<Func> extends never
+    ? ArgumentsType<[void]>
+    : UnpackReducerFunctionArguments<Func>
+  : Func extends (payload: any) => Partial<State>
+  ? UnpackReducerFunctionArguments<Func>
+  : Func extends (payload: any, state: State) => Partial<State>
+  ? UnpackReducerFunctionArguments<Func>
   : never
 
 type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? P : never
@@ -89,7 +98,7 @@ export type ActionMethodOfAyanami<M, S> = {
 export type ActionOfAyanami<M, S> = {
   [key in Exclude<keyof M, keyof Ayanami<S>>]: UnpackPayload<M[key], S> extends never
     ? never
-    : ActionMethod<UnpackPayload<M[key], S>, EffectAction<M>>
+    : ActionMethod<UnpackPayload<M[key], S>, EffectAction>
 }
 
 export interface ObjectOf<T> {

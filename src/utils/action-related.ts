@@ -21,7 +21,7 @@ export function getAllActionFactories<M extends Ayanami<any>>(target: M) {
   return getAllActionNames(target).reduce(
     (result: any, name: string) => ({
       ...result,
-      [name]: (params: any): EffectAction<M> => ({
+      [name]: (params: any): EffectAction => ({
         ayanami: target,
         actionName: name,
         params,
