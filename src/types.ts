@@ -24,6 +24,8 @@ export type ActionMethod<
 > = T extends ArgumentsType<infer Arguments>
   ? IsVoid<Arguments[0]> extends true
     ? () => R
+    : Extract<Arguments[0], undefined> extends undefined
+    ? (params?: Arguments[0]) => R
     : (params: Arguments[0]) => R
   : (params: T) => R
 
@@ -89,14 +91,14 @@ type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
     : UnpackReducerPayload<F, S>
   : UnpackEffectPayload<F, S>
 
-export type ActionMethodOfAyanami<M, S> = {
-  [key in Exclude<keyof M, keyof Ayanami<S>>]: UnpackPayload<M[key], S> extends never
+export type ActionMethodOfAyanami<M extends Ayanami<S>, S> = {
+  [key in Exclude<keyof M, keyof Ayanami<any>>]: UnpackPayload<M[key], S> extends never
     ? never
     : ActionMethod<UnpackPayload<M[key], S>>
 }
 
-export type ActionOfAyanami<M, S> = {
-  [key in Exclude<keyof M, keyof Ayanami<S>>]: UnpackPayload<M[key], S> extends never
+export type ActionOfAyanami<M extends Ayanami<S>, S> = {
+  [key in Exclude<keyof M, keyof Ayanami<any>>]: UnpackPayload<M[key], S> extends never
     ? never
     : ActionMethod<UnpackPayload<M[key], S>, EffectAction>
 }

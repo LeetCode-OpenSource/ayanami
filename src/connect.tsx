@@ -29,7 +29,7 @@ export function connectAyanami<M extends Ayanami<S>, S, P>(
     mapStateToProps?: (props: S) => Partial<P>,
     mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
   ) => (props: P) => {
-    const [state, action] = (ayanami as ConstructorOfAyanami<M>).useHooks()
+    const [state, action] = (ayanami as ConstructorOfAyanami<M>).useHooks<M, S>()
     const mappedState = mapStateToProps ? mapStateToProps(state) : state
     const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
 
