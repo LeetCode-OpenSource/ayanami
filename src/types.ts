@@ -12,6 +12,7 @@ type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
 
 type IsAny<T> = IfAny<T, true, false>
 
+// https://stackoverflow.com/questions/55542332/typescript-conditional-type-with-discriminated-union
 type IsVoid<T> = IsAny<T> extends true ? false : [T] extends [void] ? true : false
 
 // using class type to avoid conflict with user defined params
