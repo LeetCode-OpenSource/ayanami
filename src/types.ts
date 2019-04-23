@@ -83,7 +83,7 @@ type UnpackReducerPayload<Func, State> = Func extends () => Partial<State>
   ? UnpackReducerFunctionArguments<Func>
   : never
 
-type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? P : never
+type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? ArgumentsType<[P]> : never
 
 type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
   ? UnpackReducerPayload<F, S> extends never
