@@ -32,7 +32,7 @@ class Count extends Ayanami<CountState> {
   }
 
   @Reducer()
-  setCount(count: number) {
+  resetCount(count: number = 0) {
     return { count }
   }
 
@@ -40,7 +40,7 @@ class Count extends Ayanami<CountState> {
   add(count$: Observable<number>, state$: Observable<CountState>): Observable<EffectAction> {
     return count$.pipe(
       withLatestFrom(state$),
-      map(([addCount, state]) => this.getActions().setCount(state.count + addCount)),
+      map(([addCount, state]) => this.getActions().resetCount(state.count + addCount)),
     )
   }
 }
@@ -71,8 +71,8 @@ describe('utils specs:', () => {
       const count1Actions = getAllActionsForTest(count1)
       const count2Actions = getAllActionsForTest(count2)
 
-      count1Actions.setCount(1)
-      count2Actions.setCount(2)
+      count1Actions.resetCount(1)
+      count2Actions.resetCount(2)
 
       expect(count1.getState()).toEqual({ count: 1 })
       expect(count2.getState()).toEqual({ count: 2 })

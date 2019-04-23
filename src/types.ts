@@ -14,7 +14,14 @@ type IsAny<T> = IfAny<T, true, false>
 
 type IsVoid<T> = IsAny<T> extends true ? false : [T] extends [void] ? true : false
 
-export type ActionMethod<T, R = void> = IsVoid<T> extends true ? () => R : (params: T) => R
+// using class type to avoid conflict with user defined params
+class ArgumentsType<_Arguments extends Array<any>> {}
+
+export type ActionMethod<T, R = void> = IsVoid<T> extends true
+  ? () => R
+  : T extends ArgumentsType<infer Arguments>
+  ? (params: Exclude<Arguments[0], undefined> extends never ? void : Arguments[0]) => R
+  : (params: T) => R
 
 export interface ConstructorOf<T> {
   new (...args: any[]): T
@@ -53,7 +60,9 @@ type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectActi
   : never
 
 type UnpackReducerPayload<Func, State> = Func extends () => Partial<State>
-  ? void
+  ? Func extends (...payload: infer Arguments) => Partial<State>
+    ? ArgumentsType<Arguments> // using array type to avoid get `{}` when payload is undefined
+    : void
   : Func extends (payload: infer P) => Partial<State>
   ? P
   : Func extends (payload: infer P, state: infer S) => Partial<State>
