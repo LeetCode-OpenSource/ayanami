@@ -30,6 +30,7 @@ class Count extends Ayanami<CountState> {
   }
 
   @Effect()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _(_: Observable<void>): Observable<EffectAction> {
     return this.resetCountDown$.pipe(map((count) => this.getActions().setCount(count)))
   }

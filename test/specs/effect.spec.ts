@@ -34,7 +34,7 @@ class Count extends Ayanami<CountState> {
     count: 0,
   }
 
-  constructor(public readonly tips: Tips) {
+  constructor(readonly tips: Tips) {
     super()
   }
 

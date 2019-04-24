@@ -27,7 +27,7 @@ class Count extends Ayanami<CountState> {
     count: 0,
   }
 
-  constructor(public tips: Tips) {
+  constructor(readonly tips: Tips) {
     super()
   }
 
@@ -105,8 +105,10 @@ describe('utils specs:', () => {
       expect(a1).toBeInstanceOf(A)
 
       @Singleton()
-      // @ts-ignore make sure add new providers won't affect get same instance
+      // make sure add new providers won't affect get same instance
       // see https://github.com/LeetCode-OpenSource/asuka/pull/3
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class B extends Ayanami<{}> {
         defaultState = {}
       }
