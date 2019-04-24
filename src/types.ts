@@ -24,9 +24,9 @@ export type ActionMethod<
 > = T extends ArgumentsType<infer Arguments>
   ? IsVoid<Arguments[0]> extends true
     ? () => R
-    : Extract<Arguments[0], undefined> extends undefined
-    ? (params?: Arguments[0]) => R
-    : (params: Arguments[0]) => R
+    : Extract<Arguments[0], undefined> extends never
+    ? (params: Arguments[0]) => R
+    : (params?: Arguments[0]) => R
   : (params: T) => R
 
 export interface ConstructorOf<T> {
