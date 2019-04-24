@@ -23,7 +23,7 @@
     "build:esm": "shx rm -rf ./esm && tsc -p ./tsconfig.build.json -m esnext --outDir esm",
     "build:next": "shx rm -rf ./esnext && tsc -p ./tsconfig.build.json --target esnext --outDir esnext",
     "prettier": "prettier '@(src|demo)/**/*.@(ts|tsx|html|less)' --write",
-    "lint": "tslint -p tsconfig.json --fix",
+    "lint": "eslint src/**/* test/**/* demo/**/* --ext .ts,.tsx --ignore-pattern *.html --fix --max-warnings 0",
     "test": "jest --collectCoverage"
   },
   "husky": {
@@ -34,7 +34,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "prettier --write",
-      "tslint -p tsconfig.json --fix",
+      "yarn run lint",
       "git add"
     ],
     "*.{less,html}": [
@@ -70,7 +70,11 @@
     "@types/react-dom": "^16.8.3",
     "@types/react-test-renderer": "^16.8.1",
     "@types/shallowequal": "^1.1.1",
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
     "codecov": "^3.2.0",
+    "eslint": "5.3.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-react": "^7.12.4",
     "husky": "^1.3.1",
     "jest": "^24.5.0",
     "lint-staged": "^8.1.5",
@@ -84,10 +88,6 @@
     "shx": "^0.3.2",
     "ts-jest": "^24.0.1",
     "tslib": "^1.9.3",
-    "tslint": "^5.14.0",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-react": "^4.0.0",
-    "tslint-sonarts": "^1.9.0",
     "typescript": "^3.4.4"
   },
   "peerDependencies": {
