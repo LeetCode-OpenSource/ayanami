@@ -28,11 +28,12 @@ export function connectAyanami<M extends Ayanami<S>, S, P>(
   return ((
     mapStateToProps?: (props: S) => Partial<P>,
     mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
-  ) => (props: P) => {
-    const [state, action] = (ayanami as ConstructorOfAyanami<M>).useHooks<M, S>()
-    const mappedState = mapStateToProps ? mapStateToProps(state) : state
-    const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
+  ) =>
+    function ConnectAyanami(props: P) {
+      const [state, action] = (ayanami as ConstructorOfAyanami<M>).useHooks<M, S>()
+      const mappedState = mapStateToProps ? mapStateToProps(state) : state
+      const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
 
-    return <Component {...mappedState} {...mappedAction} {...props} />
-  }) as ComponentConnectedWithAyanami<M, S, P>
+      return <Component {...mappedState} {...mappedAction} {...props} />
+    }) as ComponentConnectedWithAyanami<M, S, P>
 }

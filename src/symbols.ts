@@ -1,6 +1,6 @@
 export interface ActionSymbols {
-  decorator: Symbol
-  actions: Symbol
+  decorator: symbol
+  actions: symbol
 }
 
 export const effectSymbols: ActionSymbols = {
