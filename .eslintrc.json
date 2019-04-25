@@ -19,6 +19,11 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off"
   },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "env": {
     "browser": true,
     "es6": true
