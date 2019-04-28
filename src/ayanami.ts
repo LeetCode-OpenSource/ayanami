@@ -2,10 +2,11 @@ import * as React from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import { combineWithIkari, destroyIkariFrom } from './ikari'
-import { getAllActionFactories, getAyanamiInstance, isTransient } from './utils'
-import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
+import { isTransient } from './decorators'
+import { getEffectActionFactories, getAyanamiInstance } from './utils'
 import { useAyanami, HooksResult } from './hooks'
+import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
+import { combineWithIkari, destroyIkariFrom } from './ikari'
 
 export abstract class Ayanami<State> {
   static connect<M extends Ayanami<State>, State, P>(
@@ -59,6 +60,6 @@ export abstract class Ayanami<State> {
   getActions<M extends Ayanami<State>>(
     this: M,
   ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
-    return getAllActionFactories(this)
+    return getEffectActionFactories(this)
   }
 }

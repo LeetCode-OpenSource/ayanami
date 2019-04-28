@@ -3,8 +3,8 @@ import { pick, mapValues } from 'lodash'
 
 import { OriginalDefineActions, OriginalEffectActions, OriginalReducerActions } from '../types'
 import { Ayanami } from '../ayanami'
+import { getActionNames } from '../decorators'
 import { effectSymbols, reducerSymbols, defineActionSymbols } from '../symbols'
-import { getActionNames } from './action-related'
 
 const getOriginalFunctionNames = (ayanami: Ayanami<any>) => ({
   effects: getActionNames(effectSymbols, ayanami.constructor),

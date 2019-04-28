@@ -1,5 +1,3 @@
-import { EffectAction } from '../types'
-import { Ayanami } from '../ayanami'
 import { allActionSymbols, ActionSymbols } from '../symbols'
 
 export function createActionDecorator(symbols: ActionSymbols) {
@@ -17,23 +15,9 @@ export function getActionNames(symbols: ActionSymbols, constructor: Function): s
   return Reflect.getMetadata(symbols.decorator, constructor) || []
 }
 
-export function getAllActionFactories<M extends Ayanami<any>>(target: M) {
-  return getAllActionNames(target).reduce(
-    (result: any, name: string) => ({
-      ...result,
-      [name]: (params: any): EffectAction => ({
-        ayanami: target,
-        actionName: name,
-        params,
-      }),
-    }),
-    {},
-  )
-}
-
-function getAllActionNames<M extends Ayanami<S>, S>(target: M) {
+export function getAllActionNames(instance: { constructor: Function }) {
   return allActionSymbols.reduce<string[]>(
-    (result, symbols) => [...result, ...getActionNames(symbols, target.constructor)],
+    (result, symbols) => [...result, ...getActionNames(symbols, instance.constructor)],
     [],
   )
 }

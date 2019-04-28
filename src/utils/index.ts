@@ -1,5 +1,4 @@
-export * from './action-related'
 export * from './basic-state'
 export * from './get-original-functions'
-export * from './pattern-related'
-export * from './get-ayanami-name'
+export * from './get-ayanami-instance'
+export * from './get-effect-action-factories'

@@ -11,7 +11,7 @@ import {
   TriggerActions,
 } from './types'
 import { Ayanami } from './ayanami'
-import { BasicState, getOriginalFunctions, getAyanamiName } from './utils'
+import { BasicState, getOriginalFunctions } from './utils'
 import { logStateAction } from './redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 
@@ -48,7 +48,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
     Object.assign(ayanami, mapValues(defineActions, ({ observable }) => observable))
 
     return Ikari.createAndBindAt(ayanami, {
-      nameForLog: getAyanamiName(ayanami),
+      nameForLog: ayanami.constructor.name,
       defaultState: ayanami.defaultState,
       effects,
       reducers,
@@ -143,7 +143,7 @@ export class Ikari<State> {
     if (effectAction) {
       logStateAction(this.config.nameForLog, {
         params: effectAction.params,
-        actionName: `${originalActionName}/👉${getAyanamiName(effectAction.ayanami)}/️${
+        actionName: `${originalActionName}/👉${effectAction.ayanami.constructor.name}/️${
           effectAction.actionName
         }`,
       })
