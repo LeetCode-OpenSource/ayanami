@@ -1,5 +1,4 @@
 import { noop } from 'lodash'
-import { Ayanami } from './ayanami'
 
 interface DevTools {
   send(action: { type: string }, state?: Partial<GlobalState>): void
@@ -20,10 +19,6 @@ const ReduxDevTools =
   FakeReduxDevTools
 
 const STATE: GlobalState = {}
-
-export function getAyanamiName(ayanami: Ayanami<any>): string {
-  return ayanami.constructor.name
-}
 
 const getDevTools = (() => {
   let devTools: DevTools

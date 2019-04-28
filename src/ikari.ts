@@ -11,8 +11,8 @@ import {
   TriggerActions,
 } from './types'
 import { Ayanami } from './ayanami'
-import { BasicState, getOriginalFunctions } from './utils'
-import { getAyanamiName, logStateAction } from './redux-devtools-extension'
+import { BasicState, getOriginalFunctions, getAyanamiName } from './utils'
+import { logStateAction } from './redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 
 interface Config<State> {
