@@ -5,9 +5,28 @@ import { Ayanami } from '../ayanami'
 import { patternSymbol } from '../symbols'
 
 import { copyAyanami } from './copy-ayanami'
+import { getAyanamiName } from './get-ayanami-name'
+
+function getParamTypes(target: any): any[] {
+  return Reflect.getMetadata('design:paramtypes', target) || []
+}
+
+function makeSureNotTransientParams(target: any) {
+  getParamTypes(target).forEach((param) => {
+    if (Ayanami.isPrototypeOf(param) && isTransient(param)) {
+      throw new Error(
+        `Since ${getAyanamiName(
+          param,
+        )} was decorated by @Transient(), it can only used by 'useHooks' or 'connect'.`,
+      )
+    }
+  })
+}
 
 export function createPatternDecorator(pattern: Pattern) {
   return (config?: InjectableConfig) => (target: any) => {
+    makeSureNotTransientParams(target)
+
     Reflect.defineMetadata(patternSymbol, pattern, target)
     Injectable(config)(target)
   }

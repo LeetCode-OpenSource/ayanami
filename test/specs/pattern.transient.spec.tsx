@@ -128,4 +128,28 @@ describe('Transient Pattern spec:', () => {
       expect(autoAddCallback.mock.calls.length).toBe(2)
     })
   })
+
+  it('should throw an error if trying to inject a transient Ayanami', () => {
+    expect(() => {
+      @Transient()
+      class A extends Ayanami<{}> {
+        defaultState = {}
+      }
+
+      @Transient()
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      class B extends Ayanami<{}> {
+        defaultState = {}
+
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        constructor(private a: A) {
+          super()
+        }
+      }
+    }).toThrowError(
+      `Since A was decorated by @Transient(), it can only used by 'useHooks' or 'connect'.`,
+    )
+  })
 })
