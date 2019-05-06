@@ -5,6 +5,8 @@ coverage
 /demo
 /test
 .prettierrc
+.eslintignore
+.eslintrc.json
 tsconfig.json
 tsconfig.build.json
 tslint.json
@@ -13,3 +15,4 @@ yarn.lock
 .cache
 jest.config.js
 .git/
+.circleci/
