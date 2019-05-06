@@ -10,6 +10,8 @@
     "allowSyntheticDefaultImports": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "moduleResolution": "node",
