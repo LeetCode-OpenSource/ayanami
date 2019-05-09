@@ -12,18 +12,18 @@ class Tips extends Ayanami<TipsState> {
   }
 
   @Reducer()
-  removeTips() {
+  removeTips(): TipsState {
     return { tips: '' }
   }
 
   @Reducer()
-  setTips(tips: string) {
-    return { tips }
+  setTips(state: TipsState, tips: string): TipsState {
+    return { ...state, tips }
   }
 
   @Reducer()
-  addTips(tips: string, state: TipsState) {
-    return { tips: `${state.tips} ${tips}` }
+  addTips(state: TipsState, tips: string): TipsState {
+    return { ...state, tips: `${state.tips} ${tips}` }
   }
 }
 

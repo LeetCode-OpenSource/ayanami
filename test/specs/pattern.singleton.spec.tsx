@@ -17,8 +17,8 @@ class Count extends Ayanami<CountState> {
   }
 
   @Reducer()
-  setCount(count: number) {
-    return { count }
+  setCount(state: CountState, count: number): CountState {
+    return { ...state, count }
   }
 
   @Effect()

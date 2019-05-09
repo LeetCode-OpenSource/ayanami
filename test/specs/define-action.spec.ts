@@ -25,8 +25,8 @@ class Count extends Ayanami<CountState> {
   resetCountDown$!: Observable<number>
 
   @Reducer()
-  setCount(count: number) {
-    return { count }
+  setCount(state: CountState, count: number): CountState {
+    return { ...state, count }
   }
 
   @Effect()

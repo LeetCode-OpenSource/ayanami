@@ -9,8 +9,8 @@ class CountModel extends Ayanami<CountState> {
   defaultState = { count: 0 }
 
   @Reducer()
-  setCount(count: number): Partial<CountState> {
-    return { count }
+  setCount(state: CountState, count: number): CountState {
+    return { ...state, count }
   }
 }
 

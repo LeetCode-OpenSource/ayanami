@@ -21,13 +21,13 @@ class Count extends Ayanami<State> {
   }
 
   @Reducer()
-  add(count: number, state: State) {
-    return { count: state.count + count }
+  add(state: State, count: number): State {
+    return { ...state, count: state.count + count }
   }
 
   @Reducer()
-  setCount(count: number) {
-    return { count }
+  setCount(state: State, count: number): State {
+    return { ...state, count }
   }
 
   @Effect()

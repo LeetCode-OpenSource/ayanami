@@ -21,7 +21,9 @@ const createIkariConfig = () => ({
   nameForLog: 'abc',
   defaultState: { count: 0 },
   effects: { never: () => NEVER },
-  reducers: { setCount: (count: number) => ({ count }) },
+  reducers: {
+    setCount: (state: State, count: number): State => ({ ...state, count }),
+  },
   defineActions: { hmm: getDefineAction() },
 })
 
@@ -31,7 +33,7 @@ describe('Ikari spec:', () => {
   describe('static', () => {
     describe('createAndBindAt', () => {
       it('only create once if call multiple times', () => {
-        const target = { defaultState: {} }
+        const target = { defaultState: { count: 0 } }
 
         const ikari = Ikari.createAndBindAt(target, createIkariConfig())
         expect(ikari).toBe(Ikari.createAndBindAt(target, createIkariConfig()))

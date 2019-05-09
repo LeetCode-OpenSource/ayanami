@@ -7,16 +7,15 @@ export class BasicState<S> {
 
   readonly getState: () => Readonly<S>
 
-  readonly setState: (state: Partial<S>) => void
+  readonly setState: (state: Readonly<S>) => void
 
   constructor(defaultState: S) {
     const state$ = new BehaviorSubject<S>(defaultState)
 
     this.getState = () => state$.getValue()
 
-    this.setState = (state: Partial<S>) => {
+    this.setState = (nextState: Readonly<S>) => {
       const currentState = this.getState()
-      const nextState = { ...currentState, ...state }
 
       if (!shallowequal(currentState, nextState)) {
         state$.next(nextState)
