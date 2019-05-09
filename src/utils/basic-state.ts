@@ -15,9 +15,7 @@ export class BasicState<S> {
     this.getState = () => state$.getValue()
 
     this.setState = (nextState: Readonly<S>) => {
-      const currentState = this.getState()
-
-      if (!shallowequal(currentState, nextState)) {
+      if (!shallowequal(this.getState(), nextState)) {
         state$.next(nextState)
       }
     }
