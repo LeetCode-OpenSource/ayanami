@@ -1,33 +1,6 @@
-import { Injectable } from '@asuka/di'
-
-import { Ayanami } from '../../src'
-import { BasicState, getInstance } from '../../src/utils'
+import { BasicState } from '../../src/utils'
 
 describe('utils specs:', () => {
-  describe('getInstance', () => {
-    it('for Singleton, always return same instance', () => {
-      @Injectable()
-      class A extends Ayanami<{}> {
-        defaultState = {}
-      }
-
-      const a1 = getInstance(A)
-
-      expect(a1).toBeInstanceOf(A)
-
-      @Injectable()
-      // make sure add new providers won't affect get same instance
-      // see https://github.com/LeetCode-OpenSource/asuka/pull/3
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      class B extends Ayanami<{}> {
-        defaultState = {}
-      }
-
-      expect(a1).toBe(getInstance(A))
-    })
-  })
-
   describe('BasicState', () => {
     let state: BasicState<{ count: number }>
 

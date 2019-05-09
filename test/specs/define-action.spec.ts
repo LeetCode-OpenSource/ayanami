@@ -1,4 +1,4 @@
-import { Injectable } from '@asuka/di'
+import { Injectable, Test } from '@asuka/di'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 
@@ -37,7 +37,8 @@ class Count extends Ayanami<CountState> {
 }
 
 describe('DefineAction spec:', () => {
-  const count = Count.getInstance()
+  const testModule = Test.createTestingModule().compile()
+  const count = testModule.getInstance(Count)
   const countActions = getAllActionsForTest(count)
 
   const getCount = () => count.getState().count

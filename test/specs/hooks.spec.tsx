@@ -4,7 +4,7 @@ import { act, create } from 'react-test-renderer'
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer } from '../../src'
+import { Ayanami, Effect, EffectAction, Reducer, useAyanami } from '../../src'
 
 interface State {
   count: number
@@ -41,7 +41,7 @@ class Count extends Ayanami<State> {
 }
 
 function CountComponent() {
-  const [state, actions] = Count.useHooks()
+  const [state, actions] = useAyanami(Count)
 
   const add = (count: number) => () => actions.add(count)
   const minus = (count: number) => () => actions.minus(count)

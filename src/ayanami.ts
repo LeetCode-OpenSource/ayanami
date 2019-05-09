@@ -1,32 +1,19 @@
 import * as React from 'react'
 import { Observable } from 'rxjs'
 
-import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import { getEffectActionFactories, getInstance } from './utils'
-import { useAyanami, HooksResult } from './hooks'
+import { ConstructorOf, ActionOfAyanami } from './types'
+import { getEffectActionFactories } from './utils'
 import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
 import { combineWithIkari, destroyIkariFrom } from './ikari'
 
 export abstract class Ayanami<State> {
-  static connect<M extends Ayanami<State>, State, P>(
+  static connect<M extends Ayanami<S>, S, P>(
     this: ConstructorOf<M>,
     Component: React.ComponentType<P>,
-  ): M extends Ayanami<infer S>
-    ? ComponentConnectedWithAyanami<M, S, P>
-    : ComponentConnectedWithAyanami<M, State, P> {
-    return connectAyanami<M, State, P>(this, Component) as any
-  }
-
-  static useHooks<M extends Ayanami<State>, State>(
-    this: ConstructorOf<M>,
-  ): M extends Ayanami<infer S> ? HooksResult<M, S> : HooksResult<M, State> {
-    const ayanami = React.useMemo(() => (this as ConstructorOfAyanami<M>).getInstance<M>(), [])
-
-    return useAyanami<M, State>(ayanami) as any
-  }
-
-  static getInstance<M extends Ayanami<any>>(this: ConstructorOf<M>): M {
-    return getInstance(this)
+  ): M extends Ayanami<infer SS>
+    ? ComponentConnectedWithAyanami<M, SS, P>
+    : ComponentConnectedWithAyanami<M, S, P> {
+    return connectAyanami<M, S, P>(this, Component) as any
   }
 
   abstract defaultState: State

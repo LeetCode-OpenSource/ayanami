@@ -1,19 +1,28 @@
-import { useState, useEffect, useMemo } from 'react'
+import { InjectableFactory } from '@asuka/di'
+import * as React from 'react'
 
-import { ActionMethodOfAyanami } from './types'
+import { ActionMethodOfAyanami, ConstructorOf } from './types'
 import { Ayanami } from './ayanami'
 import { combineWithIkari } from './ikari'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 
-export function useAyanami<M extends Ayanami<S>, S>(ayanami: M): HooksResult<M, S> {
-  const ikari = useMemo(() => combineWithIkari(ayanami), [ayanami])
-  const [state, setState] = useState<S>(() => ayanami.getState())
+export function useAyanamiInstance<M extends Ayanami<S>, S>(ayanami: M): HooksResult<M, S> {
+  const ikari = React.useMemo(() => combineWithIkari(ayanami), [ayanami])
+  const [state, setState] = React.useState<S>(() => ayanami.getState())
 
-  useEffect(() => {
+  React.useEffect(() => {
     const subscription = ayanami.getState$().subscribe(setState)
     return () => subscription.unsubscribe()
   }, [])
 
   return [state, ikari.triggerActions] as HooksResult<M, S>
+}
+
+export function useAyanami<M extends Ayanami<S>, S>(
+  constructor: ConstructorOf<M>,
+): M extends Ayanami<infer SS> ? HooksResult<M, SS> : HooksResult<M, S> {
+  const ayanami = React.useMemo(() => InjectableFactory.getInstance(constructor), [constructor])
+
+  return useAyanamiInstance<M, S>(ayanami) as any
 }
