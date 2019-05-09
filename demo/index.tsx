@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer } from '../src'
+import { Ayanami, Effect, EffectAction, Reducer, useAyanami } from '../src'
 
 interface State {
   count: number
@@ -60,8 +60,8 @@ class Count extends Ayanami<State> {
 }
 
 function CountComponent() {
-  const [{ count }, actions] = Count.useHooks()
-  const [{ tips }] = Tips.useHooks()
+  const [{ count }, actions] = useAyanami(Count)
+  const [{ tips }] = useAyanami(Tips)
 
   const add = (count: number) => () => actions.add(count)
   const minus = (count: number) => () => actions.minus(count)
