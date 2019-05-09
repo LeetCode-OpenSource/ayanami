@@ -2,15 +2,7 @@ import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 import { Injectable } from '@asuka/di'
 
-import {
-  Ayanami,
-  Reducer,
-  Effect,
-  EffectAction,
-  getAllActionsForTest,
-  Singleton,
-  Transient,
-} from '../../src'
+import { Ayanami, Reducer, Effect, EffectAction, getAllActionsForTest } from '../../src'
 import { copyAyanami } from '../../src/utils/copy-ayanami'
 import { BasicState, getAyanamiInstance } from '../../src/utils'
 
@@ -21,7 +13,7 @@ interface CountState {
 @Injectable()
 class Tips {}
 
-@Singleton()
+@Injectable()
 class Count extends Ayanami<CountState> {
   defaultState = {
     count: 0,
@@ -95,7 +87,7 @@ describe('utils specs:', () => {
 
   describe('getAyanamiInstance', () => {
     it('for Singleton, always return same instance', () => {
-      @Singleton()
+      @Injectable()
       class A extends Ayanami<{}> {
         defaultState = {}
       }
@@ -104,7 +96,7 @@ describe('utils specs:', () => {
 
       expect(a1).toBeInstanceOf(A)
 
-      @Singleton()
+      @Injectable()
       // make sure add new providers won't affect get same instance
       // see https://github.com/LeetCode-OpenSource/asuka/pull/3
       // @ts-ignore
@@ -114,17 +106,6 @@ describe('utils specs:', () => {
       }
 
       expect(a1).toBe(getAyanamiInstance(A))
-    })
-
-    it('for Transient, always return new instance', () => {
-      @Transient()
-      class A extends Ayanami<{}> {
-        defaultState = {}
-      }
-
-      const a1 = getAyanamiInstance(A)
-      expect(a1).toBeInstanceOf(A)
-      expect(a1 === getAyanamiInstance(A)).toBeFalsy()
     })
   })
 

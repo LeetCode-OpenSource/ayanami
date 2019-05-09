@@ -1,9 +1,10 @@
 import * as React from 'react'
+import { Injectable } from '@asuka/di'
 import { act, create } from 'react-test-renderer'
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer, ActionMethodOfAyanami, Singleton } from '../../src'
+import { Ayanami, Effect, EffectAction, Reducer, ActionMethodOfAyanami } from '../../src'
 
 interface State {
   count: number
@@ -14,7 +15,7 @@ enum CountAction {
   MINUS = 'minus',
 }
 
-@Singleton()
+@Injectable()
 class Count extends Ayanami<State> {
   defaultState = {
     count: 0,

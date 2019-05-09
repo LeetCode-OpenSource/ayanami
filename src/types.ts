@@ -2,11 +2,6 @@ import { Observable } from 'rxjs'
 
 import { Ayanami } from './ayanami'
 
-export enum Pattern {
-  Singleton = 'Singleton',
-  Transient = 'Transient',
-}
-
 // https://stackoverflow.com/questions/55541275/typescript-check-for-the-any-type
 type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
 

@@ -1,11 +1,13 @@
-import { Ayanami, Reducer, getAllActionsForTest, Singleton, ActionMethodOfAyanami } from '../../src'
+import { Injectable } from '@asuka/di'
+
+import { Ayanami, Reducer, getAllActionsForTest, ActionMethodOfAyanami } from '../../src'
 import { copyAyanami } from '../../src/utils/copy-ayanami'
 
 interface TipsState {
   tips: string
 }
 
-@Singleton()
+@Injectable()
 class Tips extends Ayanami<TipsState> {
   defaultState = {
     tips: '',

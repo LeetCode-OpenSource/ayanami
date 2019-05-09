@@ -2,7 +2,6 @@ import * as React from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import { isTransient } from './decorators'
 import { getEffectActionFactories, getAyanamiInstance } from './utils'
 import { useAyanami, HooksResult } from './hooks'
 import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
@@ -22,15 +21,6 @@ export abstract class Ayanami<State> {
     this: ConstructorOf<M>,
   ): M extends Ayanami<infer S> ? HooksResult<M, S> : HooksResult<M, State> {
     const ayanami = React.useMemo(() => (this as ConstructorOfAyanami<M>).getInstance<M>(), [])
-
-    React.useEffect(
-      () => () => {
-        if (isTransient(this)) {
-          ayanami.destroy()
-        }
-      },
-      [],
-    )
 
     return useAyanami<M, State>(ayanami) as any
   }
