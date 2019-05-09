@@ -25,7 +25,9 @@ export interface ComponentConnectedWithAyanami<M extends Ayanami<S>, S, P> {
 export function connectAyanami<M extends Ayanami<S>, S, P>(
   AyanamiClass: ConstructorOf<M>,
   Component: React.ComponentType<P>,
-) {
+): M extends Ayanami<infer SS>
+  ? ComponentConnectedWithAyanami<M, SS, P>
+  : ComponentConnectedWithAyanami<M, S, P> {
   return ((
     mapStateToProps?: (props: S) => Partial<P>,
     mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
@@ -36,5 +38,5 @@ export function connectAyanami<M extends Ayanami<S>, S, P>(
       const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
 
       return <Component {...mappedState} {...mappedAction} {...props} />
-    }) as ComponentConnectedWithAyanami<M, S, P>
+    }) as any
 }

@@ -4,7 +4,14 @@ import { act, create } from 'react-test-renderer'
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer, ActionMethodOfAyanami } from '../../src'
+import {
+  Ayanami,
+  Effect,
+  EffectAction,
+  Reducer,
+  ActionMethodOfAyanami,
+  connectAyanami,
+} from '../../src'
 
 interface State {
   count: number
@@ -64,7 +71,7 @@ class CountComponent extends React.Component<CountComponentProps> {
   private minus = (count: number) => () => this.props.minus(count)
 }
 
-const ConnectedCountComponent = Count.connect(CountComponent)(
+const ConnectedCountComponent = connectAyanami(Count, CountComponent)(
   ({ count }) => ({ count }),
   ({ add, minus }) => ({ add, minus }),
 )
