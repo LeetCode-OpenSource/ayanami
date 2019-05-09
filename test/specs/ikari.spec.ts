@@ -25,6 +25,7 @@ const createIkariConfig = () => ({
     setCount: (state: State, count: number): State => ({ ...state, count }),
   },
   defineActions: { hmm: getDefineAction() },
+  effectActionFactories: {},
 })
 
 const createIkari = () => new Ikari<State>(createIkariConfig())
