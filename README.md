@@ -1,4 +1,4 @@
-<h1 align="center">Ayanami</h1>
+<h1 align="center">[WIP]Ayanami</h1>
 <h4 align="center">
   A better way to react with state. Inspired by <a href="https://github.com/LeetCode-OpenSource/redux-epics-decorator">redux-epics-decorator</a>
 </h4>
@@ -51,6 +51,6 @@ npm install ayanami
 
 ## Examples
 
-- [Simple `Transient` demo with **useHooks**](https://codesandbox.io/s/8111031lml)
-- [Simple `Singleton` demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)
-- [Interact with other Ayanami](https://codesandbox.io/s/7jy59q34rj)
+- <del>[Simple `Transient` demo with **useHooks**](https://codesandbox.io/s/8111031lml)</del>
+- <del>[Simple `Singleton` demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)</del>
+- <del>[Interact with other Ayanami](https://codesandbox.io/s/7jy59q34rj)</del>
