@@ -9,9 +9,10 @@ import {
   OriginalReducerActions,
   OriginalDefineActions,
   TriggerActions,
+  EffectActionFactories,
 } from './types'
 import { Ayanami } from './ayanami'
-import { BasicState, getOriginalFunctions } from './utils'
+import { BasicState, getEffectActionFactories, getOriginalFunctions } from './utils'
 import { logStateAction } from './redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 
@@ -21,6 +22,7 @@ interface Config<State> {
   effects: OriginalEffectActions<State>
   reducers: OriginalReducerActions<State>
   defineActions: OriginalDefineActions
+  effectActionFactories: EffectActionFactories
 }
 
 interface Action<State> {
@@ -53,6 +55,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
       effects,
       reducers,
       defineActions,
+      effectActionFactories: getEffectActionFactories(ayanami),
     })
   }
 }
@@ -86,6 +89,8 @@ export class Ikari<State> {
 
   state: BasicState<State>
 
+  effectActionFactories: EffectActionFactories
+
   triggerActions: TriggerActions = {}
 
   subscription = new Subscription()
@@ -93,6 +98,7 @@ export class Ikari<State> {
   private isSetup: boolean = false
 
   constructor(private readonly config: Readonly<Config<State>>) {
+    this.effectActionFactories = config.effectActionFactories
     this.state = new BasicState<State>(config.defaultState)
   }
 

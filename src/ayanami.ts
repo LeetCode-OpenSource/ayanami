@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs'
 
 import { ActionOfAyanami } from './types'
-import { getEffectActionFactories } from './utils'
 import { combineWithIkari, destroyIkariFrom } from './ikari'
 
 export abstract class Ayanami<State> {
@@ -26,6 +25,6 @@ export abstract class Ayanami<State> {
   getActions<M extends Ayanami<State>>(
     this: M,
   ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
-    return getEffectActionFactories(this)
+    return combineWithIkari(this).effectActionFactories as any
   }
 }
