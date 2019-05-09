@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Observable } from 'rxjs'
 
 import { ConstructorOf, ActionOfAyanami, ConstructorOfAyanami } from './types'
-import { getEffectActionFactories, getAyanamiInstance } from './utils'
+import { getEffectActionFactories, getInstance } from './utils'
 import { useAyanami, HooksResult } from './hooks'
 import { connectAyanami, ComponentConnectedWithAyanami } from './connect'
 import { combineWithIkari, destroyIkariFrom } from './ikari'
@@ -26,7 +26,7 @@ export abstract class Ayanami<State> {
   }
 
   static getInstance<M extends Ayanami<any>>(this: ConstructorOf<M>): M {
-    return getAyanamiInstance(this)
+    return getInstance(this)
   }
 
   abstract defaultState: State

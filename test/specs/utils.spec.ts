@@ -4,7 +4,7 @@ import { Injectable } from '@asuka/di'
 
 import { Ayanami, Reducer, Effect, EffectAction, getAllActionsForTest } from '../../src'
 import { copyAyanami } from '../../src/utils/copy-ayanami'
-import { BasicState, getAyanamiInstance } from '../../src/utils'
+import { BasicState, getInstance } from '../../src/utils'
 
 interface CountState {
   count: number
@@ -85,14 +85,14 @@ describe('utils specs:', () => {
     })
   })
 
-  describe('getAyanamiInstance', () => {
+  describe('getInstance', () => {
     it('for Singleton, always return same instance', () => {
       @Injectable()
       class A extends Ayanami<{}> {
         defaultState = {}
       }
 
-      const a1 = getAyanamiInstance(A)
+      const a1 = getInstance(A)
 
       expect(a1).toBeInstanceOf(A)
 
@@ -105,7 +105,7 @@ describe('utils specs:', () => {
         defaultState = {}
       }
 
-      expect(a1).toBe(getAyanamiInstance(A))
+      expect(a1).toBe(getInstance(A))
     })
   })
 
