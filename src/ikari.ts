@@ -210,17 +210,12 @@ function setupReducerActions<State>(
     reducers.push(reducer$)
 
     const reducer = reducerActions[actionName]
+
     actions[actionName] = (params: any) => {
-      const currentState = getState()
+      const nextState = reducer(getState(), params)
+
       reducer$.next({
-        reducerAction: {
-          params,
-          actionName,
-          nextState: {
-            ...currentState,
-            ...reducer(params, currentState),
-          },
-        },
+        reducerAction: { params, actionName, nextState },
         originalActionName: actionName,
       })
     }

@@ -68,18 +68,19 @@ type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectActi
   : never
 
 type UnpackReducerFunctionArguments<T extends Function> = T extends (
+  state: any,
   ...payload: infer Arguments
 ) => any
   ? ArgumentsType<Arguments>
   : never
 
-type UnpackReducerPayload<Func, State> = Func extends () => Partial<State>
+type UnpackReducerPayload<Func, State> = Func extends () => State
   ? UnpackReducerFunctionArguments<Func> extends never
     ? ArgumentsType<[void]>
     : UnpackReducerFunctionArguments<Func>
-  : Func extends (payload: any) => Partial<State>
+  : Func extends (state: State) => State
   ? UnpackReducerFunctionArguments<Func>
-  : Func extends (payload: any, state: State) => Partial<State>
+  : Func extends (state: State, payload: any) => State
   ? UnpackReducerFunctionArguments<Func>
   : never
 
@@ -118,7 +119,7 @@ export type OriginalEffectActions<State> = ObjectOf<
 >
 
 export type OriginalReducerActions<State> = ObjectOf<
-  (payload: any, state: Readonly<State>) => Readonly<Partial<State>>
+  (state: State, payload: any) => Readonly<State>
 >
 
 export type OriginalDefineActions = ObjectOf<{

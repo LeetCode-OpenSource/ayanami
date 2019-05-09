@@ -20,8 +20,8 @@ class Tips extends Ayanami<TipsState> {
   }
 
   @Reducer()
-  showTips(tips: string) {
-    return { tips }
+  showTips(state: TipsState, tips: string): TipsState {
+    return { ...state, tips }
   }
 }
 
@@ -36,12 +36,12 @@ class Count extends Ayanami<State> {
   }
 
   @Reducer()
-  add(count: number, state: State) {
+  add(state: State, count: number): State {
     return { count: state.count + count }
   }
 
   @Reducer()
-  reset() {
+  reset(): State {
     return { count: 0 }
   }
 
