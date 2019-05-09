@@ -1,7 +1,6 @@
-import { Injectable } from '@asuka/di'
+import { Injectable, Test } from '@asuka/di'
 
 import { Ayanami, Reducer, getAllActionsForTest, ActionMethodOfAyanami } from '../../src'
-import { copyAyanami } from '../../src/utils/copy-ayanami'
 
 interface TipsState {
   tips: string
@@ -34,7 +33,9 @@ describe('Reducer spec:', () => {
   let actions: ActionMethodOfAyanami<Tips, TipsState>
 
   beforeEach(() => {
-    tips = copyAyanami(Tips)
+    const testModule = Test.createTestingModule().compile()
+
+    tips = testModule.getInstance(Tips)
     actions = getAllActionsForTest(tips)
   })
 
