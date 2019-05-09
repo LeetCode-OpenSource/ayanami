@@ -22,21 +22,22 @@ export interface ComponentConnectedWithAyanami<M extends Ayanami<S>, S, P> {
   ): ConnectedComponent<P, S, MA>
 }
 
-export function connectAyanami<M extends Ayanami<S>, S, P>(
-  AyanamiClass: ConstructorOf<M>,
-  Component: React.ComponentType<P>,
-): M extends Ayanami<infer SS>
-  ? ComponentConnectedWithAyanami<M, SS, P>
-  : ComponentConnectedWithAyanami<M, S, P> {
-  return ((
-    mapStateToProps?: (props: S) => Partial<P>,
-    mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
-  ) =>
-    function ConnectAyanami(props: P) {
-      const [state, action] = useAyanami(AyanamiClass)
-      const mappedState = mapStateToProps ? mapStateToProps(state) : state
-      const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
+export function connectAyanami<M extends Ayanami<S>, S>(AyanamiClass: ConstructorOf<M>) {
+  return function connectComponent<P>(
+    Component: React.ComponentType<P>,
+  ): M extends Ayanami<infer SS>
+    ? ComponentConnectedWithAyanami<M, SS, P>
+    : ComponentConnectedWithAyanami<M, S, P> {
+    return ((
+      mapStateToProps?: (props: S) => Partial<P>,
+      mapActionsToProps?: (actions: ActionMethodOfAyanami<M, S>) => Partial<P>,
+    ) =>
+      function ConnectAyanami(props: P) {
+        const [state, action] = useAyanami(AyanamiClass)
+        const mappedState = mapStateToProps ? mapStateToProps(state) : state
+        const mappedAction = mapActionsToProps ? mapActionsToProps(action as any) : action
 
-      return <Component {...mappedState} {...mappedAction} {...props} />
-    }) as any
+        return <Component {...mappedState} {...mappedAction} {...props} />
+      }) as any
+  }
 }
