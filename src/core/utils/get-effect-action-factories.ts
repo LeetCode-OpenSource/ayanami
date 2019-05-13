@@ -1,6 +1,6 @@
 import { Ayanami } from '../ayanami'
 import { EffectAction } from '../types'
-import { getAllActionNames } from '../decorators/action-related'
+import { getAllActionNames } from '../decorators'
 
 export function getEffectActionFactories(target: Ayanami<any>) {
   return getAllActionNames(target).reduce(

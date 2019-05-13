@@ -1,8 +1,7 @@
 import { Subject, NEVER } from 'rxjs'
 
 import '../../src'
-import { Ikari } from '../../src/ikari'
-import { BasicState } from '../../src/utils'
+import { Ikari, BasicState } from '../../src/core'
 
 interface State {
   count: number

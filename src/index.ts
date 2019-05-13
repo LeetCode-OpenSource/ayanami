@@ -1,8 +1,6 @@
 import 'reflect-metadata'
 
-export { EffectAction, ActionMethodOfAyanami } from './types'
-export { Reducer, Effect, DefineAction } from './decorators'
+export { Ayanami, Reducer, Effect, DefineAction, EffectAction, ActionMethodOfAyanami } from './core'
 export { getAllActionsForTest } from './test-helper'
 export * from './hooks'
 export * from './connect'
-export * from './ayanami'

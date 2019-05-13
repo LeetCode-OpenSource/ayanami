@@ -1,4 +1,4 @@
-import { BasicState } from '../../src/utils'
+import { BasicState } from '../../src/core'
 
 describe('utils specs:', () => {
   describe('BasicState', () => {

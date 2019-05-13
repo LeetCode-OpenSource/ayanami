@@ -1,6 +1,4 @@
-import { Ayanami } from '../ayanami'
-import { combineWithIkari } from '../ikari'
-import { ActionMethodOfAyanami } from '../types'
+import { Ayanami, combineWithIkari, ActionMethodOfAyanami } from '../core'
 
 export function getAllActionsForTest<A extends Ayanami<any>>(
   ayanami: A,

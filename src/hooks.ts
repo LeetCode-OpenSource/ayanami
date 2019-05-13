@@ -1,9 +1,7 @@
 import { InjectableFactory } from '@asuka/di'
 import * as React from 'react'
 
-import { ActionMethodOfAyanami, ConstructorOf } from './types'
-import { Ayanami } from './ayanami'
-import { combineWithIkari } from './ikari'
+import { Ayanami, combineWithIkari, ActionMethodOfAyanami, ConstructorOf } from './core'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 

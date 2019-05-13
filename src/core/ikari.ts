@@ -13,7 +13,7 @@ import {
 } from './types'
 import { Ayanami } from './ayanami'
 import { BasicState, getEffectActionFactories, getOriginalFunctions } from './utils'
-import { logStateAction } from './redux-devtools-extension'
+import { logStateAction } from '../redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 
 interface Config<State> {
