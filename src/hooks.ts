@@ -1,7 +1,13 @@
-import { InjectableFactory } from '@asuka/di'
 import * as React from 'react'
 
-import { Ayanami, combineWithIkari, ActionMethodOfAyanami, ConstructorOf } from './core'
+import {
+  Ayanami,
+  combineWithIkari,
+  getInstanceWithScope,
+  ScopeConfig,
+  ActionMethodOfAyanami,
+  ConstructorOf,
+} from './core'
 
 export type HooksResult<M extends Ayanami<S>, S> = [Readonly<S>, ActionMethodOfAyanami<M, S>]
 
@@ -18,9 +24,10 @@ export function useAyanamiInstance<M extends Ayanami<S>, S>(ayanami: M): HooksRe
 }
 
 export function useAyanami<M extends Ayanami<S>, S>(
-  constructor: ConstructorOf<M>,
+  A: ConstructorOf<M>,
+  config?: ScopeConfig,
 ): M extends Ayanami<infer SS> ? HooksResult<M, SS> : HooksResult<M, S> {
-  const ayanami = React.useMemo(() => InjectableFactory.getInstance(constructor), [constructor])
+  const ayanami = React.useMemo(() => getInstanceWithScope(A, config), [A])
 
   return useAyanamiInstance<M, S>(ayanami) as any
 }
