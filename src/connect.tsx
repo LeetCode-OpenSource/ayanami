@@ -1,7 +1,6 @@
 import * as React from 'react'
 
-import { ActionMethodOfAyanami, ConstructorOf, Omit } from './types'
-import { Ayanami } from './ayanami'
+import { Ayanami, ActionMethodOfAyanami, ConstructorOf, Omit } from './core'
 import { useAyanami } from './hooks'
 
 type ConnectedComponent<P, S, A> = React.FunctionComponent<Omit<P, keyof S | keyof A>>
