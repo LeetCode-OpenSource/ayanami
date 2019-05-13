@@ -41,24 +41,8 @@ describe('Ikari spec:', () => {
     })
   })
 
-  describe('setup', () => {
+  describe('instance', () => {
     const ikari = createIkari()
-
-    it('`setup` actually run once', () => {
-      ikari.setup()
-      const firstTriggerActions = ikari.triggerActions
-
-      ikari.setup()
-      const secondTriggerActions = ikari.triggerActions
-
-      expect(firstTriggerActions).toBe(secondTriggerActions)
-    })
-  })
-
-  describe('after setup', () => {
-    const ikari = createIkari()
-
-    ikari.setup()
 
     it('state is setup properly', () => {
       expect(ikari.state).toBeInstanceOf(BasicState)
@@ -81,8 +65,6 @@ describe('Ikari spec:', () => {
   describe('after destroy', () => {
     const ikari = createIkari()
 
-    ikari.setup()
-
     expect(ikari.subscription.closed).toBe(false)
 
     beforeEach(() => {
@@ -94,12 +76,6 @@ describe('Ikari spec:', () => {
     })
 
     it('should remove all triggerActions', () => {
-      expect(ikari.triggerActions).toEqual({})
-    })
-
-    it('should not able to reactive', () => {
-      ikari.setup()
-      expect(ikari.subscription.closed).toBe(true)
       expect(ikari.triggerActions).toEqual({})
     })
   })

@@ -77,7 +77,6 @@ export class Ikari<State> {
       return createdIkari
     } else {
       const ikari = new Ikari(config)
-      ikari.setup()
       Reflect.defineMetadata(ikariSymbol, ikari, target)
       return ikari
     }
@@ -95,17 +94,9 @@ export class Ikari<State> {
 
   subscription = new Subscription()
 
-  private isSetup: boolean = false
-
   constructor(private readonly config: Readonly<Config<State>>) {
     this.effectActionFactories = config.effectActionFactories
     this.state = new BasicState<State>(config.defaultState)
-  }
-
-  setup() {
-    if (this.isSetup) {
-      return
-    }
 
     const [effectActions$, effectActions] = setupEffectActions(
       this.config.effects,
@@ -136,8 +127,6 @@ export class Ikari<State> {
         this.handleAction(action)
       }),
     )
-
-    this.isSetup = true
   }
 
   destroy() {
