@@ -1,6 +1,6 @@
 import { Injectable } from '@asuka/di'
 import * as React from 'react'
-import { act, create, ReactTestInstance } from 'react-test-renderer'
+import { act, create, ReactTestInstance, ReactTestRenderer } from 'react-test-renderer'
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
@@ -152,9 +152,10 @@ describe('Hooks spec:', () => {
     describe('TransientScope will isolate state and actions', () => {
       let count: () => string | ReactTestInstance
       let click: (action: CountAction) => void
+      let testRenderer: ReactTestRenderer
 
       beforeEach(() => {
-        const testRenderer = create(<CountComponent scope={TransientScope} />)
+        testRenderer = create(<CountComponent scope={TransientScope} />)
 
         count = () => testRenderer.root.findByType('span').children[0]
         click = (action: CountAction) =>
@@ -176,6 +177,12 @@ describe('Hooks spec:', () => {
       it('Effect action work properly', () => {
         click(CountAction.MINUS)
         expect(count()).toBe('-1')
+      })
+
+      it('should destroy when component unmount', () => {
+        const spy = jest.spyOn(Ayanami.prototype, 'destroy')
+        act(() => testRenderer.unmount())
+        expect(spy.mock.calls.length).toBe(1)
       })
     })
   })
