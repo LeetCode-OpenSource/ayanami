@@ -1,10 +1,10 @@
 import { Injectable } from '@asuka/di'
 import * as React from 'react'
-import { act, create } from 'react-test-renderer'
+import { act, create, ReactTestInstance } from 'react-test-renderer'
 import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer, useAyanami } from '../../src'
+import { Ayanami, Effect, EffectAction, Reducer, useAyanami, TransientScope } from '../../src'
 
 interface State {
   count: number
@@ -40,8 +40,8 @@ class Count extends Ayanami<State> {
   }
 }
 
-function CountComponent() {
-  const [state, actions] = useAyanami(Count)
+function CountComponent({ scope }: { scope?: any }) {
+  const [state, actions] = useAyanami(Count, { scope })
 
   const add = (count: number) => () => actions.add(count)
   const minus = (count: number) => () => actions.minus(count)
@@ -62,25 +62,121 @@ function CountComponent() {
 }
 
 describe('Hooks spec:', () => {
-  const testRenderer = create(<CountComponent />)
-  const count = () => testRenderer.root.findByType('span').children[0]
-  const click = (action: CountAction) =>
-    act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
+  describe('Default behavior', () => {
+    const testRenderer = create(<CountComponent />)
+    const count = () => testRenderer.root.findByType('span').children[0]
+    const click = (action: CountAction) =>
+      act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
 
-  // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
-  testRenderer.update(<CountComponent />)
+    // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+    testRenderer.update(<CountComponent />)
 
-  it('default state work properly', () => {
-    expect(count()).toBe('0')
+    it('default state work properly', () => {
+      expect(count()).toBe('0')
+    })
+
+    it('Reducer action work properly', () => {
+      click(CountAction.ADD)
+      expect(count()).toBe('1')
+    })
+
+    it('Effect action work properly', () => {
+      click(CountAction.MINUS)
+      expect(count()).toBe('0')
+    })
   })
 
-  it('Reducer action work properly', () => {
-    click(CountAction.ADD)
-    expect(count()).toBe('1')
-  })
+  describe('Scope behavior', () => {
+    describe('Same scope will share state and actions', () => {
+      const scope = Symbol('scope')
+      let count: () => string | ReactTestInstance
+      let click: (action: CountAction) => void
 
-  it('Effect action work properly', () => {
-    click(CountAction.MINUS)
-    expect(count()).toBe('0')
+      beforeEach(() => {
+        const testRenderer = create(<CountComponent scope={scope} />)
+
+        count = () => testRenderer.root.findByType('span').children[0]
+        click = (action: CountAction) =>
+          act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
+
+        // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+        testRenderer.update(<CountComponent scope={scope} />)
+      })
+
+      it('default state work properly', () => {
+        expect(count()).toBe('0')
+      })
+
+      it('Reducer action work properly', () => {
+        click(CountAction.ADD)
+        expect(count()).toBe('1')
+      })
+
+      it('Effect action work properly', () => {
+        click(CountAction.MINUS)
+        expect(count()).toBe('0')
+      })
+    })
+
+    describe('Different scope will isolate state and actions', () => {
+      let count: () => string | ReactTestInstance
+      let click: (action: CountAction) => void
+
+      beforeEach(() => {
+        const scope = Symbol('scope')
+        const testRenderer = create(<CountComponent scope={scope} />)
+
+        count = () => testRenderer.root.findByType('span').children[0]
+        click = (action: CountAction) =>
+          act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
+
+        // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+        testRenderer.update(<CountComponent scope={scope} />)
+      })
+
+      it('Reducer action work properly', () => {
+        click(CountAction.ADD)
+        expect(count()).toBe('1')
+      })
+
+      it('default state work properly', () => {
+        expect(count()).toBe('0')
+      })
+
+      it('Effect action work properly', () => {
+        click(CountAction.MINUS)
+        expect(count()).toBe('-1')
+      })
+    })
+
+    describe('TransientScope will isolate state and actions', () => {
+      let count: () => string | ReactTestInstance
+      let click: (action: CountAction) => void
+
+      beforeEach(() => {
+        const testRenderer = create(<CountComponent scope={TransientScope} />)
+
+        count = () => testRenderer.root.findByType('span').children[0]
+        click = (action: CountAction) =>
+          act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
+
+        // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+        testRenderer.update(<CountComponent scope={TransientScope} />)
+      })
+
+      it('Reducer action work properly', () => {
+        click(CountAction.ADD)
+        expect(count()).toBe('1')
+      })
+
+      it('default state work properly', () => {
+        expect(count()).toBe('0')
+      })
+
+      it('Effect action work properly', () => {
+        click(CountAction.MINUS)
+        expect(count()).toBe('-1')
+      })
+    })
   })
 })
