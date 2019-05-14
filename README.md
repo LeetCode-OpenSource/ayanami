@@ -1,4 +1,4 @@
-<h1 align="center">[WIP]Ayanami</h1>
+<h1 align="center">Ayanami</h1>
 <h4 align="center">
   A better way to react with state. Inspired by <a href="https://github.com/LeetCode-OpenSource/redux-epics-decorator">redux-epics-decorator</a>
 </h4>
@@ -32,7 +32,6 @@
 - No extra configuration, everything is out of the box
 - Define state and actions in a **predictable** and **type-safe** way
 - Use **[`RxJS`](https://rxjs-dev.firebaseapp.com)** to create side effects and more
-- **Single source of truth**: The model that extends from `Ayanami` is a singleton
 - **Debuggable**: Inspect actions and state changes via [`redux-devtools-extension`](https://github.com/zalmoxisus/redux-devtools-extension)
 
 ## Installation
@@ -40,17 +39,19 @@
 ##### Using [yarn](https://yarnpkg.com/en/package/ayanami):
 
 ```bash
-yarn add ayanami
+yarn add ayanami @asuka/di reflect-metadata rxjs
 ```
 
 ##### Or via [npm](https://www.npmjs.com/package/ayanami):
 
 ```bash
-npm install ayanami
+npm install ayanami @asuka/di reflect-metadata rxjs
 ```
 
 ## Examples
 
-- <del>[Simple `Transient` demo with **useHooks**](https://codesandbox.io/s/8111031lml)</del>
-- <del>[Simple `Singleton` demo with **connect**](https://codesandbox.io/s/p9m3p5lnpq)</del>
-- <del>[Interact with other Ayanami](https://codesandbox.io/s/7jy59q34rj)</del>
+- [Reducer example](https://codesandbox.io/s/py5o3ojo7x)
+- [Effect example](https://codesandbox.io/s/nnko0rxjv4)
+- [Scope example](https://codesandbox.io/s/jlz44wrymw)
+- [Interact with other Ayanami example](https://codesandbox.io/s/ly5ol8xrqz)
+- [SameScope example](https://codesandbox.io/s/k97lqxwvn5)
