@@ -9,6 +9,7 @@ export {
   ActionMethodOfAyanami,
   TransientScope,
   SingletonScope,
+  SameScope,
 } from './core'
 export { getAllActionsForTest } from './test-helper'
 export * from './hooks'
