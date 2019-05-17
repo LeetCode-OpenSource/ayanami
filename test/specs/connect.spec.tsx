@@ -71,10 +71,10 @@ class CountComponent extends React.Component<CountComponentProps> {
   private minus = (count: number) => () => this.props.minus(count)
 }
 
-const ConnectedCountComponent = connectAyanami(Count)(CountComponent)(
+const ConnectedCountComponent = connectAyanami(Count)(
   ({ count }) => ({ count }),
   ({ add, minus }) => ({ add, minus }),
-)
+)(CountComponent)
 
 describe('Connect spec:', () => {
   const testRenderer = create(<ConnectedCountComponent />)
