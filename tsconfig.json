@@ -5,6 +5,7 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "strict": true,
+    "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
