@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs'
+import { Draft } from 'immer'
 
 import { Ayanami } from './ayanami'
 
@@ -77,11 +78,19 @@ type UnpackReducerPayload<Func, State> = Func extends () => State
   ? UnpackReducerFunctionArguments<Func>
   : never
 
+type UnpackImmerReducerPayload<Func, State> = Func extends (state: Draft<State>) => void
+  ? UnpackReducerFunctionArguments<Func>
+  : Func extends (state: Draft<State>, payload: any) => void
+  ? UnpackReducerFunctionArguments<Func>
+  : never
+
 type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? ArgumentsType<[P]> : never
 
 type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
   ? UnpackReducerPayload<F, S> extends never
-    ? UnpackDefineActionPayload<F>
+    ? UnpackImmerReducerPayload<F, S> extends never
+      ? UnpackDefineActionPayload<F>
+      : UnpackImmerReducerPayload<F, S>
     : UnpackReducerPayload<F, S>
   : UnpackEffectPayload<F, S>
 
@@ -113,6 +122,10 @@ export type OriginalEffectActions<State> = ObjectOf<
 
 export type OriginalReducerActions<State> = ObjectOf<
   (state: State, payload: any) => Readonly<State>
+>
+
+export type OriginalImmerReducerActions<State> = ObjectOf<
+  (state: Draft<State>, payload: any) => void
 >
 
 export type OriginalDefineActions = ObjectOf<{

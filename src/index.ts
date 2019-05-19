@@ -2,6 +2,7 @@ import 'reflect-metadata'
 
 export {
   Ayanami,
+  ImmerReducer,
   Reducer,
   Effect,
   DefineAction,

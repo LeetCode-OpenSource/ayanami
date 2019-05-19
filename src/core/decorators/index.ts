@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs'
+import { Draft } from 'immer'
 
-import { defineActionSymbols, effectSymbols, reducerSymbols } from '../symbols'
+import { defineActionSymbols, effectSymbols, reducerSymbols, immerReducerSymbols } from '../symbols'
 import { EffectAction } from '../types'
 import { createActionDecorator } from './action-related'
 
@@ -9,6 +10,10 @@ export * from './action-related'
 interface DecoratorReturnType<V> {
   (target: any, propertyKey: string, descriptor: { value?: V; get?(): V }): void
 }
+
+export const ImmerReducer: <S = any>() => DecoratorReturnType<
+  (state: Draft<S>, params?: any) => void
+> = createActionDecorator(immerReducerSymbols)
 
 export const Reducer: <S = any>() => DecoratorReturnType<
   (state: S, params?: any) => S

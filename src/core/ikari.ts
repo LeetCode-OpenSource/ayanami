@@ -1,12 +1,14 @@
 import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
 import { map, catchError } from 'rxjs/operators'
 import { mapValues } from 'lodash'
+import produce from 'immer'
 
 import {
   EffectAction,
   ReducerAction,
   OriginalEffectActions,
   OriginalReducerActions,
+  OriginalImmerReducerActions,
   OriginalDefineActions,
   TriggerActions,
   EffectActionFactories,
@@ -21,6 +23,7 @@ interface Config<State> {
   defaultState: State
   effects: OriginalEffectActions<State>
   reducers: OriginalReducerActions<State>
+  immerReducers: OriginalImmerReducerActions<State>
   defineActions: OriginalDefineActions
   effectActionFactories: EffectActionFactories
 }
@@ -45,7 +48,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
   if (ikari) {
     return ikari
   } else {
-    const { effects, reducers, defineActions } = getOriginalFunctions(ayanami)
+    const { effects, reducers, immerReducers, defineActions } = getOriginalFunctions(ayanami)
 
     Object.assign(ayanami, mapValues(defineActions, ({ observable }) => observable))
 
@@ -54,6 +57,7 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
       defaultState: ayanami.defaultState,
       effects,
       reducers,
+      immerReducers,
       defineActions,
       effectActionFactories: getEffectActionFactories(ayanami),
     })
@@ -108,9 +112,15 @@ export class Ikari<State> {
       this.state.getState,
     )
 
+    const [immerReducerActions$, immerReducerActions] = setupImmerReducerActions(
+      this.config.immerReducers,
+      this.state.getState,
+    )
+
     this.triggerActions = {
       ...effectActions,
       ...reducerActions,
+      ...immerReducerActions,
       ...mapValues(this.config.defineActions, ({ next }) => next),
     }
 
@@ -123,6 +133,13 @@ export class Ikari<State> {
 
     this.subscription.add(
       reducerActions$.subscribe((action) => {
+        this.log(action)
+        this.handleAction(action)
+      }),
+    )
+
+    this.subscription.add(
+      immerReducerActions$.subscribe((action) => {
         this.log(action)
         this.handleAction(action)
       }),
@@ -217,4 +234,32 @@ function setupReducerActions<State>(
   })
 
   return [merge(...reducers), actions]
+}
+
+function setupImmerReducerActions<State>(
+  immerReducerActions: OriginalImmerReducerActions<State>,
+  getState: () => State,
+): [Observable<Action<State>>, TriggerActions] {
+  const actions: TriggerActions = {}
+  const immerReducers: Observable<Action<State>>[] = []
+
+  Object.keys(immerReducerActions).forEach((actionName) => {
+    const immerReducer$ = new Subject<Action<State>>()
+    immerReducers.push(immerReducer$)
+
+    const immerReducer = immerReducerActions[actionName]
+
+    actions[actionName] = (params: any) => {
+      const nextState = produce(getState(), (draft) => {
+        immerReducer(draft, params)
+      })
+
+      immerReducer$.next({
+        reducerAction: { params, actionName, nextState },
+        originalActionName: actionName,
+      })
+    }
+  })
+
+  return [merge(...immerReducers), actions]
 }

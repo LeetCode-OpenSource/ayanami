@@ -1,4 +1,5 @@
 import { Subject, NEVER } from 'rxjs'
+import { Draft } from 'immer'
 
 import '../../src'
 import { Ikari, BasicState } from '../../src/core'
@@ -22,6 +23,11 @@ const createIkariConfig = () => ({
   effects: { never: () => NEVER },
   reducers: {
     setCount: (state: State, count: number): State => ({ ...state, count }),
+  },
+  immerReducers: {
+    immerSetCount: (state: Draft<State>, count: number) => {
+      state.count = count
+    },
   },
   defineActions: { hmm: getDefineAction() },
   effectActionFactories: {},
@@ -49,16 +55,22 @@ describe('Ikari spec:', () => {
       expect(ikari.state.getState()).toEqual({ count: 0 })
     })
 
-    it('triggerActions is combination of effects, reducers and defineActions', () => {
-      expect(Object.keys(ikari.triggerActions).length).toBe(3)
+    it('triggerActions is combination of effects, reducers, immerReducers and defineActions', () => {
+      expect(Object.keys(ikari.triggerActions).length).toBe(4)
       expect(typeof ikari.triggerActions.never).toBe('function')
       expect(typeof ikari.triggerActions.setCount).toBe('function')
+      expect(typeof ikari.triggerActions.immerSetCount).toBe('function')
       expect(typeof ikari.triggerActions.hmm).toBe('function')
     })
 
     it('reducers can change state', () => {
       ikari.triggerActions.setCount(1)
       expect(ikari.state.getState()).toEqual({ count: 1 })
+    })
+
+    it('ImmerReducers can change state', () => {
+      ikari.triggerActions.immerSetCount(2)
+      expect(ikari.state.getState()).toEqual({ count: 2 })
     })
   })
 
