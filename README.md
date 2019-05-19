@@ -51,6 +51,7 @@ npm install ayanami @asuka/di reflect-metadata rxjs
 ## Examples
 
 - [Reducer example](https://codesandbox.io/s/py5o3ojo7x)
+- [ImmerReducer example](https://codesandbox.io/s/ayanamiimmerreducerexample-r07kk)
 - [Effect example](https://codesandbox.io/s/nnko0rxjv4)
 - [Scope example](https://codesandbox.io/s/jlz44wrymw)
 - [Interact with other Ayanami example](https://codesandbox.io/s/ly5ol8xrqz)
