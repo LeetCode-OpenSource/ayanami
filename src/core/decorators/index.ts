@@ -8,15 +8,15 @@ import { createActionDecorator } from './action-related'
 export * from './action-related'
 
 interface DecoratorReturnType<V> {
-  (target: any, propertyKey: string, descriptor: { value?: V; get?(): V }): void
+  (target: any, propertyKey: string, descriptor: { value?: V }): void
 }
 
 export const ImmerReducer: <S = any>() => DecoratorReturnType<
-  (state: Draft<S>, params?: any) => void
+  (state: Draft<S>, params: any) => undefined | void
 > = createActionDecorator(immerReducerSymbols)
 
 export const Reducer: <S = any>() => DecoratorReturnType<
-  (state: S, params?: any) => S
+  (state: S, params: any) => S
 > = createActionDecorator(reducerSymbols)
 
 export const Effect: <A = any, S = any>() => DecoratorReturnType<
