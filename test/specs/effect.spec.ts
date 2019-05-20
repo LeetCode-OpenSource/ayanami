@@ -105,11 +105,15 @@ describe('Effect spec:', () => {
 
   describe('Error handles', () => {
     it(`Error won't affect the main state$`, () => {
+      const errorLog = jest.spyOn(console, 'error').mockImplementation(() => {})
       countActions.error()
+      expect(errorLog.mock.calls.length).toBe(1)
+      errorLog.mockRestore()
+
       countActions.add(1)
-      countActions.minus(1)
-      countActions.minus(1)
-      expect(getCount()).toBe(-1)
+      countActions.minus(2)
+      countActions.minus(3)
+      expect(getCount()).toBe(-4)
     })
   })
 })
