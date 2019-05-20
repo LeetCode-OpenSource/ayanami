@@ -39,13 +39,13 @@
 ##### Using [yarn](https://yarnpkg.com/en/package/ayanami):
 
 ```bash
-yarn add ayanami @asuka/di reflect-metadata rxjs
+yarn add ayanami @asuka/di reflect-metadata rxjs immer
 ```
 
 ##### Or via [npm](https://www.npmjs.com/package/ayanami):
 
 ```bash
-npm install ayanami @asuka/di reflect-metadata rxjs
+npm install ayanami @asuka/di reflect-metadata rxjs immer
 ```
 
 ## Examples
