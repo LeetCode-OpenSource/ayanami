@@ -185,5 +185,33 @@ describe('Hooks spec:', () => {
         expect(spy.mock.calls.length).toBe(1)
       })
     })
+
+    describe('Dynamic update scope', () => {
+      const testRenderer = create(<CountComponent scope={1} />)
+      const count = () => testRenderer.root.findByType('span').children[0]
+      const click = (action: CountAction) =>
+        act(() => testRenderer.root.findByProps({ id: action }).props.onClick())
+
+      it(`should use same Ayanami at each update if scope didn't change`, () => {
+        testRenderer.update(<CountComponent scope={1} />)
+        click(CountAction.ADD)
+        expect(count()).toBe('1')
+      })
+
+      it(`should use new scope's Ayanami if scope changed`, () => {
+        testRenderer.update(<CountComponent scope={2} />)
+        click(CountAction.MINUS)
+        expect(count()).toBe('-1')
+      })
+
+      it(`should update state to corresponding one`, () => {
+        testRenderer.update(<CountComponent scope={1} />)
+        expect(count()).toBe('1')
+        testRenderer.update(<CountComponent scope={2} />)
+        expect(count()).toBe('-1')
+        testRenderer.update(<CountComponent scope={3} />)
+        expect(count()).toBe('0')
+      })
+    })
   })
 })

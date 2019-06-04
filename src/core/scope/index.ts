@@ -1,5 +1,4 @@
 import { InjectableFactory, ValueProvider } from '@asuka/di'
-import { get } from 'lodash'
 
 import { ConstructorOf } from '../types'
 import { ScopeConfig } from './type'
@@ -12,13 +11,14 @@ export const TransientScope = Symbol('scope:transient')
 
 export const SingletonScope = Symbol('scope:singleton')
 
-export function getInstanceWithScope<T>(constructor: ConstructorOf<T>, config?: ScopeConfig): T {
-  const scope = get(config, 'scope', SingletonScope)
-
+export function getInstanceWithScope<T>(
+  constructor: ConstructorOf<T>,
+  scope: ScopeConfig['scope'] = SingletonScope,
+): T {
   const providers = getSameScopeInjectionParams(constructor).map(
     (sameScopeInjectionParam): ValueProvider => ({
       provide: sameScopeInjectionParam,
-      useValue: getInstanceWithScope(sameScopeInjectionParam, { scope }),
+      useValue: getInstanceWithScope(sameScopeInjectionParam, scope),
     }),
   )
 

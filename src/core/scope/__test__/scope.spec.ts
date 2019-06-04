@@ -33,7 +33,7 @@ describe('Scope spec:', () => {
 
       scopes.forEach((scope) => {
         class Test {}
-        expect(getInstanceWithScope(Test, { scope })).toBeInstanceOf(Test)
+        expect(getInstanceWithScope(Test, scope)).toBeInstanceOf(Test)
       })
     })
 
@@ -41,17 +41,16 @@ describe('Scope spec:', () => {
       const scope = 'scope'
       class Test {}
 
-      expect(getInstanceWithScope(Test, { scope })).toBe(getInstanceWithScope(Test, { scope }))
+      expect(getInstanceWithScope(Test, scope)).toBe(getInstanceWithScope(Test, scope))
     })
 
     it('should always return new instance if scope is TransientScope', () => {
       class Test {}
 
-      expect(getInstanceWithScope(Test, { scope: TransientScope })).toBeInstanceOf(Test)
+      expect(getInstanceWithScope(Test, TransientScope)).toBeInstanceOf(Test)
 
       expect(
-        getInstanceWithScope(Test, { scope: TransientScope }) ===
-          getInstanceWithScope(Test, { scope: TransientScope }),
+        getInstanceWithScope(Test, TransientScope) === getInstanceWithScope(Test, TransientScope),
       ).toBeFalsy()
     })
 
@@ -76,10 +75,10 @@ describe('Scope spec:', () => {
         }
 
         it('should return same instance whether scope is same or not', () => {
-          const b = getInstanceWithScope(B, { scope: 'b' })
-          const c1 = getInstanceWithScope(C, { scope: 'c1' })
-          const c2 = getInstanceWithScope(C, { scope: 'c2' })
-          const d = getInstanceWithScope(D, { scope: 'c2' })
+          const b = getInstanceWithScope(B, 'b')
+          const c1 = getInstanceWithScope(C, 'c1')
+          const c2 = getInstanceWithScope(C, 'c2')
+          const d = getInstanceWithScope(D, 'c2')
 
           expect(b.a).toBeInstanceOf(A)
           expect(b.a).toBe(c1.a)
@@ -104,17 +103,17 @@ describe('Scope spec:', () => {
 
         it('should return same instance if is same scope', () => {
           const scope = 'scope'
-          const b = getInstanceWithScope(B, { scope })
-          const c = getInstanceWithScope(C, { scope })
+          const b = getInstanceWithScope(B, scope)
+          const c = getInstanceWithScope(C, scope)
 
           expect(b.a).toBeInstanceOf(A)
           expect(b.a).toBe(c.a)
         })
 
         it('should return different instance if is different scope', () => {
-          const b = getInstanceWithScope(B, { scope: 'b' })
-          const c1 = getInstanceWithScope(C, { scope: 'c1' })
-          const c2 = getInstanceWithScope(C, { scope: 'c2' })
+          const b = getInstanceWithScope(B, 'b')
+          const c1 = getInstanceWithScope(C, 'c1')
+          const c2 = getInstanceWithScope(C, 'c2')
 
           expect(b.a).toBeInstanceOf(A)
           expect(c1.a).toBeInstanceOf(A)
