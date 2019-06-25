@@ -94,13 +94,17 @@ type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
     : UnpackReducerPayload<F, S>
   : UnpackEffectPayload<F, S>
 
+type PayloadMethodKeys<M, S> = {
+  [key in keyof M]: UnpackPayload<M[key], S> extends never ? never : key
+}[keyof M]
+
 export type ActionMethodOfAyanami<M extends Ayanami<S>, S> = Pick<
   {
     [key in keyof M]: UnpackPayload<M[key], S> extends never
       ? never
       : ActionMethod<UnpackPayload<M[key], S>>
   },
-  Exclude<keyof M, keyof Ayanami<S>>
+  Exclude<PayloadMethodKeys<M, S>, keyof Ayanami<S>>
 >
 
 export type ActionOfAyanami<M extends Ayanami<S>, S> = Pick<
@@ -109,7 +113,7 @@ export type ActionOfAyanami<M extends Ayanami<S>, S> = Pick<
       ? never
       : ActionMethod<UnpackPayload<M[key], S>, EffectAction>
   },
-  Exclude<keyof M, keyof Ayanami<S>>
+  Exclude<PayloadMethodKeys<M, S>, keyof Ayanami<S>>
 >
 
 export interface ObjectOf<T> {
