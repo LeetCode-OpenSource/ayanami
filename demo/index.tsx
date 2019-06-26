@@ -32,6 +32,8 @@ class Count extends Ayanami<State> {
     count: 0,
   }
 
+  otherProps: string = ''
+
   constructor(private readonly tips: Tips) {
     super()
   }
@@ -39,6 +41,11 @@ class Count extends Ayanami<State> {
   @Reducer()
   add(state: State, count: number): State {
     return { count: state.count + count }
+  }
+
+  @Reducer()
+  addOne(state: State): State {
+    return { count: state.count + 1 }
   }
 
   @Reducer()

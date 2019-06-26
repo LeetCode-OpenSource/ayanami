@@ -94,26 +94,29 @@ type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
     : UnpackReducerPayload<F, S>
   : UnpackEffectPayload<F, S>
 
-type PayloadMethodKeys<M, S> = {
-  [key in keyof M]: UnpackPayload<M[key], S> extends never ? never : key
-}[keyof M]
+type PayloadMethodKeySet<M, S, SS extends keyof M> = {
+  [key in SS]: M[key] extends
+    | (() => Observable<EffectAction>)
+    | ((payload$: Observable<any>) => Observable<EffectAction>)
+    | ((payload$: Observable<any>, state$: Observable<S>) => Observable<EffectAction>)
+    ? key
+    : M[key] extends (() => S) | ((state: S) => S) | ((state: S, payload: any) => S)
+    ? key
+    : M[key] extends ((state: Draft<S>) => void) | ((state: Draft<S>, payload: any) => void)
+    ? key
+    : M[key] extends Observable<any>
+    ? key
+    : never
+}[SS]
 
 export type ActionMethodOfAyanami<M extends Ayanami<S>, S> = Pick<
-  {
-    [key in keyof M]: UnpackPayload<M[key], S> extends never
-      ? never
-      : ActionMethod<UnpackPayload<M[key], S>>
-  },
-  Exclude<PayloadMethodKeys<M, S>, keyof Ayanami<S>>
+  { [key in keyof M]: ActionMethod<UnpackPayload<M[key], S>> },
+  PayloadMethodKeySet<M, S, Exclude<keyof M, keyof Ayanami<S>>>
 >
 
 export type ActionOfAyanami<M extends Ayanami<S>, S> = Pick<
-  {
-    [key in keyof M]: UnpackPayload<M[key], S> extends never
-      ? never
-      : ActionMethod<UnpackPayload<M[key], S>, EffectAction>
-  },
-  Exclude<PayloadMethodKeys<M, S>, keyof Ayanami<S>>
+  { [key in keyof M]: ActionMethod<UnpackPayload<M[key], S>, EffectAction> },
+  PayloadMethodKeySet<M, S, Exclude<keyof M, keyof Ayanami<S>>>
 >
 
 export interface ObjectOf<T> {
