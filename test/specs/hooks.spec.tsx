@@ -5,6 +5,7 @@ import { Observable } from 'rxjs'
 import { map, withLatestFrom } from 'rxjs/operators'
 
 import { Ayanami, Effect, EffectAction, Reducer, useAyanami, TransientScope } from '../../src'
+import { useCallback, useEffect } from 'react'
 
 interface State {
   count: number
@@ -83,6 +84,38 @@ describe('Hooks spec:', () => {
     it('Effect action work properly', () => {
       click(CountAction.MINUS)
       expect(count()).toBe('0')
+    })
+
+    it('should only render once when update the state right during rendering', () => {
+      const spy = jest.fn()
+      const TestComponent = () => {
+        const [state, actions] = useAyanami(Count, { scope: TransientScope })
+        const addOne = useCallback(() => actions.add(1), [])
+
+        if (state.count % 2 === 0) {
+          actions.add(1)
+        }
+
+        useEffect(() => {
+          spy(state.count)
+        }, [state.count])
+
+        return (
+          <div>
+            <p>count: {state.count}</p>
+            <button onClick={addOne}>add one</button>
+          </div>
+        )
+      }
+
+      const renderer = create(<TestComponent />)
+
+      // https://github.com/facebook/react/issues/14050 to trigger useEffect manually
+      renderer.update(<TestComponent />)
+      expect(spy.mock.calls).toEqual([[1]])
+
+      act(() => renderer.root.findByType('button').props.onClick())
+      expect(spy.mock.calls).toEqual([[1], [3]])
     })
   })
 

@@ -2,6 +2,7 @@ import * as React from 'react'
 import { get } from 'lodash'
 
 import { ActionMethodOfAyanami, Ayanami, combineWithIkari } from '../core'
+import { useSubscribeAyanamiState } from './use-subscribe-ayanami-state'
 
 export interface UseAyanamiInstanceConfig {
   destroyWhenUnmount?: boolean
@@ -20,19 +21,8 @@ export function useAyanamiInstance<M extends Ayanami<S>, S>(
   ayanami: M,
   config?: Config,
 ): Result<M, S> {
-  const ayanamiRef = React.useRef(ayanami)
   const ikari = React.useMemo(() => combineWithIkari(ayanami), [ayanami])
-  const [state, setState] = React.useState<S>(() => ayanami.getState())
-
-  if (ayanamiRef.current !== ayanami) {
-    ayanamiRef.current = ayanami
-    setState(ayanami.getState())
-  }
-
-  React.useEffect(() => {
-    const subscription = ayanami.getState$().subscribe(setState)
-    return () => subscription.unsubscribe()
-  }, [ayanami])
+  const state = useSubscribeAyanamiState(ayanami)
 
   React.useEffect(
     () => () => {
