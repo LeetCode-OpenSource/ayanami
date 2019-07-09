@@ -3,11 +3,13 @@ import { Subscription } from 'rxjs'
 
 import { Ayanami } from '../core'
 
+import { useLazyState } from './use-lazy-state'
+
 export function useSubscribeAyanamiState<M extends Ayanami<S>, S>(ayanami: M): S {
   const ayanamiRef = React.useRef<Ayanami<S> | null>(null)
   const subscriptionRef = React.useRef<Subscription | null>(null)
 
-  const [state, setState] = React.useState<S>(() => ayanami.getState())
+  const [state, setState] = useLazyState<S>(() => ayanami.getState())
 
   if (ayanamiRef.current !== ayanami) {
     ayanamiRef.current = ayanami
