@@ -15,3 +15,4 @@ export {
 export { getAllActionsForTest } from './test-helper'
 export * from './hooks'
 export * from './connect'
+export { enableReduxLog, disableReduxLog } from './redux-devtools-extension'

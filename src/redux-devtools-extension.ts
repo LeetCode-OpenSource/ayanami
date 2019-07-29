@@ -32,18 +32,30 @@ const getDevTools = (() => {
   }
 })()
 
+let isEnableLog = false
+
+export function enableReduxLog() {
+  isEnableLog = true
+}
+
+export function disableReduxLog() {
+  isEnableLog = false
+}
+
 export function logStateAction(
   namespace: string,
   infos: { actionName: string; params: string; state?: any },
 ) {
-  const action = {
-    type: `${namespace}/${infos.actionName}`,
-    params: infos.params,
-  }
+  if (isEnableLog) {
+    const action = {
+      type: `${namespace}/${infos.actionName}`,
+      params: infos.params,
+    }
 
-  if (infos.state) {
-    STATE[namespace] = infos.state
-  }
+    if (infos.state) {
+      STATE[namespace] = infos.state
+    }
 
-  getDevTools().send(action, STATE)
+    getDevTools().send(action, STATE)
+  }
 }
