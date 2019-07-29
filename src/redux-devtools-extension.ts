@@ -49,7 +49,7 @@ export function logStateAction(
   if (isEnableLog) {
     const action = {
       type: `${namespace}/${infos.actionName}`,
-      params: infos.params,
+      params: filterParams(infos.params),
     }
 
     if (infos.state) {
@@ -58,4 +58,16 @@ export function logStateAction(
 
     getDevTools().send(action, STATE)
   }
+}
+
+function filterParams(params: any): any {
+  if (params && typeof params === 'object') {
+    if (params instanceof Event) {
+      return `<<Event:${params.type}>>`
+    } else if (params.nativeEvent instanceof Event) {
+      return `<<SyntheticEvent:${params.nativeEvent.type}>>`
+    }
+  }
+
+  return params
 }
