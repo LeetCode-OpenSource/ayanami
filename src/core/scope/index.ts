@@ -1,11 +1,11 @@
-import { InjectableFactory, ValueProvider } from '@asuka/di'
+import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf } from '../types'
 import { ScopeConfig } from './type'
-import { createNewInstance, createOrGetInstanceInScope } from './utils'
-import { getSameScopeInjectionParams, SameScope } from './same-scope-decorator'
+import { createOrGetInstanceInScope, createScopeWithRequest } from './utils'
+import { SameScope } from './same-scope-decorator'
 
-export { ScopeConfig, SameScope }
+export { ScopeConfig, SameScope, createScopeWithRequest }
 
 export const TransientScope = Symbol('scope:transient')
 
@@ -15,19 +15,12 @@ export function getInstanceWithScope<T>(
   constructor: ConstructorOf<T>,
   scope: ScopeConfig['scope'] = SingletonScope,
 ): T {
-  const providers = getSameScopeInjectionParams(constructor).map(
-    (sameScopeInjectionParam): ValueProvider => ({
-      provide: sameScopeInjectionParam,
-      useValue: getInstanceWithScope(sameScopeInjectionParam, scope),
-    }),
-  )
-
   switch (scope) {
     case SingletonScope:
       return InjectableFactory.getInstance(constructor)
     case TransientScope:
-      return createNewInstance(constructor, providers)
+      return InjectableFactory.initialize(constructor)
     default:
-      return createOrGetInstanceInScope(constructor, scope, providers)
+      return createOrGetInstanceInScope(constructor, scope)
   }
 }

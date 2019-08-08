@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist/",
     "declaration": true,
-    "removeComments": true,
+    "removeComments": false,
     "preserveConstEnums": true,
     "strict": true,
     "skipLibCheck": true,

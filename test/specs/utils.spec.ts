@@ -1,11 +1,11 @@
-import { BasicState } from '../../src/core'
+import { createState, State } from '../../src/core'
 
 describe('utils specs:', () => {
   describe('BasicState', () => {
-    let state: BasicState<{ count: number }>
+    let state: State<any>
 
     beforeEach(() => {
-      state = new BasicState({ count: 0 })
+      state = createState({ count: 0 })
     })
 
     it('getState should return current state', () => {
@@ -33,11 +33,11 @@ describe('utils specs:', () => {
         expect(spy.mock.calls[1][0]).toEqual({ count: 10 })
       })
 
-      it('should not push state when set same state', () => {
+      it('should push state even when set same state', () => {
         const spy = jest.fn()
         state.state$.subscribe(spy)
         state.setState({ count: 0 })
-        expect(spy.mock.calls.length).toBe(1)
+        expect(spy.mock.calls.length).toBe(2)
       })
     })
   })
