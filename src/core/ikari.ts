@@ -19,7 +19,7 @@ import { logStateAction } from '../redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 import { TERMINATE_ACTION } from '../ssr/terminate'
 import { SSREnabled } from '../ssr/flag'
-import { SSRSymbol } from '../ssr'
+import { SSRSymbol } from '../ssr/meta-symbol'
 
 interface Config<State> {
   nameForLog: string
