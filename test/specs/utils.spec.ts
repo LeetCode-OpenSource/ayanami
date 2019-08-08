@@ -33,11 +33,11 @@ describe('utils specs:', () => {
         expect(spy.mock.calls[1][0]).toEqual({ count: 10 })
       })
 
-      it('should not push state when set same state', () => {
+      it('should push state even when set same state', () => {
         const spy = jest.fn()
         state.state$.subscribe(spy)
         state.setState({ count: 0 })
-        expect(spy.mock.calls.length).toBe(1)
+        expect(spy.mock.calls.length).toBe(2)
       })
     })
   })

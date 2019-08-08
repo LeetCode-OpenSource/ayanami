@@ -1,7 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs'
 
-const shallowequal = require('shallowequal')
-
 export class BasicState<S> {
   readonly state$: Observable<S>
 
@@ -15,9 +13,7 @@ export class BasicState<S> {
     this.getState = () => state$.getValue()
 
     this.setState = (nextState: Readonly<S>) => {
-      if (!shallowequal(this.getState(), nextState)) {
-        state$.next(nextState)
-      }
+      state$.next(nextState)
     }
 
     this.state$ = state$.asObservable()
