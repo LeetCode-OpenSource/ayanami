@@ -8,7 +8,7 @@ import { createActionDecorator } from './action-related'
 export * from './action-related'
 
 interface DecoratorReturnType<V> {
-  (target: any, propertyKey: string, descriptor: { value?: V }): void
+  (target: any, propertyKey: string, descriptor: { value?: V }): PropertyDescriptor
 }
 
 export const ImmerReducer: <S = any>() => DecoratorReturnType<
@@ -23,4 +23,4 @@ export const Effect: <A = any, S = any>() => DecoratorReturnType<
   (action: Observable<A>, state$: Observable<S>) => Observable<EffectAction>
 > = createActionDecorator(effectSymbols)
 
-export const DefineAction = createActionDecorator(defineActionSymbols)
+export const DefineAction: () => any = createActionDecorator(defineActionSymbols)

@@ -1,5 +1,5 @@
-import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
-import { map, catchError } from 'rxjs/operators'
+import { merge, Observable, Subject, Subscription, NEVER, ReplaySubject } from 'rxjs'
+import { map, catchError, takeUntil, skip, take } from 'rxjs/operators'
 import { mapValues } from 'lodash'
 import produce from 'immer'
 
@@ -17,6 +17,9 @@ import { Ayanami } from './ayanami'
 import { BasicState, getEffectActionFactories, getOriginalFunctions } from './utils'
 import { logStateAction } from '../redux-devtools-extension'
 import { ikariSymbol } from './symbols'
+import { TERMINATE_ACTION } from '../ssr/terminate'
+import { SSREnabled } from '../ssr/flag'
+import { SSRSymbol } from '../ssr'
 
 interface Config<State> {
   nameForLog: string
@@ -74,13 +77,13 @@ export function destroyIkariFrom<S>(ayanami: Ayanami<S>): void {
 }
 
 export class Ikari<State> {
-  static createAndBindAt<S>(target: { defaultState: S }, config: Config<S>): Ikari<S> {
+  static createAndBindAt<S>(target: Ayanami<S>, config: Config<S>): Ikari<S> {
     const createdIkari = this.getFrom(target)
 
     if (createdIkari) {
       return createdIkari
     } else {
-      const ikari = new Ikari(config)
+      const ikari = new Ikari(target, config)
       Reflect.defineMetadata(ikariSymbol, ikari, target)
       return ikari
     }
@@ -98,7 +101,12 @@ export class Ikari<State> {
 
   subscription = new Subscription()
 
-  constructor(private readonly config: Readonly<Config<State>>) {
+  // @internal
+  terminate$: Observable<EffectAction>
+
+  private readonly _terminate$ = new ReplaySubject<typeof TERMINATE_ACTION>(1)
+
+  constructor(readonly ayanami: Ayanami<State>, private readonly config: Readonly<Config<State>>) {
     this.effectActionFactories = config.effectActionFactories
     this.state = new BasicState<State>(config.defaultState)
 
@@ -106,6 +114,8 @@ export class Ikari<State> {
       this.config.effects,
       this.state.state$,
     )
+
+    this.terminate$ = this._terminate$
 
     const [reducerActions$, reducerActions] = setupReducerActions(
       this.config.reducers,
@@ -124,8 +134,26 @@ export class Ikari<State> {
       ...mapValues(this.config.defineActions, ({ next }) => next),
     }
 
+    let effectActionsWithTerminate$: Observable<Action<any>>
+
+    if (!SSREnabled) {
+      effectActionsWithTerminate$ = effectActions$
+    } else {
+      const prototype = Object.getPrototypeOf(ayanami)
+      const metas = prototype ? Reflect.getMetadata(SSRSymbol, prototype) : null
+      if (metas) {
+        this.terminate$ = this.terminate$.pipe(
+          skip(metas.length - 1),
+          take(1),
+        )
+        effectActionsWithTerminate$ = effectActions$.pipe(takeUntil(this.terminate$))
+      } else {
+        effectActionsWithTerminate$ = effectActions$
+      }
+    }
+
     this.subscription.add(
-      effectActions$.subscribe((action) => {
+      effectActionsWithTerminate$.subscribe((action) => {
         this.log(action)
         this.handleAction(action)
       }),
@@ -152,12 +180,10 @@ export class Ikari<State> {
   }
 
   private log = ({ originalActionName, effectAction, reducerAction }: Action<State>) => {
-    if (effectAction) {
+    if (effectAction && effectAction !== TERMINATE_ACTION) {
       logStateAction(this.config.nameForLog, {
         params: effectAction.params,
-        actionName: `${originalActionName}/👉${effectAction.ayanami.constructor.name}/️${
-          effectAction.actionName
-        }`,
+        actionName: `${originalActionName}/👉${effectAction.ayanami.constructor.name}/️${effectAction.actionName}`,
       })
     }
 
@@ -172,8 +198,12 @@ export class Ikari<State> {
 
   private handleAction = ({ effectAction, reducerAction }: Action<State>) => {
     if (effectAction) {
-      const { ayanami, actionName, params } = effectAction
-      combineWithIkari(ayanami).triggerActions[actionName](params)
+      if (effectAction !== TERMINATE_ACTION) {
+        const { ayanami, actionName, params } = effectAction
+        combineWithIkari(ayanami).triggerActions[actionName](params)
+      } else {
+        this._terminate$.next(effectAction)
+      }
     }
 
     if (reducerAction) {

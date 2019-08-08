@@ -3,8 +3,9 @@ import { Ayanami } from '../ayanami'
 import { ConstructorOf } from '../types'
 
 export function createActionDecorator(symbols: ActionSymbols) {
-  return () => ({ constructor }: any, propertyKey: string) => {
-    addActionName(symbols, constructor, propertyKey)
+  return () => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    addActionName(symbols, target.constructor, propertyKey)
+    return descriptor
   }
 }
 

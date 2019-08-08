@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`collect hooks plugin specs should collect from function component 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+var react_1 = require(\\"react\\");
+var react_dom_1 = require(\\"react-dom\\");
+var index_1 = require(\\"../../index\\");
+function CountComponent() {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    var _a = index_1.useAyanami(Count), count = _a[0].count, actions = _a[1];
+    var tips = index_1.useAyanami(Tips)[0].tips;
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (react_1.default.createElement(\\"div\\", null,
+        react_1.default.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        react_1.default.createElement(\\"p\\", null,
+            \\"tips: \\",
+            tips),
+        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
+react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;

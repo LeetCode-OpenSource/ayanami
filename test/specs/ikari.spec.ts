@@ -33,7 +33,7 @@ const createIkariConfig = () => ({
   effectActionFactories: {},
 })
 
-const createIkari = () => new Ikari<State>(createIkariConfig())
+const createIkari = () => new Ikari<State>(Object.create(null), createIkariConfig())
 
 describe('Ikari spec:', () => {
   describe('static', () => {
@@ -41,8 +41,8 @@ describe('Ikari spec:', () => {
       it('only create once if call multiple times', () => {
         const target = { defaultState: { count: 0 } }
 
-        const ikari = Ikari.createAndBindAt(target, createIkariConfig())
-        expect(ikari).toBe(Ikari.createAndBindAt(target, createIkariConfig()))
+        const ikari = Ikari.createAndBindAt(target as any, createIkariConfig())
+        expect(ikari).toBe(Ikari.createAndBindAt(target as any, createIkariConfig()))
       })
     })
   })
