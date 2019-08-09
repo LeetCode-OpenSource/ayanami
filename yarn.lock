@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@asuka/di@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.1.6.tgz#e0b253b766647a3bb2bca685a1594c4365d6311a"
-  integrity sha512-VHMSwuDRR0J2Dv5JQffKvzxe3bUIqJLE86OXgZMVm41hRydrjuRIMYACzJU6tcDXv5Lkw1rwFEcDV/huWV59Dw==
+"@asuka/di@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.2.0.tgz#bcb9d0625c491b35be14dac8a0c345aa84735626"
+  integrity sha512-Hs/KGqn7Gad97eSnnY6DUT+jm9TYG9/XX/1QItui1Avk7b+YEyIndgKMNC3wHiqtmpQ8FbJQugH/ebJjtQKEvA==
   dependencies:
     injection-js "^2.2.1"
     tslib "^1.10.0"

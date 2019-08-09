@@ -61,7 +61,7 @@
     "shallowequal": "^1.1.0"
   },
   "devDependencies": {
-    "@asuka/di": "^0.1.6",
+    "@asuka/di": "^0.2.0",
     "@types/express": "^4.17.0",
     "@types/jest": "^24.0.16",
     "@types/lodash": "^4.14.136",
@@ -96,7 +96,7 @@
     "typescript": "^3.5.3"
   },
   "peerDependencies": {
-    "@asuka/di": "^0.1.5",
+    "@asuka/di": "^0.2.0",
     "immer": "^3.2.0",
     "lodash": "^4.17.15",
     "react": "^16.8.6",
