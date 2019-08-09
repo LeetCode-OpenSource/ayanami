@@ -1,5 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`collect hooks plugin specs dose not support scoped ayanami module 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+var react_1 = require(\\"react\\");
+var react_dom_1 = require(\\"react-dom\\");
+var index_1 = require(\\"../../index\\");
+function CountComponent() {
+    var _a = index_1.useAyanami(Count, { scope: 'Count' }), count = _a[0].count, actions = _a[1];
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (react_1.default.createElement(\\"div\\", null,
+        react_1.default.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should collect from arrow-function-none-block component 1`] = `
+"import React from 'react';
+import ReactDOM from 'react-dom';
+import { Modal } from 'antd';
+const CountComponent = () => {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    return React.createElement(Modal, null);
+};
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [Modal[require(\\"ayanami\\").SSRSymbol]];
+ReactDOM.render(React.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
 exports[`collect hooks plugin specs should collect from function component 1`] = `
 "\\"use strict\\";
 Object.defineProperty(exports, \\"__esModule\\", { value: true });
@@ -22,6 +57,121 @@ function CountComponent() {
         react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
         react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
         react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
+react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should collect from variable component 1`] = `
+"import React from 'react';
+import ReactDOM from 'react-dom';
+import { Modal } from 'antd';
+import { useAyanami } from '../../index';
+const CountComponent = () => {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    const [{ count }, actions] = useAyanami(Count);
+    const [{ tips }] = useAyanami(Tips);
+    const add = (count) => () => actions.add(count);
+    const minus = (count) => () => actions.minus(count);
+    return (React.createElement(\\"div\\", null,
+        React.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        React.createElement(\\"p\\", null,
+            \\"tips: \\",
+            tips),
+        React.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        React.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        React.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\"),
+        React.createElement(Modal, null)));
+};
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips, Modal[require(\\"ayanami\\").SSRSymbol]];
+ReactDOM.render(React.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should collect from variable-function component 1`] = `
+"import React from 'react';
+import ReactDOM from 'react-dom';
+import { useAyanami } from '../../index';
+const CountComponent = function () {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    const [{ count }, actions] = useAyanami(Count);
+    const [{ tips }] = useAyanami(Tips);
+    const add = (count) => () => actions.add(count);
+    const minus = (count) => () => actions.minus(count);
+    return (React.createElement(\\"div\\", null,
+        React.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        React.createElement(\\"p\\", null,
+            \\"tips: \\",
+            tips),
+        React.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        React.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        React.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+};
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
+ReactDOM.render(React.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should do nothing to basic component 1`] = `
+"function Button() {
+    return React.createElement(\\"button\\", null, \\"click me\\");
+}
+"
+`;
+
+exports[`collect hooks plugin specs should ignore anonymous component from props 1`] = `
+"import React from 'react';
+import ReactDOM from 'react-dom';
+import { useAyanami } from '../../index';
+export default function () {
+    var _a = useAyanami(Count), count = _a[0].count, actions = _a[1];
+    var tips = useAyanami(Tips)[0].tips;
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (React.createElement(\\"div\\", null,
+        React.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        React.createElement(\\"p\\", null,
+            \\"tips: \\",
+            tips),
+        React.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        React.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        React.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+ReactDOM.render(React.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should ignore component from props 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+var react_1 = require(\\"react\\");
+var react_dom_1 = require(\\"react-dom\\");
+var index_1 = require(\\"../../index\\");
+function CountComponent(_a) {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    var Button = _a.Button;
+    var _b = index_1.useAyanami(Count), count = _b[0].count, actions = _b[1];
+    var tips = index_1.useAyanami(Tips)[0].tips;
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (react_1.default.createElement(\\"div\\", null,
+        react_1.default.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        react_1.default.createElement(\\"p\\", null,
+            \\"tips: \\",
+            tips),
+        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\"),
+        react_1.default.createElement(Button, { onClick: actions.send })));
 }
 CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
 react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));

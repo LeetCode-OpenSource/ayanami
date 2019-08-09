@@ -10,7 +10,7 @@ export const collectAyanamiHooksFactory: (
 ) => ts.TransformerFactory<ts.SourceFile> = (config = { filter: (_name: string) => true }) => (
   context,
 ) => {
-  let sourceFile: ts.SourceFile
+  let typeChecker: ts.TypeChecker
   const updateDeclaration = (
     parent: ts.FunctionDeclaration | ts.VariableStatement,
   ):
@@ -23,10 +23,6 @@ export const collectAyanamiHooksFactory: (
     } else {
       result = parent
     }
-
-    const parameters = ts.isFunctionDeclaration(result)
-      ? result.parameters
-      : (result.initializer! as ts.FunctionExpression).parameters
 
     // Anonymous component
     if (!result.name) {
@@ -161,8 +157,13 @@ export const collectAyanamiHooksFactory: (
         typeof node.arguments[0] !== 'undefined' &&
         ts.isIdentifier(node.arguments[0])
       ) {
-        const identifier = ts.createIdentifier(node.arguments[0].text)
-        if (parameters.every((p) => p.name.getText(sourceFile) !== identifier.text)) {
+        const componentIdentifier: ts.Identifier = node.arguments[0]
+        const identifier = ts.createIdentifier(componentIdentifier.text)
+        if (
+          typeChecker
+            .getSymbolsInScope(parent, ts.SymbolFlags.FunctionScopedVariable)
+            .every((symbol) => symbol.escapedName !== identifier.text)
+        ) {
           addAdditionalExpression(
             ts.createElementAccess(
               identifier,
@@ -257,8 +258,6 @@ export const collectAyanamiHooksFactory: (
       return node
     }
 
-    sourceFile = node
-
     if (!node.fileName) {
       return node
     }
@@ -266,6 +265,12 @@ export const collectAyanamiHooksFactory: (
     if (!config.filter!(node.fileName)) {
       return node
     }
+
+    const program = ts.createProgram({
+      rootNames: [node.fileName],
+      options: context.getCompilerOptions(),
+    })
+    typeChecker = program.getTypeChecker()
     return ts.visitEachChild(node, topLevelvisitor, context)
   }
 }
