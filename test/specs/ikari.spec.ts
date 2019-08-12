@@ -2,7 +2,7 @@ import { Subject, NEVER } from 'rxjs'
 import { Draft } from 'immer'
 
 import '../../src'
-import { Ikari, BasicState } from '../../src/core'
+import { Ikari } from '../../src/core'
 
 interface State {
   count: number
@@ -51,7 +51,6 @@ describe('Ikari spec:', () => {
     const ikari = createIkari()
 
     it('state is setup properly', () => {
-      expect(ikari.state).toBeInstanceOf(BasicState)
       expect(ikari.state.getState()).toEqual({ count: 0 })
     })
 

@@ -21,7 +21,7 @@ export const expressTerminate = (req: Request, res: Response): Promise<any> => {
           flatMap(async (m) => {
             const metas: any[] = Reflect.getMetadata(SSRSymbol, m.prototype)
             if (metas) {
-              const ayanamiInstance: any = InjectableFactory.getInstance(m)
+              const ayanamiInstance: any = InjectableFactory.initialize(m)
               const moduleName = ayanamiInstance[moduleNameKey]
               if (!moduleName) {
                 throw new TypeError('SSRModule has no name')
@@ -38,6 +38,9 @@ export const expressTerminate = (req: Request, res: Response): Promise<any> => {
               }
               await ikari.terminate$.toPromise()
               stateToSerialize[moduleName] = ikari.state.getState()
+              const existedAyanami = InjectableFactory.getInstance(m)
+              const existedIkari = combineWithIkari(existedAyanami)
+              existedIkari.state.setState(stateToSerialize[moduleName])
             }
             return stateToSerialize
           }),

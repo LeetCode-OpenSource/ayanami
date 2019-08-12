@@ -14,7 +14,7 @@ import {
   EffectActionFactories,
 } from './types'
 import { Ayanami } from './ayanami'
-import { BasicState, getEffectActionFactories, getOriginalFunctions } from './utils'
+import { createState, getEffectActionFactories, getOriginalFunctions } from './utils'
 import { logStateAction } from '../redux-devtools-extension'
 import { ikariSymbol } from './symbols'
 import { TERMINATE_ACTION } from '../ssr/terminate'
@@ -93,9 +93,9 @@ export class Ikari<State> {
     return Reflect.getMetadata(ikariSymbol, target)
   }
 
-  state: BasicState<State>
+  state = createState(this.config.defaultState)
 
-  effectActionFactories: EffectActionFactories
+  effectActionFactories = this.config.effectActionFactories
 
   triggerActions: TriggerActions = {}
 
@@ -107,9 +107,6 @@ export class Ikari<State> {
   private readonly _terminate$ = new ReplaySubject<typeof TERMINATE_ACTION>(1)
 
   constructor(readonly ayanami: Ayanami<State>, private readonly config: Readonly<Config<State>>) {
-    this.effectActionFactories = config.effectActionFactories
-    this.state = new BasicState<State>(config.defaultState)
-
     const [effectActions$, effectActions] = setupEffectActions(
       this.config.effects,
       this.state.state$,

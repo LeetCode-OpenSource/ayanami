@@ -1,11 +1,11 @@
-import { BasicState } from '../../src/core'
+import { createState, State } from '../../src/core'
 
 describe('utils specs:', () => {
   describe('BasicState', () => {
-    let state: BasicState<{ count: number }>
+    let state: State<any>
 
     beforeEach(() => {
-      state = new BasicState({ count: 0 })
+      state = createState({ count: 0 })
     })
 
     it('getState should return current state', () => {

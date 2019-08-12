@@ -24,3 +24,7 @@ export const collectModules = (
     }
   })
 }
+
+export const cleanupAyanamiStates = () => {
+  collectModuleCallbacks.length = 0
+}
