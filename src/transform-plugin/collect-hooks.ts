@@ -3,6 +3,7 @@ import * as ts from 'typescript'
 
 export interface CollectHooksConfig {
   filter?: (filename: string) => boolean
+  typeChecker?: ts.TypeChecker
 }
 
 export const collectAyanamiHooksFactory: (
@@ -274,11 +275,15 @@ export const collectAyanamiHooksFactory: (
 
     sourceFile = node
 
-    const program = ts.createProgram({
-      rootNames: [node.fileName],
-      options: context.getCompilerOptions(),
-    })
-    typeChecker = program.getTypeChecker()
+    if (!config.typeChecker) {
+      const program = ts.createProgram({
+        rootNames: [node.fileName],
+        options: context.getCompilerOptions(),
+      })
+      typeChecker = program.getTypeChecker()
+    } else {
+      typeChecker = config.typeChecker
+    }
     return ts.visitEachChild(node, topLevelvisitor, context)
   }
 }
