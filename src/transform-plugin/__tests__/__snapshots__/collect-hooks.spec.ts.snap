@@ -63,6 +63,22 @@ react_dom_1.default.render(react_1.default.createElement(CountComponent, null), 
 "
 `;
 
+exports[`collect hooks plugin specs should collect from smoke-1 component 1`] = `
+"var render = function (Component) {
+    require(\\"ayanami\\").collectModules(render[require(\\"ayanami\\").SSRSymbol]);
+    var _a = configureStore(), store = _a.store, history = _a.history;
+    var client = InjectableFactory.getInstanceByToken(apolloClientProvider.provide);
+    renderFunc(React.createElement(PrerenderCacheProvider, null,
+        React.createElement(LocaleProvider, { locale: zhCN },
+            React.createElement(Provider, { store: store },
+                React.createElement(ApolloProvider, { client: client },
+                    React.createElement(ConnectedRouter, { history: history },
+                        React.createElement(Component, null)))))), document.querySelector('#app'));
+};
+render[require(\\"ayanami\\").SSRSymbol] = [PrerenderCacheProvider[require(\\"ayanami\\").SSRSymbol], LocaleProvider[require(\\"ayanami\\").SSRSymbol], Provider[require(\\"ayanami\\").SSRSymbol], ApolloProvider[require(\\"ayanami\\").SSRSymbol], ConnectedRouter[require(\\"ayanami\\").SSRSymbol]];
+"
+`;
+
 exports[`collect hooks plugin specs should collect from variable component 1`] = `
 "import React from 'react';
 import ReactDOM from 'react-dom';

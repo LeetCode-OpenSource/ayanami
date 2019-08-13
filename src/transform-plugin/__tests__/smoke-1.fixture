@@ -1,0 +1,20 @@
+const render = (Component: any) => {
+  const { store, history } = configureStore()
+
+  const client = InjectableFactory.getInstanceByToken(apolloClientProvider.provide)
+
+  renderFunc(
+    <PrerenderCacheProvider>
+      <LocaleProvider locale={zhCN}>
+        <Provider store={store}>
+          <ApolloProvider client={client}>
+            <ConnectedRouter history={history}>
+              <Component />
+            </ConnectedRouter>
+          </ApolloProvider>
+        </Provider>
+      </LocaleProvider>
+    </PrerenderCacheProvider>,
+    document.querySelector('#app'),
+  )
+}

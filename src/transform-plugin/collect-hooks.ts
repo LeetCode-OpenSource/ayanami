@@ -11,6 +11,7 @@ export const collectAyanamiHooksFactory: (
   context,
 ) => {
   let typeChecker: ts.TypeChecker
+  let sourceFile: ts.SourceFile
   const updateDeclaration = (
     parent: ts.FunctionDeclaration | ts.VariableStatement,
   ):
@@ -28,6 +29,10 @@ export const collectAyanamiHooksFactory: (
     if (!result.name) {
       return parent
     }
+
+    const parameters = ts.isFunctionDeclaration(result)
+      ? result.parameters
+      : (result.initializer! as ts.FunctionExpression).parameters
 
     function addExpressionToComponent(expression: ts.ExpressionStatement) {
       if (ts.isFunctionDeclaration(result)) {
@@ -162,7 +167,8 @@ export const collectAyanamiHooksFactory: (
         if (
           typeChecker
             .getSymbolsInScope(parent, ts.SymbolFlags.Variable)
-            .every((symbol) => symbol.escapedName !== identifier.text)
+            .every((symbol) => symbol.escapedName !== identifier.text) &&
+          parameters.every((p) => p.name.getText(sourceFile) !== identifier.text)
         ) {
           addAdditionalExpression(
             ts.createElementAccess(
@@ -265,6 +271,8 @@ export const collectAyanamiHooksFactory: (
     if (!config.filter!(node.fileName)) {
       return node
     }
+
+    sourceFile = node
 
     const program = ts.createProgram({
       rootNames: [node.fileName],

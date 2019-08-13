@@ -88,6 +88,9 @@ describe('collect hooks plugin specs', () => {
         },
       },
     },
+    {
+      name: 'smoke-1',
+    },
   ].forEach((meta) => {
     it(meta.describe ? meta.describe : `should collect from ${meta.name} component`, () => {
       expect(transpile(readFile(meta.name), meta.options)).toMatchSnapshot()
