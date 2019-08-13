@@ -1,0 +1,17 @@
+export function TabTitle(props: {
+  isActive: boolean
+  Title: ComponentType<{ isActive: boolean }>
+  icon?: string
+  toolTipTitle?: string
+}) {
+  const { icon, Title, toolTipTitle, isActive } = props
+
+  const mainNode = (
+    <TabHeader>
+      {icon && <Icon type={icon} />}
+      <Title isActive={isActive} />
+    </TabHeader>
+  )
+
+  return toolTipTitle ? <Tooltip title={toolTipTitle}>{mainNode}</Tooltip> : mainNode
+}

@@ -76,6 +76,10 @@ describe('collect hooks plugin specs', () => {
       describe: 'should ignore component from props',
     },
     {
+      name: 'function-with-nonprops-argument',
+      describe: 'should ignore component from params',
+    },
+    {
       name: 'anonymous-component',
       describe: 'should ignore anonymous component from props',
       options: {

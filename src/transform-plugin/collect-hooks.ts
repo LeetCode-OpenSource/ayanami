@@ -161,7 +161,7 @@ export const collectAyanamiHooksFactory: (
         const identifier = ts.createIdentifier(componentIdentifier.text)
         if (
           typeChecker
-            .getSymbolsInScope(parent, ts.SymbolFlags.FunctionScopedVariable)
+            .getSymbolsInScope(parent, ts.SymbolFlags.Variable)
             .every((symbol) => symbol.escapedName !== identifier.text)
         ) {
           addAdditionalExpression(

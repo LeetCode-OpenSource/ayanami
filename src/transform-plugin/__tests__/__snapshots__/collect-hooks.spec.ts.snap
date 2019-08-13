@@ -148,6 +148,22 @@ ReactDOM.render(React.createElement(CountComponent, null), document.querySelecto
 "
 `;
 
+exports[`collect hooks plugin specs should ignore component from params 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+function TabTitle(props) {
+    require(\\"ayanami\\").collectModules(TabTitle[require(\\"ayanami\\").SSRSymbol]);
+    var icon = props.icon, Title = props.Title, toolTipTitle = props.toolTipTitle, isActive = props.isActive;
+    var mainNode = (React.createElement(TabHeader, null,
+        icon && React.createElement(Icon, { type: icon }),
+        React.createElement(Title, { isActive: isActive })));
+    return toolTipTitle ? React.createElement(Tooltip, { title: toolTipTitle }, mainNode) : mainNode;
+}
+TabTitle[require(\\"ayanami\\").SSRSymbol] = [TabHeader[require(\\"ayanami\\").SSRSymbol], Icon[require(\\"ayanami\\").SSRSymbol], Tooltip[require(\\"ayanami\\").SSRSymbol]];
+exports.TabTitle = TabTitle;
+"
+`;
+
 exports[`collect hooks plugin specs should ignore component from props 1`] = `
 "\\"use strict\\";
 Object.defineProperty(exports, \\"__esModule\\", { value: true });
