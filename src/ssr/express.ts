@@ -1,13 +1,18 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
+import { Observable } from 'rxjs'
 import { skip } from 'rxjs/operators'
 
 import { SSRSymbol } from './meta-symbol'
 import { SSREnabled } from './flag'
 import { Effect } from '../core/decorators'
-import { Observable } from 'rxjs'
+
+export const SKIP_SYMBOL = Symbol('skip')
 
 export function SSR<T, Payload>(
-  middleware?: (req: Request, res: Response) => Payload | Promise<Payload>,
+  middleware?: (
+    req: Request,
+    skip: () => typeof SKIP_SYMBOL,
+  ) => Payload | Promise<Payload> | typeof SKIP_SYMBOL,
 ) {
   return (target: T, method: string, descriptor: PropertyDescriptor) => {
     const existedMetas = Reflect.getMetadata(SSRSymbol, target)

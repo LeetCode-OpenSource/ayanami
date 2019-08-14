@@ -7,6 +7,7 @@ import { activedModulesSets, collectModuleCallbacks } from './collect-modules'
 import { combineWithIkari } from '../core/ikari'
 import { SSRSymbol } from './meta-symbol'
 import { moduleNameKey } from './ssr-module'
+import { SKIP_SYMBOL } from './express'
 
 export const expressTerminate = (req: Request, res: Response): Promise<any> => {
   const identity = Object.create({ name: 'terminate-identity' })
@@ -31,7 +32,9 @@ export const expressTerminate = (req: Request, res: Response): Promise<any> => {
                 const dispatcher = ikari.triggerActions[meta.action]
                 if (meta.middleware) {
                   const param = await meta.middleware(req, res)
-                  dispatcher(param)
+                  if (param !== SKIP_SYMBOL) {
+                    dispatcher(param)
+                  }
                 } else {
                   dispatcher(void 0)
                 }
