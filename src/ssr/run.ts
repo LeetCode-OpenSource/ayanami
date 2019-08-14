@@ -59,28 +59,31 @@ export const expressTerminate = (req: Request): Promise<{ state: any; cleanup: (
                   dispatcher(void 0)
                 }
               }
-              await ikari.terminate$
-                .pipe(
-                  skip(skipCount),
-                  take(1),
-                )
-                .toPromise()
 
-              ikari.terminate$.next(null)
-              const existedAyanami = createOrGetInstanceInScope(
-                constructor,
-                scope === DEFAULT_SCOPE_NAME ? req : reqMap.get(req)!.get(scope),
-              )
-              const state = ikari.state.getState()
-              if (stateToSerialize[moduleName]) {
-                stateToSerialize[moduleName][scope] = state
-              } else {
-                stateToSerialize[moduleName] = {
-                  [scope]: state,
+              if (skipCount > -1) {
+                await ikari.terminate$
+                  .pipe(
+                    skip(skipCount),
+                    take(1),
+                  )
+                  .toPromise()
+
+                ikari.terminate$.next(null)
+                const existedAyanami = createOrGetInstanceInScope(
+                  constructor,
+                  scope === DEFAULT_SCOPE_NAME ? req : reqMap.get(req)!.get(scope),
+                )
+                const state = ikari.state.getState()
+                if (stateToSerialize[moduleName]) {
+                  stateToSerialize[moduleName][scope] = state
+                } else {
+                  stateToSerialize[moduleName] = {
+                    [scope]: state,
+                  }
                 }
+                const existedIkari = combineWithIkari(existedAyanami)
+                existedIkari.state.setState(state)
               }
-              const existedIkari = combineWithIkari(existedAyanami)
-              existedIkari.state.setState(state)
             }
             const cleanupFn = () => {
               collectModuleCallbacks.length = 0
