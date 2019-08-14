@@ -1,7 +1,8 @@
-import { InjectableFactory, Provider } from '@asuka/di'
+import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf } from '../types'
 import { Scope } from './type'
+import { SameScopeMetadataKey } from './same-scope-decorator'
 
 type ScopeMap<K, V> = Map<K, V>
 
@@ -11,31 +12,28 @@ type Key = ConstructorOf<Instance>
 
 const map: Map<Key, ScopeMap<Scope, Instance>> = new Map()
 
-export function createNewInstance<T>(constructor: ConstructorOf<T>, providers: Provider[] = []): T {
-  return InjectableFactory.injector
-    .resolveAndCreateChild([...providers, constructor])
-    .get(constructor)
-}
-
-export function createOrGetInstanceInScope<T>(
-  constructor: ConstructorOf<T>,
-  scope: Scope,
-  providers: Provider[] = [],
-): T {
+export function createOrGetInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope): T {
   const instanceAtScope = getInstanceFrom(constructor, scope)
 
-  return instanceAtScope ? instanceAtScope : createInstanceInScope(constructor, scope, providers)
+  return instanceAtScope ? instanceAtScope : createInstanceInScope(constructor, scope)
 }
 
-function createInstanceInScope<T>(
-  constructor: ConstructorOf<T>,
-  scope: Scope,
-  providers: Provider[],
-): T {
-  const newInstance = createNewInstance(constructor, providers)
+function createInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope): T {
+  const constructorParams: ConstructorOf<any>[] =
+    Reflect.getMetadata('design:paramtypes', constructor) || []
+
+  const sameScopeParams: number[] = Reflect.getMetadata(SameScopeMetadataKey, constructor) || []
+  const deps = constructorParams.map((paramConstructor, index) => {
+    if (sameScopeParams[index]) {
+      return createOrGetInstanceInScope(paramConstructor, scope)
+    } else {
+      return InjectableFactory.getInstance(paramConstructor)
+    }
+  })
+
+  const newInstance = new constructor(...deps)
 
   setInstanceInScope(constructor, scope, newInstance)
-
   return newInstance
 }
 

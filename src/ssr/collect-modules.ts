@@ -3,7 +3,10 @@ import { flatMap } from 'lodash'
 import { Ayanami } from '../core/ayanami'
 import { ConstructorOf } from '../core/types'
 
-export const activedModulesSets = new Map<object, Set<ConstructorOf<Ayanami<any>>>>()
+export const activedModulesSets = new Map<
+  object,
+  Set<ConstructorOf<Ayanami<any>> | { module: ConstructorOf<Ayanami<any>>; scope: string }>
+>()
 export const collectModuleCallbacks: ((identity: object) => void)[] = []
 
 export const collectModules = (
@@ -23,8 +26,4 @@ export const collectModules = (
         })
     }
   })
-}
-
-export const cleanupAyanamiStates = () => {
-  collectModuleCallbacks.length = 0
 }

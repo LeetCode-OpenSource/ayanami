@@ -11,6 +11,9 @@ export abstract class Ayanami<State> {
   // @internal
   ssrLoadKey = Symbol('SSR_LOADED')
 
+  // @internal
+  scopeName!: string
+
   constructor() {
     if (!SSREnabled) {
       const name = Object.getPrototypeOf(this)[moduleNameKey]
@@ -23,7 +26,7 @@ export abstract class Ayanami<State> {
         if (moduleCache) {
           Reflect.defineMetadata(this.ssrLoadKey, true, this)
           Object.defineProperty(this, 'defaultState', {
-            get: () => moduleCache,
+            get: () => moduleCache[this.scopeName],
             set: noop,
           })
         }
