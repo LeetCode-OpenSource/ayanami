@@ -1,6 +1,6 @@
 import { Request } from 'express'
 import { from } from 'rxjs'
-import { flatMap, finalize } from 'rxjs/operators'
+import { flatMap, finalize, skip, take } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
 import { activedModulesSets, collectModuleCallbacks } from './collect-modules'
@@ -30,18 +30,28 @@ export const expressTerminate = (req: Request): Promise<any> => {
                 throw new TypeError('SSRModule has no name')
               }
               const ikari = combineWithIkari(ayanamiInstance)
+              let skipCount = metas.length
               for (const meta of metas) {
                 const dispatcher = ikari.triggerActions[meta.action]
                 if (meta.middleware) {
                   const param = await meta.middleware(req, skipFn)
                   if (param !== SKIP_SYMBOL) {
                     dispatcher(param)
+                  } else {
+                    skipCount -= 1
                   }
                 } else {
                   dispatcher(void 0)
                 }
               }
-              await ikari.terminate$.toPromise()
+              await ikari.terminate$
+                .pipe(
+                  skip(skipCount),
+                  take(1),
+                )
+                .toPromise()
+
+              ikari.terminate$.next(null)
               stateToSerialize[moduleName] = ikari.state.getState()
               const existedAyanami = InjectableFactory.getInstance(m)
               const existedIkari = combineWithIkari(existedAyanami)

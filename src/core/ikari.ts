@@ -1,5 +1,5 @@
-import { merge, Observable, Subject, Subscription, NEVER, ReplaySubject } from 'rxjs'
-import { map, catchError, takeUntil, skip, take } from 'rxjs/operators'
+import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
+import { map, catchError, takeUntil, filter } from 'rxjs/operators'
 import { mapValues } from 'lodash'
 import produce from 'immer'
 
@@ -102,17 +102,13 @@ export class Ikari<State> {
   subscription = new Subscription()
 
   // @internal
-  terminate$: Observable<EffectAction>
-
-  private readonly _terminate$ = new ReplaySubject<typeof TERMINATE_ACTION>(1)
+  terminate$ = new Subject<typeof TERMINATE_ACTION | null>()
 
   constructor(readonly ayanami: Ayanami<State>, private readonly config: Readonly<Config<State>>) {
     const [effectActions$, effectActions] = setupEffectActions(
       this.config.effects,
       this.state.state$,
     )
-
-    this.terminate$ = this._terminate$
 
     const [reducerActions$, reducerActions] = setupReducerActions(
       this.config.reducers,
@@ -139,11 +135,9 @@ export class Ikari<State> {
       const prototype = Object.getPrototypeOf(ayanami)
       const metas = prototype ? Reflect.getMetadata(SSRSymbol, prototype) : null
       if (metas) {
-        this.terminate$ = this.terminate$.pipe(
-          skip(metas.length - 1),
-          take(1),
+        effectActionsWithTerminate$ = effectActions$.pipe(
+          takeUntil(this.terminate$.pipe(filter((action) => action === null))),
         )
-        effectActionsWithTerminate$ = effectActions$.pipe(takeUntil(this.terminate$))
       } else {
         effectActionsWithTerminate$ = effectActions$
       }
@@ -199,7 +193,7 @@ export class Ikari<State> {
         const { ayanami, actionName, params } = effectAction
         combineWithIkari(ayanami).triggerActions[actionName](params)
       } else {
-        this._terminate$.next(effectAction)
+        this.terminate$.next(effectAction)
       }
     }
 
