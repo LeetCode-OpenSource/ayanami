@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import { from } from 'rxjs'
 import { flatMap, finalize } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
@@ -9,7 +9,9 @@ import { SSRSymbol } from './meta-symbol'
 import { moduleNameKey } from './ssr-module'
 import { SKIP_SYMBOL } from './express'
 
-export const expressTerminate = (req: Request, res: Response): Promise<any> => {
+const skipFn = () => SKIP_SYMBOL
+
+export const expressTerminate = (req: Request): Promise<any> => {
   const identity = Object.create({ name: 'terminate-identity' })
   collectModuleCallbacks.forEach((callback) => callback(identity))
   collectModuleCallbacks.length = 0
@@ -31,7 +33,7 @@ export const expressTerminate = (req: Request, res: Response): Promise<any> => {
               for (const meta of metas) {
                 const dispatcher = ikari.triggerActions[meta.action]
                 if (meta.middleware) {
-                  const param = await meta.middleware(req, res)
+                  const param = await meta.middleware(req, skipFn)
                   if (param !== SKIP_SYMBOL) {
                     dispatcher(param)
                   }
