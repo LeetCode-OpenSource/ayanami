@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { from } from 'rxjs'
+import { from, race, timer, throwError } from 'rxjs'
 import { flatMap, finalize, skip, take } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
@@ -18,7 +18,11 @@ const skipFn = () => SKIP_SYMBOL
 
 export const reqMap = new Map<Request, Map<any, { scope: string; req: Request }>>()
 
-export const expressTerminate = (req: Request): Promise<{ state: any; cleanup: () => void }> => {
+export const expressTerminate = (
+  req: Request,
+  // timeout seconds
+  timeout: number = 3,
+): Promise<{ state: any; cleanup: () => void }> => {
   const identity = Object.create({ name: 'terminate-identity' })
   collectModuleCallbacks.forEach((callback) => callback(identity))
   collectModuleCallbacks.length = 0
@@ -26,8 +30,8 @@ export const expressTerminate = (req: Request): Promise<{ state: any; cleanup: (
   const stateToSerialize: any = {}
   return !modulesSet
     ? Promise.resolve(stateToSerialize)
-    : from(modulesSet.values())
-        .pipe(
+    : race(
+        from(modulesSet.values()).pipe(
           flatMap(async (m) => {
             let constructor: ConstructorOf<Ayanami<any>>
             let scope = DEFAULT_SCOPE_NAME
@@ -94,6 +98,7 @@ export const expressTerminate = (req: Request): Promise<{ state: any; cleanup: (
           finalize(() => {
             activedModulesSets.delete(identity)
           }),
-        )
-        .toPromise()
+        ),
+        timer(timeout * 1000).pipe(flatMap(() => throwError(new Error('Terminate timeout')))),
+      ).toPromise()
 }
