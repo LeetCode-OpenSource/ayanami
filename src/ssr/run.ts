@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { from, race, timer, throwError } from 'rxjs'
+import { from, race, timer, throwError, noop } from 'rxjs'
 import { flatMap, finalize, skip, take } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
@@ -29,7 +29,7 @@ export const expressTerminate = (
   const modulesSet = activedModulesSets.get(identity)
   const stateToSerialize: any = {}
   return !modulesSet
-    ? Promise.resolve(stateToSerialize)
+    ? Promise.resolve({ state: stateToSerialize, cleanup: noop })
     : race(
         from(modulesSet.values()).pipe(
           flatMap(async (m) => {
