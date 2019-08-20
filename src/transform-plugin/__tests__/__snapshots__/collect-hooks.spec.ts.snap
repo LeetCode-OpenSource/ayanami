@@ -1,27 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`collect hooks plugin specs dose not support scoped ayanami module 1`] = `
-"\\"use strict\\";
-Object.defineProperty(exports, \\"__esModule\\", { value: true });
-var react_1 = require(\\"react\\");
-var react_dom_1 = require(\\"react-dom\\");
-var index_1 = require(\\"../../index\\");
-function CountComponent() {
-    var _a = index_1.useAyanami(Count, { scope: 'Count' }), count = _a[0].count, actions = _a[1];
-    var add = function (count) { return function () { return actions.add(count); }; };
-    var minus = function (count) { return function () { return actions.minus(count); }; };
-    return (react_1.default.createElement(\\"div\\", null,
-        react_1.default.createElement(\\"p\\", null,
-            \\"count: \\",
-            count),
-        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
-        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
-        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
-}
-react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
-"
-`;
-
 exports[`collect hooks plugin specs should collect from arrow-function-none-block component 1`] = `
 "import React from 'react';
 import ReactDOM from 'react-dom';
@@ -59,6 +37,30 @@ function CountComponent() {
         react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
 }
 CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
+react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should collect from literal-scope component 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+var react_1 = require(\\"react\\");
+var react_dom_1 = require(\\"react-dom\\");
+var index_1 = require(\\"../../index\\");
+function CountComponent() {
+    require(\\"ayanami\\").collectModules(CountComponent[require(\\"ayanami\\").SSRSymbol]);
+    var _a = index_1.useAyanami(Count, { scope: 'Count' }), count = _a[0].count, actions = _a[1];
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (react_1.default.createElement(\\"div\\", null,
+        react_1.default.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+CountComponent[require(\\"ayanami\\").SSRSymbol] = [{ module: Count, scope: \\"Count\\" }];
 react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
 "
 `;
@@ -130,6 +132,40 @@ const CountComponent = function () {
 };
 CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
 ReactDOM.render(React.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should collect from with-memo component 1`] = `
+"export var Submissions = memo(function (props) {
+    require(\\"ayanami\\").collectModules(Submissions[require(\\"ayanami\\").SSRSymbol]);
+    var _a = useAyanami(SubmissionModule), state = _a[0], actions = _a[1];
+    var loadMore = useCallback(function () {
+        actions.nextPage();
+    }, []);
+    useEffect(function () {
+        actions.getRecentSubmissions(props.userSlug);
+        return actions.disposeFetching$;
+    }, [props.userSlug]);
+    return (React.createElement(FeedList, { activities: state.shownSubmissions, hasMore: state.currentPage < state.totalPage, isMyProfile: props.isMyProfile, loading: state.loading, loadMore: loadMore }));
+});
+Submissions[require(\\"ayanami\\").SSRSymbol] = [SubmissionModule, FeedList[require(\\"ayanami\\").SSRSymbol]];
+"
+`;
+
+exports[`collect hooks plugin specs should collect from with-react-memo component 1`] = `
+"export var Submissions = React.memo(function (props) {
+    require(\\"ayanami\\").collectModules(Submissions[require(\\"ayanami\\").SSRSymbol]);
+    var _a = useAyanami(SubmissionModule), state = _a[0], actions = _a[1];
+    var loadMore = useCallback(function () {
+        actions.nextPage();
+    }, []);
+    useEffect(function () {
+        actions.getRecentSubmissions(props.userSlug);
+        return actions.disposeFetching$;
+    }, [props.userSlug]);
+    return (React.createElement(FeedList, { activities: state.shownSubmissions, hasMore: state.currentPage < state.totalPage, isMyProfile: props.isMyProfile, loading: state.loading, loadMore: loadMore }));
+});
+Submissions[require(\\"ayanami\\").SSRSymbol] = [SubmissionModule, FeedList[require(\\"ayanami\\").SSRSymbol]];
 "
 `;
 
@@ -207,5 +243,65 @@ function CountComponent(_a) {
 }
 CountComponent[require(\\"ayanami\\").SSRSymbol] = [Count, Tips];
 react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should ignore dynamic scope from props 1`] = `
+"\\"use strict\\";
+Object.defineProperty(exports, \\"__esModule\\", { value: true });
+var react_1 = require(\\"react\\");
+var react_dom_1 = require(\\"react-dom\\");
+var index_1 = require(\\"../../index\\");
+function CountComponent(_a) {
+    var scope = _a.scope;
+    var _b = index_1.useAyanami(Count, { scope: scope }), count = _b[0].count, actions = _b[1];
+    var add = function (count) { return function () { return actions.add(count); }; };
+    var minus = function (count) { return function () { return actions.minus(count); }; };
+    return (react_1.default.createElement(\\"div\\", null,
+        react_1.default.createElement(\\"p\\", null,
+            \\"count: \\",
+            count),
+        react_1.default.createElement(\\"button\\", { onClick: add(1) }, \\"add one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: minus(1) }, \\"minus one\\"),
+        react_1.default.createElement(\\"button\\", { onClick: actions.reset }, \\"reset to zero\\")));
+}
+react_dom_1.default.render(react_1.default.createElement(CountComponent, null), document.querySelector('#app'));
+"
+`;
+
+exports[`collect hooks plugin specs should ignore memo with dynamic scope from props 1`] = `
+"export var Submissions = memo(function (_a) {
+    require(\\"ayanami\\").collectModules(Submissions[require(\\"ayanami\\").SSRSymbol]);
+    var scope = _a.scope;
+    var _b = useAyanami(SubmissionModule, {
+        scope: scope,
+    }), state = _b[0], actions = _b[1];
+    var loadMore = useCallback(function () {
+        actions.nextPage();
+    }, []);
+    useEffect(function () {
+        actions.getRecentSubmissions(props.userSlug);
+        return actions.disposeFetching$;
+    }, [props.userSlug]);
+    return (React.createElement(FeedList, { activities: state.shownSubmissions, hasMore: state.currentPage < state.totalPage, isMyProfile: props.isMyProfile, loading: state.loading, loadMore: loadMore }));
+});
+Submissions[require(\\"ayanami\\").SSRSymbol] = [FeedList[require(\\"ayanami\\").SSRSymbol]];
+"
+`;
+
+exports[`collect hooks plugin specs should not collect scoped component 1`] = `
+"export var SolutionTab = memo(function () {
+    require(\\"ayanami\\").collectModules(SolutionTab[require(\\"ayanami\\").SSRSymbol]);
+    var _a = useAyanami(QuestionDetailModule), state = _a[0], actions = _a[1];
+    useEffect(function () {
+        state.questionSlug && actions.getSolutionCount();
+    }, [state.questionSlug]);
+    var title = '题解' + (state.solutionCount ? \\"(\\" + state.solutionCount + \\")\\" : '');
+    var Title = simpleTitle(title, '题解');
+    return (React.createElement(React.Fragment, null,
+        React.createElement(Icon, { type: \\"bottle\\" }),
+        React.createElement(Title, null)));
+});
+SolutionTab[require(\\"ayanami\\").SSRSymbol] = [QuestionDetailModule, Icon[require(\\"ayanami\\").SSRSymbol]];
 "
 `;

@@ -1,0 +1,22 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+
+import { useAyanami } from '../../index'
+
+function CountComponent({ scope }) {
+  const [{ count }, actions] = useAyanami(Count, { scope })
+
+  const add = (count: number) => () => actions.add(count)
+  const minus = (count: number) => () => actions.minus(count)
+
+  return (
+    <div>
+      <p>count: {count}</p>
+      <button onClick={add(1)}>add one</button>
+      <button onClick={minus(1)}>minus one</button>
+      <button onClick={actions.reset}>reset to zero</button>
+    </div>
+  )
+}
+
+ReactDOM.render(<CountComponent />, document.querySelector('#app'))

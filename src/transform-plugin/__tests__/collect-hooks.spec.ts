@@ -68,8 +68,11 @@ describe('collect hooks plugin specs', () => {
       },
     },
     {
-      name: 'scope',
-      describe: 'dose not support scoped ayanami module',
+      name: 'literal-scope',
+    },
+    {
+      name: 'dynamic-scope',
+      describe: 'should ignore dynamic scope from props',
     },
     {
       name: 'component-from-props',
@@ -90,6 +93,40 @@ describe('collect hooks plugin specs', () => {
     },
     {
       name: 'smoke-1',
+    },
+    {
+      name: 'smoke-2',
+      options: {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+        },
+      },
+      describe: 'should not collect scoped component',
+    },
+    {
+      name: 'with-memo',
+      options: {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+        },
+      },
+    },
+    {
+      name: 'with-react-memo',
+      options: {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+        },
+      },
+    },
+    {
+      name: 'with-memo-dynamic-scope',
+      options: {
+        compilerOptions: {
+          module: ts.ModuleKind.ESNext,
+        },
+      },
+      describe: 'should ignore memo with dynamic scope from props',
     },
   ].forEach((meta) => {
     it(meta.describe ? meta.describe : `should collect from ${meta.name} component`, () => {

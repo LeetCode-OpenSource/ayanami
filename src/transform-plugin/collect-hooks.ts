@@ -20,8 +20,14 @@ export const collectAyanamiHooksFactory: (
     | [ts.FunctionDeclaration | ts.VariableStatement, ts.ExpressionStatement] => {
     let result: ts.FunctionDeclaration | ts.VariableDeclaration
     let finalResult: ts.FunctionDeclaration | ts.VariableStatement = parent
+    let isMemo = false
     if (ts.isVariableStatement(parent)) {
-      result = parent.declarationList.declarations[0]
+      const declaration = parent.declarationList.declarations[0]
+      const initializer = declaration.initializer!
+      if (ts.isCallExpression(initializer)) {
+        isMemo = true
+      }
+      result = declaration
     } else {
       result = parent
     }
@@ -31,9 +37,17 @@ export const collectAyanamiHooksFactory: (
       return parent
     }
 
-    const parameters = ts.isFunctionDeclaration(result)
+    const parameters = isMemo
+      ? (((result as ts.VariableDeclaration).initializer! as ts.CallExpression)
+          .arguments[0] as ts.FunctionExpression).parameters
+      : ts.isFunctionDeclaration(result)
       ? result.parameters
       : (result.initializer! as ts.FunctionExpression).parameters
+
+    // memo(forwardRef(memo(xxxxx))) WTF
+    if (!parameters) {
+      return parent
+    }
 
     function addExpressionToComponent(expression: ts.ExpressionStatement) {
       if (ts.isFunctionDeclaration(result)) {
@@ -104,6 +118,25 @@ export const collectAyanamiHooksFactory: (
               ]),
             ),
           )
+        } else if (ts.isCallExpression(result.initializer!)) {
+          const paramFunc = result.initializer.arguments[0] as ts.FunctionExpression
+          result = ts.updateVariableDeclaration(
+            result,
+            result.name,
+            result.type,
+            ts.updateCall(result.initializer, result.initializer.expression, void 0, [
+              ts.updateFunctionExpression(
+                paramFunc,
+                paramFunc.modifiers,
+                paramFunc.asteriskToken,
+                paramFunc.name,
+                paramFunc.typeParameters,
+                paramFunc.parameters,
+                paramFunc.type,
+                ts.updateBlock(paramFunc.body, [expression, ...paramFunc.body.statements]),
+              ),
+            ]),
+          )
         }
         const _parent = parent as ts.VariableStatement
         finalResult = ts.updateVariableStatement(
@@ -153,6 +186,14 @@ export const collectAyanamiHooksFactory: (
 
     let additionalResult: ts.ExpressionStatement | undefined
     const functionLevelVisitor: ts.Visitor = (node) => {
+      function warn() {
+        console.warn(
+          `Does not support run ayanami module with dynamic scope in SSR mode, ${
+            ((node as ts.CallExpression).arguments[0] as ts.Identifier).text
+          } will not run`,
+        )
+      }
+
       if (
         ts.isCallExpression(node) &&
         ts.isPropertyAccessExpression(node.expression) &&
@@ -167,7 +208,13 @@ export const collectAyanamiHooksFactory: (
         const identifier = ts.createIdentifier(componentIdentifier.text)
         if (
           typeChecker
-            .getSymbolsInScope(parent, ts.SymbolFlags.Variable)
+            .getSymbolsInScope(
+              isMemo
+                ? ((result as ts.VariableDeclaration).initializer! as ts.CallExpression)
+                    .arguments[0]
+                : parent,
+              ts.SymbolFlags.Variable,
+            )
             .every((symbol) => symbol.escapedName !== identifier.text) &&
           parameters.every((p) => p.name.getText(sourceFile) !== identifier.text)
         ) {
@@ -193,11 +240,35 @@ export const collectAyanamiHooksFactory: (
         ts.isIdentifier(node.arguments[0])
       ) {
         if (node.arguments.length === 2) {
-          console.warn(
-            `Does not support run ayanami module with scope in SSR mode, ${
-              (node.arguments[0] as ts.Identifier).text
-            } will not run`,
-          )
+          const arg2 = node.arguments[1]
+          if (ts.isObjectLiteralExpression(arg2)) {
+            const scopeProperty = arg2.properties.find(
+              (property) =>
+                ts.isPropertyAssignment(property) &&
+                ts.isIdentifier(property.name) &&
+                property.name.text === 'scope',
+            )
+            if (scopeProperty) {
+              const scopeAssignment = scopeProperty as ts.PropertyAssignment
+              const initializer = scopeAssignment.initializer
+              const moduleIdentifier = ts.createIdentifier(node.arguments[0].text)
+              if (ts.isStringLiteral(initializer)) {
+                addAdditionalExpression(
+                  ts.createObjectLiteral([
+                    ts.createPropertyAssignment(ts.createIdentifier('module'), moduleIdentifier),
+                    ts.createPropertyAssignment(
+                      ts.createIdentifier('scope'),
+                      ts.createStringLiteral(initializer.text),
+                    ),
+                  ]),
+                )
+              } else {
+                warn()
+              }
+            }
+          } else {
+            warn()
+          }
         } else {
           const moduleIdentifier = ts.createIdentifier(node.arguments[0].text)
           addAdditionalExpression(moduleIdentifier)
@@ -252,7 +323,8 @@ export const collectAyanamiHooksFactory: (
         node.declarationList.declarations[0] &&
         node.declarationList.declarations[0].initializer &&
         (ts.isFunctionExpression(node.declarationList.declarations[0].initializer) ||
-          ts.isArrowFunction(node.declarationList.declarations[0].initializer)))
+          ts.isArrowFunction(node.declarationList.declarations[0].initializer) ||
+          isMemoComponent(node.declarationList.declarations[0].initializer)))
     ) {
       return updateDeclaration(node)
     }
@@ -286,4 +358,16 @@ export const collectAyanamiHooksFactory: (
     }
     return ts.visitEachChild(node, topLevelvisitor, context)
   }
+}
+
+function isMemoComponent(node: ts.Node) {
+  return (
+    ts.isCallExpression(node) &&
+    ((ts.isIdentifier(node.expression) && node.expression.text === 'memo') ||
+      (ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.name) &&
+        node.expression.name.text === 'memo' &&
+        ts.isIdentifier(node.expression.expression) &&
+        node.expression.expression.text === 'React'))
+  )
 }
