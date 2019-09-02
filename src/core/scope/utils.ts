@@ -3,6 +3,7 @@ import { InjectableFactory } from '@asuka/di'
 import { ConstructorOf } from '../types'
 import { Scope } from './type'
 import { SameScopeMetadataKey } from './same-scope-decorator'
+import { CleanupSymbol } from '../../ssr'
 
 type ScopeMap<K, V> = Map<K, V>
 
@@ -42,6 +43,9 @@ function setInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope, newI
 
   scopeMap.set(scope, newInstance)
   map.set(constructor, scopeMap)
+  newInstance[CleanupSymbol] = () => {
+    scopeMap.delete(scope)
+  }
 }
 
 function getInstanceFrom<T>(constructor: ConstructorOf<T>, scope: Scope): T | undefined {

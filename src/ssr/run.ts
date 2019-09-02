@@ -5,7 +5,7 @@ import { InjectableFactory } from '@asuka/di'
 
 import { activedModulesSets, collectModuleCallbacks } from './collect-modules'
 import { combineWithIkari } from '../core/ikari'
-import { SSRSymbol } from './meta-symbol'
+import { SSRSymbol, CleanupSymbol } from './meta-symbol'
 import { moduleNameKey } from './ssr-module'
 import { SKIP_SYMBOL } from './express'
 import { ConstructorOf } from '../core/types'
@@ -42,6 +42,7 @@ export const expressTerminate = (
               constructor = m
             }
             const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype)
+            const ayanamiInstances: Ayanami<any>[] = []
             if (metas) {
               const ayanamiInstance: any = InjectableFactory.initialize(constructor)
               const moduleName = ayanamiInstance[moduleNameKey]
@@ -77,6 +78,7 @@ export const expressTerminate = (
                   constructor,
                   scope === DEFAULT_SCOPE_NAME ? req : reqMap.get(req)!.get(scope),
                 )
+                ayanamiInstances.push(existedAyanami)
                 const state = ikari.state.getState()
                 if (stateToSerialize[moduleName]) {
                   stateToSerialize[moduleName][scope] = state
@@ -92,6 +94,7 @@ export const expressTerminate = (
             const cleanupFn = () => {
               collectModuleCallbacks.length = 0
               reqMap.delete(req)
+              ayanamiInstances.forEach((instance) => (instance as any)[CleanupSymbol].call())
             }
             return { state: stateToSerialize, cleanup: cleanupFn }
           }),
