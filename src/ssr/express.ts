@@ -18,15 +18,38 @@ function addDecorator(target: any, method: any, middleware: any) {
   }
 }
 
-export function SSR<T, Payload>(
-  middleware?: (
+interface SSREffectOptions<Payload> {
+  /**
+   * Function used to get effect payload.
+   *
+   * if SKIP_SYMBOL returned(`return skip()`), effect won't get dispatched when SSR
+   *
+   * @param req express request object
+   * @param skip get a symbol used to let effect escape from ssr effects dispatching
+   */
+  payloadGetter?: (
     req: Request,
     skip: () => typeof SKIP_SYMBOL,
-  ) => Payload | Promise<Payload> | typeof SKIP_SYMBOL,
-) {
+  ) => Payload | Promise<Payload> | typeof SKIP_SYMBOL
+
+  /**
+   * Whether skip first effect dispatching in client if effect ever got dispatched when SSR
+   *
+   * @default true
+   */
+  skipFirstClientDispatch?: boolean
+}
+
+export function SSREffect<T, Payload>(options?: SSREffectOptions<Payload>) {
+  const { payloadGetter, skipFirstClientDispatch } = {
+    payloadGetter: undefined,
+    skipFirstClientDispatch: true,
+    ...options,
+  }
+
   return (target: T, method: string, descriptor: PropertyDescriptor) => {
-    addDecorator(target, method, middleware)
-    if (!SSREnabled) {
+    addDecorator(target, method, payloadGetter)
+    if (!SSREnabled && skipFirstClientDispatch) {
       const originalValue = descriptor.value
       descriptor.value = function(
         this: any,
@@ -39,18 +62,6 @@ export function SSR<T, Payload>(
         return originalValue.call(this, action$, state$)
       }
     }
-    return Effect()(target, method, descriptor)
-  }
-}
-
-export function SSRServerOnly<T, Payload>(
-  middleware?: (
-    req: Request,
-    skip: () => typeof SKIP_SYMBOL,
-  ) => Payload | Promise<Payload> | typeof SKIP_SYMBOL,
-) {
-  return (target: T, method: string, descriptor: PropertyDescriptor) => {
-    addDecorator(target, method, middleware)
     return Effect()(target, method, descriptor)
   }
 }

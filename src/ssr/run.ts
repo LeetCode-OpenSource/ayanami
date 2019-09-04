@@ -22,13 +22,13 @@ const skipFn = () => SKIP_SYMBOL
 export const reqMap = new Map<Request, Map<any, { scope: string; req: Request }>>()
 
 /**
- * Run all @SSR and @SSRServerOnly decorated effects and extract modules states.
+ * Run all @SSREffect decorated effects of given modules and extract latest states.
  * `cleanup` function returned must be called before end of responding
  *
- * @param {Request} req express request object
- * @param {ModuleMeta[]} modules used ayanami modules
- * @param {number} timeout seconds to wait before all effects stream out TERMINATE_ACTION
- * @returns {Promise<{ state: any; cleanup: Function }>}
+ * @param req express request object
+ * @param modules used ayanami modules
+ * @param timeout seconds to wait before all effects stream out TERMINATE_ACTION
+ * @returns object contains ayanami state and cleanup function
  */
 export const emitSSREffects = (
   req: Request,
