@@ -1,8 +1,0 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-
-import { Modal } from 'antd'
-
-const CountComponent = () => <Modal />
-
-ReactDOM.render(<CountComponent />, document.querySelector('#app'))

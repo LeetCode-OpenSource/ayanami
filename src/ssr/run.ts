@@ -1,9 +1,8 @@
 import { Request } from 'express'
 import { from, race, timer, throwError, noop } from 'rxjs'
-import { flatMap, finalize, skip, take } from 'rxjs/operators'
+import { flatMap, skip, take } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
-import { activedModulesSets, collectModuleCallbacks } from './collect-modules'
 import { combineWithIkari } from '../core/ikari'
 import { SSRSymbol, CleanupSymbol } from './meta-symbol'
 import { moduleNameKey } from './ssr-module'
@@ -12,26 +11,35 @@ import { ConstructorOf } from '../core/types'
 import { Ayanami } from '../core/ayanami'
 import { createOrGetInstanceInScope } from '../core/scope/utils'
 
+export type ModuleMeta =
+  | ConstructorOf<Ayanami<any>>
+  | { module: ConstructorOf<Ayanami<any>>; scope: string }
+
 export const DEFAULT_SCOPE_NAME = '__$$AYANAMI_DEFAULT__SCOPE$$__'
 
 const skipFn = () => SKIP_SYMBOL
 
 export const reqMap = new Map<Request, Map<any, { scope: string; req: Request }>>()
 
-export const expressTerminate = (
+/**
+ * Run all @SSR and @SSRServerOnly decorated effects and extract modules states.
+ * `cleanup` function returned must be called before end of responding
+ *
+ * @param {Request} req express request object
+ * @param {ModuleMeta[]} modules used ayanami modules
+ * @param {number} timeout seconds to wait before all effects stream out TERMINATE_ACTION
+ * @returns {Promise<{ state: any; cleanup: Function }>}
+ */
+export const emitSSREffects = (
   req: Request,
-  // timeout seconds
+  modules: ModuleMeta[],
   timeout: number = 3,
 ): Promise<{ state: any; cleanup: () => void }> => {
-  const identity = Object.create({ name: 'terminate-identity' })
-  collectModuleCallbacks.forEach((callback) => callback(identity))
-  collectModuleCallbacks.length = 0
-  const modulesSet = activedModulesSets.get(identity)
   const stateToSerialize: any = {}
-  return !modulesSet
+  return modules.length === 0
     ? Promise.resolve({ state: stateToSerialize, cleanup: noop })
     : race(
-        from(modulesSet.values()).pipe(
+        from(modules).pipe(
           flatMap(async (m) => {
             let constructor: ConstructorOf<Ayanami<any>>
             let scope = DEFAULT_SCOPE_NAME
@@ -92,14 +100,10 @@ export const expressTerminate = (
               }
             }
             const cleanupFn = () => {
-              collectModuleCallbacks.length = 0
               reqMap.delete(req)
               ayanamiInstances.forEach((instance) => (instance as any)[CleanupSymbol].call())
             }
             return { state: stateToSerialize, cleanup: cleanupFn }
-          }),
-          finalize(() => {
-            activedModulesSets.delete(identity)
           }),
         ),
         timer(timeout * 1000).pipe(flatMap(() => throwError(new Error('Terminate timeout')))),
