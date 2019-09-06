@@ -92,7 +92,7 @@ export const emitSSREffects = (
                 }
                 const existedAyanami = createOrGetInstanceInScope(
                   constructor,
-                  createScopeWithRequest(req, scope),
+                  createScopeWithRequest(req, scope === DEFAULT_SCOPE_NAME ? undefined : scope),
                 )
                 const existedIkari = combineWithIkari(existedAyanami)
                 existedIkari.state.setState(state)
