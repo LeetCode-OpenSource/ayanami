@@ -3,7 +3,7 @@ import { InjectableFactory } from '@asuka/di'
 import { ConstructorOf } from '../types'
 import { Scope } from './type'
 import { SameScopeMetadataKey } from './same-scope-decorator'
-import { CleanupSymbol } from '../../ssr'
+import { CleanupSymbol, SSREnabled } from '../../ssr'
 
 type ScopeMap<K, V> = Map<K, V>
 
@@ -12,6 +12,8 @@ type Instance = any
 type Key = ConstructorOf<Instance>
 
 const map: Map<Key, ScopeMap<Scope, Instance>> = new Map()
+
+export const ayanamiInstances: Map<Scope, Instance[]> = new Map()
 
 export function createOrGetInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope): T {
   const instanceAtScope = getInstanceFrom(constructor, scope)
@@ -44,7 +46,12 @@ function setInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope, newI
   scopeMap.set(scope, newInstance)
   map.set(constructor, scopeMap)
   newInstance[CleanupSymbol] = () => {
+    newInstance.destroy()
     scopeMap.delete(scope)
+  }
+
+  if (SSREnabled) {
+    ayanamiInstances.set(scope, (ayanamiInstances.get(scope) || []).concat(newInstance))
   }
 }
 

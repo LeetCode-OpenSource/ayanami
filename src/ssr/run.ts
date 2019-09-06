@@ -9,7 +9,8 @@ import { moduleNameKey } from './ssr-module'
 import { SKIP_SYMBOL } from './express'
 import { ConstructorOf } from '../core/types'
 import { Ayanami } from '../core/ayanami'
-import { createOrGetInstanceInScope } from '../core/scope/utils'
+import { createOrGetInstanceInScope, ayanamiInstances } from '../core/scope/utils'
+import { createScopeWithRequest } from '../hooks'
 
 export type ModuleMeta =
   | ConstructorOf<Ayanami<any>>
@@ -50,7 +51,6 @@ export const emitSSREffects = (
               constructor = m
             }
             const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype)
-            const ayanamiInstances: Ayanami<any>[] = []
             if (metas) {
               const ayanamiInstance: any = InjectableFactory.initialize(constructor)
               const moduleName = ayanamiInstance[moduleNameKey]
@@ -82,11 +82,6 @@ export const emitSSREffects = (
                   .toPromise()
 
                 ikari.terminate$.next(null)
-                const existedAyanami = createOrGetInstanceInScope(
-                  constructor,
-                  scope === DEFAULT_SCOPE_NAME ? req : reqMap.get(req)!.get(scope),
-                )
-                ayanamiInstances.push(existedAyanami)
                 const state = ikari.state.getState()
                 if (stateToSerialize[moduleName]) {
                   stateToSerialize[moduleName][scope] = state
@@ -95,13 +90,34 @@ export const emitSSREffects = (
                     [scope]: state,
                   }
                 }
+                const existedAyanami = createOrGetInstanceInScope(
+                  constructor,
+                  createScopeWithRequest(req, scope),
+                )
                 const existedIkari = combineWithIkari(existedAyanami)
                 existedIkari.state.setState(state)
+                ayanamiInstance.destroy()
               }
             }
             const cleanupFn = () => {
-              reqMap.delete(req)
-              ayanamiInstances.forEach((instance) => (instance as any)[CleanupSymbol].call())
+              // non-scope ayanami
+              if (ayanamiInstances.has(req)) {
+                ayanamiInstances.get(req)!.forEach((instance) => {
+                  instance[CleanupSymbol].call()
+                })
+                ayanamiInstances.delete(req)
+              }
+
+              // scoped ayanami
+              if (reqMap.has(req)) {
+                Array.from(reqMap.get(req)!.values()).forEach((s) => {
+                  ayanamiInstances.get(s)!.forEach((instance) => {
+                    instance[CleanupSymbol].call()
+                  })
+                  ayanamiInstances.delete(s)
+                })
+                reqMap.delete(req)
+              }
             }
             return { state: stateToSerialize, cleanup: cleanupFn }
           }),

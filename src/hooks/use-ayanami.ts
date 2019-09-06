@@ -31,10 +31,7 @@ export function useAyanami<M extends Ayanami<S>, S>(
   return useAyanamiInstance<M, S>(ayanami, useAyanamiInstanceConfig) as any
 }
 
-function createScopeWithRequest(req: Request, scope: any | undefined) {
-  if (scope === TransientScope) {
-    return scope
-  }
+export function createScopeWithRequest(req: Request, scope: any | undefined) {
   if (!scope) {
     return req
   }
