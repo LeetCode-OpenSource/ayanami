@@ -2,18 +2,9 @@ import 'reflect-metadata'
 import { Injectable } from '@asuka/di'
 
 import { getInstanceWithScope, TransientScope, SameScope } from '../'
-import { createNewInstance, createOrGetInstanceInScope } from '../utils'
+import { createOrGetInstanceInScope } from '../utils'
 
 describe('Scope spec:', () => {
-  describe('createNewInstance', () => {
-    it('should always return new instance', () => {
-      class Test {}
-
-      expect(createNewInstance(Test)).toBeInstanceOf(Test)
-      expect(createNewInstance(Test) === createNewInstance(Test)).toBeFalsy()
-    })
-  })
-
   describe('createOrGetInstanceInScope', () => {
     class Test {}
     const scope = 'Scope'
@@ -102,7 +93,7 @@ describe('Scope spec:', () => {
         }
 
         it('should return same instance if is same scope', () => {
-          const scope = 'scope'
+          const scope = Symbol('scope')
           const b = getInstanceWithScope(B, scope)
           const c = getInstanceWithScope(C, scope)
 
@@ -111,9 +102,9 @@ describe('Scope spec:', () => {
         })
 
         it('should return different instance if is different scope', () => {
-          const b = getInstanceWithScope(B, 'b')
-          const c1 = getInstanceWithScope(C, 'c1')
-          const c2 = getInstanceWithScope(C, 'c2')
+          const b = getInstanceWithScope(B, Symbol('b'))
+          const c1 = getInstanceWithScope(C, Symbol('c1'))
+          const c2 = getInstanceWithScope(C, Symbol('c2'))
 
           expect(b.a).toBeInstanceOf(A)
           expect(c1.a).toBeInstanceOf(A)

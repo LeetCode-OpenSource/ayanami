@@ -1,5 +1,5 @@
 import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
-import { map, catchError } from 'rxjs/operators'
+import { map, catchError, takeUntil, filter } from 'rxjs/operators'
 import { mapValues } from 'lodash'
 import produce from 'immer'
 
@@ -14,9 +14,11 @@ import {
   EffectActionFactories,
 } from './types'
 import { Ayanami } from './ayanami'
-import { BasicState, getEffectActionFactories, getOriginalFunctions } from './utils'
+import { createState, getEffectActionFactories, getOriginalFunctions } from './utils'
 import { logStateAction } from '../redux-devtools-extension'
 import { ikariSymbol } from './symbols'
+import { TERMINATE_ACTION } from '../ssr/terminate'
+import { isSSREnabled } from '../ssr/flag'
 
 interface Config<State> {
   nameForLog: string
@@ -74,13 +76,13 @@ export function destroyIkariFrom<S>(ayanami: Ayanami<S>): void {
 }
 
 export class Ikari<State> {
-  static createAndBindAt<S>(target: { defaultState: S }, config: Config<S>): Ikari<S> {
+  static createAndBindAt<S>(target: Ayanami<S>, config: Config<S>): Ikari<S> {
     const createdIkari = this.getFrom(target)
 
     if (createdIkari) {
       return createdIkari
     } else {
-      const ikari = new Ikari(config)
+      const ikari = new Ikari(target, config)
       Reflect.defineMetadata(ikariSymbol, ikari, target)
       return ikari
     }
@@ -90,18 +92,18 @@ export class Ikari<State> {
     return Reflect.getMetadata(ikariSymbol, target)
   }
 
-  state: BasicState<State>
+  state = createState(this.config.defaultState)
 
-  effectActionFactories: EffectActionFactories
+  effectActionFactories = this.config.effectActionFactories
 
   triggerActions: TriggerActions = {}
 
   subscription = new Subscription()
 
-  constructor(private readonly config: Readonly<Config<State>>) {
-    this.effectActionFactories = config.effectActionFactories
-    this.state = new BasicState<State>(config.defaultState)
+  // @internal
+  terminate$ = new Subject<typeof TERMINATE_ACTION | null>()
 
+  constructor(readonly ayanami: Ayanami<State>, private readonly config: Readonly<Config<State>>) {
     const [effectActions$, effectActions] = setupEffectActions(
       this.config.effects,
       this.state.state$,
@@ -124,8 +126,18 @@ export class Ikari<State> {
       ...mapValues(this.config.defineActions, ({ next }) => next),
     }
 
+    let effectActionsWithTerminate$: Observable<Action<any>>
+
+    if (!isSSREnabled()) {
+      effectActionsWithTerminate$ = effectActions$
+    } else {
+      effectActionsWithTerminate$ = effectActions$.pipe(
+        takeUntil(this.terminate$.pipe(filter((action) => action === null))),
+      )
+    }
+
     this.subscription.add(
-      effectActions$.subscribe((action) => {
+      effectActionsWithTerminate$.subscribe((action) => {
         this.log(action)
         this.handleAction(action)
       }),
@@ -152,12 +164,10 @@ export class Ikari<State> {
   }
 
   private log = ({ originalActionName, effectAction, reducerAction }: Action<State>) => {
-    if (effectAction) {
+    if (effectAction && effectAction !== TERMINATE_ACTION) {
       logStateAction(this.config.nameForLog, {
         params: effectAction.params,
-        actionName: `${originalActionName}/👉${effectAction.ayanami.constructor.name}/️${
-          effectAction.actionName
-        }`,
+        actionName: `${originalActionName}/👉${effectAction.ayanami.constructor.name}/️${effectAction.actionName}`,
       })
     }
 
@@ -172,8 +182,12 @@ export class Ikari<State> {
 
   private handleAction = ({ effectAction, reducerAction }: Action<State>) => {
     if (effectAction) {
-      const { ayanami, actionName, params } = effectAction
-      combineWithIkari(ayanami).triggerActions[actionName](params)
+      if (effectAction !== TERMINATE_ACTION) {
+        const { ayanami, actionName, params } = effectAction
+        combineWithIkari(ayanami).triggerActions[actionName](params)
+      } else {
+        this.terminate$.next(effectAction)
+      }
     }
 
     if (reducerAction) {

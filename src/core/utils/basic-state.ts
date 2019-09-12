@@ -1,25 +1,21 @@
 import { BehaviorSubject, Observable } from 'rxjs'
 
-const shallowequal = require('shallowequal')
+export interface State<S> {
+  getState(): S
+  setState(state: S): void
+  state$: Observable<S>
+}
 
-export class BasicState<S> {
-  readonly state$: Observable<S>
+export function createState<S>(defaultState: S): State<S> {
+  const _state$ = new BehaviorSubject<S>(defaultState)
 
-  readonly getState: () => Readonly<S>
-
-  readonly setState: (state: Readonly<S>) => void
-
-  constructor(defaultState: S) {
-    const state$ = new BehaviorSubject<S>(defaultState)
-
-    this.getState = () => state$.getValue()
-
-    this.setState = (nextState: Readonly<S>) => {
-      if (!shallowequal(this.getState(), nextState)) {
-        state$.next(nextState)
-      }
-    }
-
-    this.state$ = state$.asObservable()
+  return {
+    getState() {
+      return _state$.getValue()
+    },
+    setState(state: S) {
+      _state$.next(state)
+    },
+    state$: _state$.asObservable(),
   }
 }

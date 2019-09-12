@@ -2,7 +2,7 @@ import { Subject, NEVER } from 'rxjs'
 import { Draft } from 'immer'
 
 import '../../src'
-import { Ikari, BasicState } from '../../src/core'
+import { Ikari } from '../../src/core'
 
 interface State {
   count: number
@@ -33,7 +33,7 @@ const createIkariConfig = () => ({
   effectActionFactories: {},
 })
 
-const createIkari = () => new Ikari<State>(createIkariConfig())
+const createIkari = () => new Ikari<State>(Object.create(null), createIkariConfig())
 
 describe('Ikari spec:', () => {
   describe('static', () => {
@@ -41,8 +41,8 @@ describe('Ikari spec:', () => {
       it('only create once if call multiple times', () => {
         const target = { defaultState: { count: 0 } }
 
-        const ikari = Ikari.createAndBindAt(target, createIkariConfig())
-        expect(ikari).toBe(Ikari.createAndBindAt(target, createIkariConfig()))
+        const ikari = Ikari.createAndBindAt(target as any, createIkariConfig())
+        expect(ikari).toBe(Ikari.createAndBindAt(target as any, createIkariConfig()))
       })
     })
   })
@@ -51,7 +51,6 @@ describe('Ikari spec:', () => {
     const ikari = createIkari()
 
     it('state is setup properly', () => {
-      expect(ikari.state).toBeInstanceOf(BasicState)
       expect(ikari.state.getState()).toEqual({ count: 0 })
     })
 
