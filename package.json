@@ -77,7 +77,7 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.3",
     "husky": "^3.0.2",
-    "immer": "^4.0.0",
+    "immer": "^5.0.0",
     "jest": "^24.8.0",
     "lint-staged": "^9.2.1",
     "lodash": "^4.17.15",
