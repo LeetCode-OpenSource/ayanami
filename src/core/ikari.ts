@@ -1,6 +1,6 @@
 import { merge, Observable, Subject, Subscription, NEVER } from 'rxjs'
 import { map, catchError, takeUntil, filter } from 'rxjs/operators'
-import { mapValues } from 'lodash'
+import mapValues from 'lodash/mapValues'
 import produce from 'immer'
 
 import {

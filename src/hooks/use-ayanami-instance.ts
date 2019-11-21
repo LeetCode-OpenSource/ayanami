@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { get } from 'lodash'
+import get from 'lodash/get'
 
 import { ActionMethodOfAyanami, Ayanami, combineWithIkari } from '../core'
 import { useSubscribeAyanamiState } from './use-subscribe-ayanami-state'
@@ -10,7 +10,7 @@ export interface UseAyanamiInstanceConfig {
 
 export type UseAyanamiInstanceResult<M extends Ayanami<S>, S> = [
   Readonly<S>,
-  ActionMethodOfAyanami<M, S>
+  ActionMethodOfAyanami<M, S>,
 ]
 
 type Config = UseAyanamiInstanceConfig

@@ -33,7 +33,7 @@ const skipFn = () => SKIP_SYMBOL
 export const emitSSREffects = (
   req: Request,
   modules: ModuleMeta[],
-  timeout: number = 3,
+  timeout = 3,
 ): Promise<{ state: any; cleanup: () => void }> => {
   const stateToSerialize: any = {}
   const cleanup = () => {

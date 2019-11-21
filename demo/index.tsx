@@ -32,7 +32,7 @@ class Count extends Ayanami<State> {
     count: 0,
   }
 
-  otherProps: string = ''
+  otherProps = ''
 
   constructor(private readonly tips: Tips) {
     super()

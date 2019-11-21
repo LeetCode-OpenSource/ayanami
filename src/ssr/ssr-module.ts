@@ -1,5 +1,5 @@
 import { InjectableConfig, Injectable } from '@asuka/di'
-import { omit } from 'lodash'
+import omit from 'lodash/omit'
 
 const configSets = new Set<string>()
 
