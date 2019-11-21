@@ -1,4 +1,4 @@
-import { InjectableFactory } from '@asuka/di'
+import { InjectableFactory, Inject } from '@asuka/di'
 import { Request } from 'express'
 
 import { ConstructorOf } from '../types'
@@ -25,16 +25,29 @@ export function createOrGetInstanceInScope<T>(constructor: ConstructorOf<T>, sco
 }
 
 function createInstanceInScope<T>(constructor: ConstructorOf<T>, scope: Scope): T {
-  const constructorParams: ConstructorOf<any>[] =
+  const paramTypes: ConstructorOf<any>[] =
     Reflect.getMetadata('design:paramtypes', constructor) || []
 
+  // parameters decorated by @Inject
+  const paramAnnotations = Reflect.getMetadata('parameters', constructor) || []
+
   const sameScopeParams: number[] = Reflect.getMetadata(SameScopeMetadataKey, constructor) || []
-  const deps = constructorParams.map((paramConstructor, index) => {
+
+  const deps = paramTypes.map((type, index) => {
     if (sameScopeParams[index]) {
-      return createOrGetInstanceInScope(paramConstructor, scope)
-    } else {
-      return InjectableFactory.getInstance(paramConstructor)
+      return createOrGetInstanceInScope(type, scope)
     }
+
+    if (paramAnnotations[index] !== null) {
+      let metadata: any[] = paramAnnotations[index]
+      metadata = Array.isArray(metadata) ? metadata : [metadata]
+      const inject: Inject | undefined = metadata.find((factory) => factory instanceof Inject)
+      if (inject && inject.token) {
+        return InjectableFactory.getInstanceByToken(inject.token)
+      }
+    }
+
+    return InjectableFactory.getInstance(type)
   })
 
   const newInstance = new constructor(...deps)
