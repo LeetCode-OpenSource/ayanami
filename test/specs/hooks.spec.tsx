@@ -1,4 +1,4 @@
-import { Injectable } from '@asuka/di'
+import { Injectable, ValueProvider, Inject } from '@asuka/di'
 import * as React from 'react'
 import { act, create, ReactTestInstance, ReactTestRenderer } from 'react-test-renderer'
 import { Observable } from 'rxjs'
@@ -16,10 +16,22 @@ enum CountAction {
   MINUS = 'minus',
 }
 
-@Injectable()
+const numberProvider: ValueProvider = {
+  provide: 'token',
+  useValue: 0,
+}
+
+@Injectable({
+  providers: [numberProvider],
+})
 class Count extends Ayanami<State> {
   defaultState = {
-    count: 0,
+    count: -1,
+  }
+
+  constructor(@Inject(numberProvider.provide) number: number) {
+    super()
+    this.defaultState.count = number
   }
 
   @Reducer()
