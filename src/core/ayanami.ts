@@ -1,7 +1,5 @@
-import { Observable, noop } from 'rxjs'
+import { noop } from 'rxjs'
 
-import { ActionOfAyanami } from './types'
-import { combineWithIkari, destroyIkariFrom } from './ikari'
 import { moduleNameKey, globalKey } from '../ssr/ssr-module'
 import { isSSREnabled } from '../ssr/flag'
 
@@ -43,27 +41,5 @@ export abstract class Ayanami<State> {
         }
       }
     }
-  }
-
-  destroy() {
-    destroyIkariFrom(this)
-  }
-
-  getState$<M extends Ayanami<State>>(
-    this: M,
-  ): M extends Ayanami<infer S> ? Observable<Readonly<S>> : Observable<Readonly<State>> {
-    return combineWithIkari(this).state.state$ as any
-  }
-
-  getState<M extends Ayanami<State>>(
-    this: M,
-  ): M extends Ayanami<infer S> ? Readonly<S> : Readonly<State> {
-    return combineWithIkari(this).state.getState() as any
-  }
-
-  getActions<M extends Ayanami<State>>(
-    this: M,
-  ): M extends Ayanami<infer S> ? ActionOfAyanami<M, S> : ActionOfAyanami<M, State> {
-    return combineWithIkari(this).effectActionFactories as any
   }
 }
