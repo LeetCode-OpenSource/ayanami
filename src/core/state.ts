@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs'
-import produce, { Draft } from 'immer'
-import { map, filter, publishBehavior, refCount } from 'rxjs/operators'
+import { Reducer } from 'react'
+import { map, filter, publishBehavior, refCount, share } from 'rxjs/operators'
 
 export enum StateType {
   Singleton = 'Singleton',
@@ -12,52 +12,83 @@ const SingletonSymbol = Symbol('Singleton')
 
 export type State<S> = {
   state$: Observable<S>
+  getState: () => S
   dispatch: <T>(action: Action<T>) => void
+  unsubscribe: () => void
+}
+
+export type StateCreator<S> = {
+  (stateType: typeof StateType.Scoped, scopeKey: symbol, defaltState?: S): State<S>
+  (stateType: typeof StateType.Singleton): State<S>
+  (stateType: typeof StateType.Transient, defaltState?: S): State<S>
 }
 
 export interface Action<T> {
-  type: string | symbol
+  type: string
   payload: T
 }
 
 export type Option<T> = T | undefined
 
-export type ImmerReducer<S, T> = (prevState: Draft<S>, action: Action<T>) => void
+export type Epic<T, State> = (
+  action$: Observable<Action<T>>,
+  state$: Observable<State>,
+) => Observable<Action<unknown>>
 
-function assertExist<T>(value: Option<T>): asserts value is T {
+function assertExist<S>(value: Option<symbol | S>, msg: string): asserts value is symbol {
   if (!value) {
-    throw new TypeError('undefiend value')
+    throw new TypeError(msg)
   }
 }
 
-export function createState<S>(defaltState: S, reducer: ImmerReducer<S, unknown>, effect: (action$: Observable<unknown>, state$?: Observable<S>) => Observable<Action<unknown>>) {
+export function createState<S>(
+  defaltState: S,
+  reducer: Reducer<S, Action<unknown>>,
+  effect: Epic<unknown, S>,
+): StateCreator<S> {
   const states = new Map<symbol, S>()
-  const state$ = new Subject<{ scope: symbol, state: S }>()
-  const action$ = new Subject<{ scope: symbol, action: Action<unknown> }>()
+  const effects = new Map<symbol, Observable<Action<unknown>>>()
+  const state$ = new Subject<{ scope: symbol; state: S }>()
+  const action$ = new Subject<{ scope: symbol; action: Action<unknown> }>()
 
-  function scoped(stateType: typeof StateType.Scoped, scopeKey: symbol): State<S>
-  function scoped(stateType: typeof StateType.Singleton): State<S>
-  function scoped(stateType: typeof StateType.Transient): State<S>
-  function scoped(stateType: StateType, scopeKey?: symbol): State<S> {
+  const scoped: StateCreator<S> = (
+    stateType: StateType,
+    scopeKey?: symbol | S,
+    stateToOverride?: S,
+  ): State<S> => {
     let symbolKey: symbol
-    const firstState = { ...defaltState }
     switch (stateType) {
       case StateType.Singleton:
         symbolKey = SingletonSymbol
         break
       case StateType.Scoped:
-        assertExist(scopeKey)
+        assertExist(scopeKey, 'scopeKey must exist when stateType is Scoped')
         symbolKey = scopeKey
         break
       case StateType.Transient:
         symbolKey = Symbol(StateType.Transient)
+        stateToOverride = scopeKey as S | undefined
         break
     }
-    states.set(symbolKey, firstState)
+    const firstState = { ...(stateToOverride || defaltState) }
+    if (!states.has(symbolKey)) {
+      states.set(symbolKey, firstState)
+    }
 
-    const payload$ = action$.pipe(
+    function dispatch<T>(action: Action<T>) {
+      const prevState: S = states.get(symbolKey)!
+      const newState = reducer(prevState, action)
+      if (newState !== prevState) {
+        state$.next({ state: newState, scope: symbolKey })
+      }
+      states.set(symbolKey, newState)
+      action$.next({ scope: symbolKey, action })
+    }
+
+    const _action$ = action$.pipe(
       filter(({ scope }) => scope === symbolKey),
-      map(({ action }) => action.payload)
+      map(({ action }) => action),
+      share(),
     )
 
     const _state$ = state$.pipe(
@@ -66,17 +97,24 @@ export function createState<S>(defaltState: S, reducer: ImmerReducer<S, unknown>
       publishBehavior(firstState),
       refCount(),
     )
+    let effect$: Observable<Action<unknown>>
 
-    const effect$ = effect(payload$, _state$)
+    if (effects.has(symbolKey)) {
+      effect$ = effects.get(symbolKey)!
+    } else {
+      effect$ = effect(_action$, _state$)
+      effects.set(symbolKey, effect$)
+    }
+
+    const subscription = effect$.subscribe((action) => {
+      dispatch(action)
+    })
 
     return {
       state$: _state$,
-      dispatch: <T>(action: Action<T>) => {
-        const prevState = states.get(symbolKey)!
-        const newState = produce(prevState, (draft) => reducer(draft, action))
-        state$.next({ state: newState, scope: symbolKey })
-        action$.next({ scope: symbolKey, action })
-      },
+      dispatch,
+      getState: () => states.get(symbolKey)!,
+      unsubscribe: () => subscription.unsubscribe(),
     }
   }
   return scoped
