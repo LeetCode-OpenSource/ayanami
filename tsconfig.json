@@ -16,6 +16,7 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "noImplicitReturns": true,
+    "downlevelIteration": true,
     "moduleResolution": "node",
     "lib": ["dom", "es2015"],
     "jsx": "react",
