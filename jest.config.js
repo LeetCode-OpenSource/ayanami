@@ -4,5 +4,4 @@ module.exports = {
   testMatch: [
     '**/__tests__/**/?(*.)+(spec|test).ts?(x)', '**/?(*.)+(spec|test).ts?(x)', 
   ],
-  globalSetup: './setup.js'
 }
