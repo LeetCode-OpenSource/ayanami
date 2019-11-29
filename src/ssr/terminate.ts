@@ -1,6 +1,6 @@
-import { EffectAction } from '../core/types'
+import { Action } from '../core'
 
-export const TERMINATE_ACTION: EffectAction = {
-  actionName: Symbol('terminate'),
-  params: null,
-} as any
+export const TERMINATE_ACTION: Action<null> = {
+  type: Symbol('terminate'),
+  payload: null,
+}
