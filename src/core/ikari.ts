@@ -52,7 +52,10 @@ export function combineWithIkari<S>(ayanami: Ayanami<S>): Ikari<S> {
   } else {
     const { effects, reducers, immerReducers, defineActions } = getOriginalFunctions(ayanami)
 
-    Object.assign(ayanami, mapValues(defineActions, ({ observable }) => observable))
+    Object.assign(
+      ayanami,
+      mapValues(defineActions, ({ observable }) => observable),
+    )
 
     return Ikari.createAndBindAt(ayanami, {
       nameForLog: ayanami.constructor.name,
@@ -103,7 +106,10 @@ export class Ikari<State> {
   // @internal
   terminate$ = new Subject<typeof TERMINATE_ACTION | null>()
 
-  constructor(readonly ayanami: Ayanami<State>, private readonly config: Readonly<Config<State>>) {
+  constructor(
+    public readonly ayanami: Ayanami<State>,
+    private readonly config: Readonly<Config<State>>,
+  ) {
     const [effectActions$, effectActions] = setupEffectActions(
       this.config.effects,
       this.state.state$,
