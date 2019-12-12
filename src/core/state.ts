@@ -54,7 +54,7 @@ export function createState<S>(
       _action$.next(action)
     }
 
-    const effect$: Observable<Action<unknown>> = effect(_action$.asObservable(), state$, state)
+    const effect$: Observable<Action<unknown>> = effect(_action$, state$, state)
 
     const subscription = effect$.subscribe((action) => {
       dispatch(action)

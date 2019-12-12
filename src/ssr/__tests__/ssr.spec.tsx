@@ -226,7 +226,7 @@ describe('SSR specs:', () => {
         <ComponentWithSelector />
       </SSRContext.Provider>,
     )
-    expect(html).toContain('<span>1</span>')
+    expect(html).toContain('<span>2</span>')
     expect(html).toMatchSnapshot()
   })
 
