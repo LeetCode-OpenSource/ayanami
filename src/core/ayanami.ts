@@ -1,4 +1,4 @@
-import { Observable, merge } from 'rxjs'
+import { Observable, merge, Subject } from 'rxjs'
 import { map, filter, publish, refCount, skip } from 'rxjs/operators'
 import { Reducer } from 'react'
 import produce, { Draft } from 'immer'
@@ -41,7 +41,9 @@ export abstract class Ayanami<S> {
   readonly _actionKeys: string[] = []
 
   // @internal
-  state?: State<S>
+  state!: State<S>
+
+  state$!: Subject<S>
 
   private stateCreator!: StateCreator<S>
 
@@ -84,6 +86,10 @@ export abstract class Ayanami<S> {
     }, {} as any)
   }
 
+  getState(): S {
+    return this.state!.getState()
+  }
+
   createState() {
     const ssrCache = (_globalThis as any)[Symbol.for(Symbol.keyFor(GLOBAL_KEY)!)]
     let loadFromSSR = false
@@ -98,6 +104,8 @@ export abstract class Ayanami<S> {
     this.state = this.stateCreator(preloadState ?? this.defaultState)
 
     Reflect.defineMetadata(SSR_LOADED_KEY, loadFromSSR, this.state)
+
+    this.state$ = this.state.state$
 
     return this.state
   }

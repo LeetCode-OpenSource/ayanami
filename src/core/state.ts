@@ -6,6 +6,8 @@ export type State<S> = {
   dispatch: <T>(action: Action<T>) => void
   // @internal
   action$: Subject<Action<unknown>>
+  // @internal
+  state$: Subject<S>
   fork: (defaltStateToOverride?: S) => State<S>
   subscribeState: (observer: (value: S) => void) => void
   subscribeAction: (observer: (action: Action<unknown>) => void) => void
@@ -85,6 +87,7 @@ export function createState<S>(
     Object.assign(state, {
       dispatch,
       action$,
+      state$,
       getState: () => state$.getValue(),
       fork: (defaltStateToOverride?: S) => {
         return createState(reducer, effect).stateCreator(defaltStateToOverride ?? state$.getValue())

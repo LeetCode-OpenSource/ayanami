@@ -62,46 +62,70 @@ function _useAyanamiState<S, U = S>(state: State<S>, selector?: StateSelector<S,
   return appState
 }
 
-export function useAyanamiState<S, U = S>(
-  A: ConstructorOf<Ayanami<S>>,
-  config?: StateSelectorConfig<S, U>,
-): S {
+export function useAyanamiState<M extends Ayanami<any>>(
+  A: ConstructorOf<M>,
+): M extends Ayanami<infer State> ? State : never
+
+export function useAyanamiState<M extends Ayanami<any>>(
+  A: ConstructorOf<M>,
+  config: M extends Ayanami<infer State>
+    ? {
+        defaultState: State
+      }
+    : never,
+): M extends Ayanami<infer State> ? State : never
+
+export function useAyanamiState<M extends Ayanami<any>, U>(
+  A: ConstructorOf<M>,
+  config: M extends Ayanami<infer State>
+    ? {
+        selector: StateSelector<State, U>
+      }
+    : never,
+): M extends Ayanami<infer State>
+  ? typeof config['selector'] extends StateSelector<State, infer NewState>
+    ? NewState
+    : never
+  : never
+
+export function useAyanamiState<M extends Ayanami<any>, U>(
+  A: ConstructorOf<M>,
+  config?: M extends Ayanami<infer S> ? StateSelectorConfig<S, U> : never,
+) {
   const { state } = _useState(A, config)
   return _useAyanamiState(state)
 }
 
-export function useAyanami<M extends Ayanami<S>, S = any>(
+export function useAyanami<M extends Ayanami<any>>(
   A: ConstructorOf<M>,
-): [S, ActionOfAyanami<M, S>]
+): M extends Ayanami<infer State> ? [State, ActionOfAyanami<M, State>] : never
 
-export function useAyanami<M extends Ayanami<S>, S = any>(
+export function useAyanami<M extends Ayanami<any>>(
   A: ConstructorOf<M>,
-  config: {
-    defaultState: S
-  },
-): [S, ActionOfAyanami<M, S>]
+  config: M extends Ayanami<infer State>
+    ? {
+        defaultState: State
+      }
+    : never,
+): M extends Ayanami<infer State> ? [State, ActionOfAyanami<M, State>] : never
 
-export function useAyanami<M extends Ayanami<S>, S = any, U = any>(
+export function useAyanami<M extends Ayanami<any>, U>(
   A: ConstructorOf<M>,
-  config: {
-    selector: StateSelector<S, U>
-  },
-): [U, ActionOfAyanami<M, S>]
+  config: M extends Ayanami<infer State>
+    ? {
+        selector: StateSelector<State, U>
+      }
+    : never,
+): M extends Ayanami<infer State>
+  ? typeof config['selector'] extends StateSelector<State, infer NewState>
+    ? [NewState, ActionOfAyanami<M, State>]
+    : never
+  : never
 
-export function useAyanami<M extends Ayanami<S>, S = any, U = any>(
-  A: ConstructorOf<M>,
-  config: {
-    defaultState: S
-    selector: StateSelector<S, U>
-  },
-): [U, ActionOfAyanami<M, S>]
-
-export function useAyanami<M extends Ayanami<S>, S, U>(
+export function useAyanami<M extends Ayanami<S>, U, S>(
   A: ConstructorOf<M>,
   config?: StateSelectorConfig<S, U>,
-): StateSelectorConfig<S, U>['selector'] extends StateSelector<S, infer NewState>
-  ? [NewState, ActionOfAyanami<M, S>]
-  : [S, ActionOfAyanami<M, S>] {
+) {
   const { ayanami, state } = _useState(A, config)
   const appState = _useAyanamiState(state)
   const appDispatcher = _useActionsCreator(ayanami)
@@ -111,7 +135,7 @@ export function useAyanami<M extends Ayanami<S>, S, U>(
 
 function _useState<M extends Ayanami<S>, S = any, U = S>(
   A: ConstructorOf<M>,
-  config?: StateSelectorConfig<S, U>,
+  _config?: StateSelectorConfig<S, U>,
 ): { ayanami: M; state: State<S> } {
   const ssrContext = useContext(SSRContext)
   const ayanami = React.useMemo(() => InjectableFactory.getInstance(A), [A])
@@ -119,7 +143,7 @@ function _useState<M extends Ayanami<S>, S = any, U = S>(
     return ssrContext && SSRStates.has(ssrContext)
       ? SSRStates.get(ssrContext)!
       : ayanami.createState()
-  }, [ayanami, ssrContext, config?.defaultState])
+  }, [ayanami, ssrContext])
 
   return { ayanami, state }
 }

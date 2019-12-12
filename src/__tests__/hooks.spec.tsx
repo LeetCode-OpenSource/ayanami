@@ -59,9 +59,13 @@ class Count extends Ayanami<State> {
   }
 }
 
-function CountComponent({ selector }: { selector?: (s: State) => SelectedState }) {
+function CountComponent({
+  selector = (s: State) => ({ ...s, forkCount: `${s.count}` }),
+}: {
+  selector?: (s: State) => SelectedState
+}) {
   const [state, actions] = useAyanami(Count, {
-    selector: selector ?? ((s) => s),
+    selector: selector,
   })
 
   const add = (count: number) => () => actions.add(count)
@@ -86,7 +90,7 @@ function CountComponent({ selector }: { selector?: (s: State) => SelectedState }
 }
 
 function SeparateHooks({ selector }: { selector?: (s: State) => SelectedState }) {
-  const state = useAyanamiState(Count, { selector })
+  const state = useAyanamiState(Count, { selector: selector! })
   const actions = useActionsCreator(Count, { selector })
 
   const add = (count: number) => () => actions.add(count)
