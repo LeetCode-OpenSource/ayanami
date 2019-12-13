@@ -99,9 +99,11 @@ export function createState<S>(
         actionObservers.add(observer)
       },
       unsubscribe: () => {
-        subscription.unsubscribe()
         stateObservers.clear()
         actionObservers.clear()
+      },
+      dispose: () => {
+        subscription.unsubscribe()
         state.dispatch = noop
       },
     })

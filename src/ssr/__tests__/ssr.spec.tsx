@@ -7,6 +7,7 @@ import { Draft } from 'immer'
 import { renderToString } from 'react-dom/server'
 import { create, act } from 'react-test-renderer'
 import uniqueId from 'lodash/uniqueId'
+import { InjectableFactory } from '@asuka/di'
 
 import { TERMINATE_ACTION, emitSSREffects, SSREffect } from '../index'
 
@@ -120,6 +121,12 @@ const ComponentWithSelector = () => {
 }
 
 describe('SSR specs:', () => {
+  beforeEach(() => {
+    const providers = Array.from(InjectableFactory.providers)
+    InjectableFactory.reset()
+    InjectableFactory.addProviders(...providers)
+  })
+
   beforeAll(() => {
     process.env.ENABLE_AYANAMI_SSR = 'true'
   })

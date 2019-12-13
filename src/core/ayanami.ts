@@ -41,7 +41,7 @@ export abstract class Ayanami<S> {
   readonly _actionKeys: string[] = []
 
   // @internal
-  state!: State<S>
+  state: State<S> | null = null
 
   state$!: Subject<S>
 
@@ -91,6 +91,7 @@ export abstract class Ayanami<S> {
   }
 
   createState() {
+    if (this.state) return this.state
     const ssrCache = (_globalThis as any)[Symbol.for(Symbol.keyFor(GLOBAL_KEY)!)]
     let loadFromSSR = false
     let preloadState: S | undefined

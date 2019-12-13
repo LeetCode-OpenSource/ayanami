@@ -5,13 +5,14 @@ import { Ayanami, ConstructorOf, ActionOfAyanami, State } from './core'
 import { SSRContext } from './ssr/ssr-context'
 import { SSRStates } from './ssr/ssr-states'
 import { SSR_LOADED_KEY } from './ssr/constants'
+import produce, { Draft } from 'immer'
 export type StateSelector<S, U> = {
   (state: S): U
 }
 
 export type StateSelectorConfig<S, U> = {
   selector?: StateSelector<S, U>
-  defaultState?: (s: S) => S
+  defaultState?: (s: Draft<S>) => void
 }
 
 function _useActionsCreator<M extends Ayanami<S>, S = any>(ayanami: M) {
@@ -42,12 +43,12 @@ export function useActionsCreator<M extends Ayanami<S>, S = any, U = S>(
 function _useAyanamiState<S, U = S>(
   state: State<S>,
   selector?: StateSelector<S, U>,
-  defaultState?: (s: S) => S,
+  defaultState?: (s: Draft<S>) => void,
 ): S | U {
   const [appState, setState] = React.useState(() => {
     let initialState = state.getState()
     if (typeof defaultState === 'function') {
-      initialState = defaultState(initialState)
+      initialState = produce(initialState, defaultState)
       state.state$.next(initialState)
     }
     return selector && !Reflect.getMetadata(SSR_LOADED_KEY, state)
@@ -85,7 +86,7 @@ export function useAyanamiState<M extends Ayanami<any>, U>(
   A: ConstructorOf<M>,
   config: M extends Ayanami<infer State>
     ? {
-        defaultState?: (s: State) => State
+        defaultState?: (s: Draft<State>) => void
         selector: StateSelector<State, U>
       }
     : never,
@@ -99,7 +100,7 @@ export function useAyanamiState<M extends Ayanami<any>, U>(
   A: ConstructorOf<M>,
   config: M extends Ayanami<infer State>
     ? {
-        defaultState: (s: State) => State
+        defaultState: (s: Draft<State>) => void
       }
     : never,
 ): M extends Ayanami<infer State> ? State : never
@@ -121,7 +122,7 @@ export function useAyanami<M extends Ayanami<any>, U>(
   config: M extends Ayanami<infer State>
     ? {
         selector: StateSelector<State, U>
-        defaultState?: (s: State) => State
+        defaultState?: (s: Draft<State>) => void
       }
     : never,
 ): M extends Ayanami<infer State>
@@ -134,7 +135,7 @@ export function useAyanami<M extends Ayanami<any>, U>(
   A: ConstructorOf<M>,
   config: M extends Ayanami<infer State>
     ? {
-        defaultState: (s: State) => State
+        defaultState: (s: Draft<State>) => void
       }
     : never,
 ): M extends Ayanami<infer State> ? [State, ActionOfAyanami<M, State>] : never
