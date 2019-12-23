@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SSR specs: should return right state in hooks #without config 1`] = `"<span>1</span>"`;
+exports[`SSR specs: should return right state in hooks 1`] = `"<span>1</span>"`;
 
 exports[`SSR specs: should run ssr effects 1`] = `
 Object {

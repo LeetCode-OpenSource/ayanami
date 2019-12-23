@@ -12,10 +12,10 @@ import { InjectableFactory } from '@asuka/di'
 import { TERMINATE_ACTION, emitSSREffects, SSREffect } from '../index'
 
 import { Ayanami, ImmerReducer, Module, Action } from '../../core'
-import { useAyanami } from '../../hooks'
+import { useAyanami, useAyanamiState } from '../../hooks'
 import { GLOBAL_KEY } from '../constants'
-import { SSRContext } from '../ssr-context'
-import { SSRStates } from '../ssr-states'
+import { SSRSharedContext, SSRContext } from '../ssr-context'
+import { SSRStateCacheInstance } from '../ssr-states'
 
 interface CountState {
   count: number
@@ -125,10 +125,11 @@ describe('SSR specs:', () => {
     const providers = Array.from(InjectableFactory.providers)
     InjectableFactory.reset()
     InjectableFactory.addProviders(...providers)
+    SSRStateCacheInstance.setPoolSize(100)
   })
 
-  afterAll(() => {
-    SSRStates.clear()
+  afterEach(() => {
+    SSRStateCacheInstance.setPoolSize(0)
   })
 
   it('should throw if module name not given', () => {
@@ -206,12 +207,11 @@ describe('SSR specs:', () => {
     expect(state).toMatchSnapshot()
   })
 
-  it('should return right state in hooks #without config', async () => {
+  it('should return right state in hooks', async () => {
     const req = {}
-    const uuid = uniqueId()
-    await emitSSREffects(req, [CountModel], uuid)
+    await emitSSREffects(req, [CountModel])
     const html = renderToString(
-      <SSRContext.Provider value={uuid}>
+      <SSRContext.Provider value={req}>
         <Component />
       </SSRContext.Provider>,
     )
@@ -219,7 +219,7 @@ describe('SSR specs:', () => {
     expect(html).toMatchSnapshot()
   })
 
-  it('should restore state from global #without config', () => {
+  it('should restore state from global', () => {
     // @ts-ignore
     global[GLOBAL_KEY] = {
       CountModel: {
@@ -275,5 +275,45 @@ describe('SSR specs:', () => {
     return emitSSREffects(req, [CountModel], reqContext, 0).catch((e: Error) => {
       expect(e.message).toBe('Terminate timeout')
     })
+  })
+
+  it('should reuse state if provider context', async () => {
+    const requestId = uniqueId()
+    const req1 = {}
+    const req2 = {}
+    await emitSSREffects(req1, [CountModel], requestId)
+    await emitSSREffects(req2, [CountModel], requestId)
+    const SharedComponent1 = () => {
+      const state = useAyanamiState(CountModel)
+      return (
+        <>
+          <span>{state.count}</span>
+        </>
+      )
+    }
+
+    const SharedComponent2 = () => {
+      const state = useAyanamiState(CountModel)
+      return (
+        <>
+          <span>{state.count}</span>
+        </>
+      )
+    }
+    const cachedState = SSRStateCacheInstance.get(requestId, CountModel)!
+    expect(cachedState.getState().count).toBe(1)
+
+    const result1 = renderToString(
+      <SSRSharedContext.Provider value={requestId}>
+        <SharedComponent1 />
+      </SSRSharedContext.Provider>,
+    )
+    const result2 = renderToString(
+      <SSRSharedContext.Provider value={requestId}>
+        <SharedComponent2 />
+      </SSRSharedContext.Provider>,
+    )
+
+    expect(result1).toBe(result2)
   })
 })

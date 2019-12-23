@@ -2,8 +2,8 @@ import React, { useContext } from 'react'
 import { InjectableFactory } from '@asuka/di'
 
 import { Ayanami, ConstructorOf, ActionOfAyanami, State } from './core'
-import { SSRContext } from './ssr/ssr-context'
-import { SSRStates } from './ssr/ssr-states'
+import { SSRSharedContext, SSRContext, SSRStates } from './ssr/ssr-context'
+import { SSRStateCacheInstance } from './ssr/ssr-states'
 import { SSR_LOADED_KEY } from './ssr/constants'
 import produce, { Draft } from 'immer'
 export type StateSelector<S, U> = {
@@ -65,14 +65,14 @@ function _useAyanamiState<S, U = S>(
   // https://reactjs.org/docs/hooks-faq.html#how-do-i-implement-getderivedstatefromprops
   // do not put subscribe in useEffect
 
-  const subscribeFn = React.useCallback(() => {
-    state.subscribeState(stateObserver)
-  }, [state])
+  const subscribeFn = React.useCallback(() => state.subscribeState(stateObserver), [state])
+
+  const disposeFn = subscribeFn()
+
   React.useEffect(() => {
-    return () => state.unsubscribe()
+    return () => disposeFn()
   }, [state])
 
-  subscribeFn()
   return appState
 }
 
@@ -152,13 +152,16 @@ export function useAyanami<M extends Ayanami<S>, U, S>(
 function _useState<M extends Ayanami<S>, S = any>(
   A: ConstructorOf<M>,
 ): { ayanami: M; state: State<S> } {
+  const ssrSharedContext = useContext(SSRSharedContext)
   const ssrContext = useContext(SSRContext)
   const ayanami = React.useMemo(() => InjectableFactory.getInstance(A), [A])
   const state = React.useMemo(() => {
-    return ssrContext && SSRStates.has(ssrContext)
+    return ssrSharedContext && SSRStateCacheInstance.has(ssrSharedContext)
+      ? SSRStateCacheInstance.get(ssrSharedContext, A)!
+      : ssrContext
       ? SSRStates.get(ssrContext)!
       : ayanami.createState()
-  }, [ayanami, ssrContext])
+  }, [ayanami, ssrContext, ssrSharedContext])
 
   return { ayanami, state }
 }

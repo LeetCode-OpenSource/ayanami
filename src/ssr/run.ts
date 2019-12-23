@@ -4,11 +4,12 @@ import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf } from '../core/types'
 import { Ayanami } from '../core/ayanami'
-import { Action } from '../core/state'
+import { Action, State } from '../core/state'
 import { SSRSymbol } from './constants'
 import { SKIP_SYMBOL } from './ssr-effect'
 import { TERMINATE_ACTION } from './terminate'
-import { SSRStates } from './ssr-states'
+import { SSRStateCacheInstance } from './ssr-states'
+import { SSRStates } from './ssr-context'
 
 export type ModuleMeta = ConstructorOf<Ayanami<any>>
 
@@ -38,17 +39,34 @@ export const runSSREffects = <Context, Returned = any>(
           flatMap((constructor) => {
             let cleanup = noop
             const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype) || []
-            const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
-            const moduleName = ayanamiInstance.scopeName
+            let ayanamiState: State<any>
+            let moduleName: string
+            if (sharedCtx) {
+              if (
+                SSRStateCacheInstance.has(sharedCtx) &&
+                SSRStateCacheInstance.get(sharedCtx, constructor)
+              ) {
+                ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
+                moduleName = constructor.prototype.scopeName
+              } else {
+                const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
+                moduleName = ayanamiInstance.scopeName
+                ayanamiState = ayanamiInstance.createState()
+                SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
+              }
+            } else {
+              const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
+              moduleName = ayanamiInstance.scopeName
+              ayanamiState = ayanamiInstance.createState()
+              SSRStates.set(ctx, ayanamiState)
+            }
             let skipCount = metas.length - 1
-            const ayanamiState = ayanamiInstance.createState()
-            SSRStates.set(sharedCtx ?? ctx, ayanamiState)
+            let disposeFn = noop
             cleanup = sharedCtx
-              ? ayanamiState.unsubscribe
+              ? () => disposeFn()
               : () => {
                   ayanamiState.action$.complete()
                   ayanamiState.unsubscribe()
-                  SSRStates.delete(ctx)
                 }
             return new Observable((observer: Observer<Returned>) => {
               async function runEffects() {
@@ -77,7 +95,7 @@ export const runSSREffects = <Context, Returned = any>(
 
                 if (skipCount > -1) {
                   const action$ = new Subject<Action<unknown>>()
-                  ayanamiState.subscribeAction((action) => {
+                  disposeFn = ayanamiState.subscribeAction((action) => {
                     action$.next(action)
                   })
                   await action$
