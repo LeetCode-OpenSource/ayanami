@@ -1,4 +1,4 @@
-import { Observable, Subject, noop, BehaviorSubject } from 'rxjs'
+import { Observable, Subject, noop, BehaviorSubject, Subscription } from 'rxjs'
 import { Reducer } from 'react'
 import { TERMINATE_ACTION } from '../ssr/terminate'
 
@@ -62,13 +62,17 @@ export function createState<S>(
 
     const effect$: Observable<Action<unknown>> = effect(_action$, state$, state)
 
-    const subscription = effect$.subscribe(
-      (action) => {
-        dispatch(action)
-      },
-      (err) => {
-        console.error(err)
-      },
+    const subscription = new Subscription()
+
+    subscription.add(
+      effect$.subscribe(
+        (action) => {
+          dispatch(action)
+        },
+        (err) => {
+          console.error(err)
+        },
+      ),
     )
 
     subscription.add(
