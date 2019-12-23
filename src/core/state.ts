@@ -9,8 +9,8 @@ export type State<S> = {
   action$: Subject<Action<unknown>>
   // @internal
   state$: Subject<S>
-  subscribeState: (observer: (value: S) => void) => void
-  subscribeAction: (observer: (action: Action<unknown>) => void) => void
+  subscribeState: (observer: (value: S) => void) => () => void
+  subscribeAction: (observer: (action: Action<unknown>) => void) => () => void
   unsubscribe: () => void
 }
 
@@ -106,17 +106,17 @@ export function createState<S>(
       getState: () => state$.getValue(),
       subscribeState: (observer: (value: S) => void) => {
         stateObservers.add(observer)
+        return () => stateObservers.delete(observer)
       },
       subscribeAction: (observer: (action: Action<unknown>) => void) => {
         actionObservers.add(observer)
+        return () => actionObservers.delete(observer)
       },
       unsubscribe: () => {
-        stateObservers.clear()
-        actionObservers.clear()
-      },
-      dispose: () => {
         subscription.unsubscribe()
         state.dispatch = noop
+        stateObservers.clear()
+        actionObservers.clear()
       },
     })
 
