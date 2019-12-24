@@ -1,4 +1,4 @@
-import { Observable, merge, Subject } from 'rxjs'
+import { Observable, merge, identity } from 'rxjs'
 import { map, filter, publish, refCount, skip } from 'rxjs/operators'
 import { Reducer } from 'react'
 import produce, { Draft } from 'immer'
@@ -11,15 +11,16 @@ import {
   DEFINE_ACTION_DECORATOR_SYMBOL,
 } from './symbols'
 import { InstanceActionOfAyanami, ActionStreamOfAyanami } from './types'
-import { GLOBAL_KEY, SSR_LOADED_KEY, ACTION_TO_SKIP_KEY } from '../ssr/constants'
+import { GLOBAL_KEY, ACTION_TO_SKIP_KEY, SSR_LOADED_KEY } from '../ssr/constants'
 
-type Effect<T, State> = (
-  payload$: Observable<T>,
-  state$?: Observable<State>,
-) => Observable<Action<unknown>>
+type Effect<T> = (payload$: Observable<T>) => Observable<Action<unknown>>
 
 const _globalThis =
-  typeof globalThis === 'undefined' ? (typeof window === 'undefined' ? global : window) : globalThis
+  /* istanbul ignore next */ typeof globalThis === 'undefined'
+    ? /* istanbul ignore next */ typeof window === 'undefined'
+      ? global
+      : window
+    : globalThis
 
 type ImmerReducer<S, T> = (prevState: Draft<S>, payload: T) => void
 
@@ -43,7 +44,7 @@ export abstract class Ayanami<S> {
   // @internal
   state: State<S> | null = null
 
-  state$!: Subject<S>
+  state$: Observable<S>
 
   private stateCreator!: StateCreator<S>
 
@@ -55,16 +56,17 @@ export abstract class Ayanami<S> {
 
   private readonly action$: Observable<Action<unknown>>
 
-  private readonly effect: Epic<unknown, S>
+  private readonly effect: Epic<unknown>
   private readonly reducer: Reducer<S, Action<unknown>>
 
   constructor() {
     this.effect = this.combineEffects()
     this.reducer = this.combineReducers()
 
-    const { stateCreator, action$ } = createState(this.reducer, this.effect)
+    const { stateCreator, action$, state$ } = createState(this.reducer, this.effect)
     this.stateCreator = stateCreator
     this.action$ = action$
+    this.state$ = state$.pipe(skip(1))
 
     this.combineDefineActions()
 
@@ -95,36 +97,25 @@ export abstract class Ayanami<S> {
     }, {} as any)
   }
 
-  getState(): S {
-    return this.state!.getState()
-  }
-
-  createState() {
+  createState(
+    middleware: (effect$: Observable<Action<unknown>>) => Observable<Action<unknown>> = identity,
+  ) {
     if (this.state) return this.state
     const ssrCache = (_globalThis as any)[Symbol.for(Symbol.keyFor(GLOBAL_KEY)!)]
     let loadFromSSR = false
     let preloadState: S | undefined
     if (ssrCache && ssrCache[this.scopeName]) {
       preloadState = ssrCache[this.scopeName]
-      if (preloadState) {
-        loadFromSSR = true
-      }
+      loadFromSSR = true
     }
-
-    this.state = this.stateCreator(preloadState ?? this.defaultState)
-
+    this.state = this.stateCreator(preloadState ?? this.defaultState, middleware, loadFromSSR)
     Reflect.defineMetadata(SSR_LOADED_KEY, loadFromSSR, this.state)
-
-    this.state$ = this.state.state$
-
     return this.state
   }
 
   getActions<M extends Ayanami<S>>(
     this: M,
-  ): M extends Ayanami<infer State>
-    ? InstanceActionOfAyanami<M, State>
-    : InstanceActionOfAyanami<M, S> {
+  ): M extends Ayanami<infer State> ? InstanceActionOfAyanami<M, State> : never {
     return this._actions
   }
 
@@ -148,7 +139,7 @@ export abstract class Ayanami<S> {
     const effectKeys =
       (Reflect.getMetadata(EFFECT_DECORATOR_SYMBOL, this.constructor) as string[]) || []
     this._actionKeys.push(...effectKeys)
-    const effects: Effect<unknown, S>[] = effectKeys.map((property) => {
+    const effects: Effect<unknown>[] = effectKeys.map((property) => {
       const effect = (this as any)[property].bind(this)
       Object.defineProperty(effect, effectNameSymbol, {
         value: property,
@@ -159,12 +150,11 @@ export abstract class Ayanami<S> {
       return effect
     })
 
-    return (action$: Observable<Action<unknown>>, state$: Observable<S>, state: State<S>) => {
+    return (action$: Observable<Action<unknown>>, loadFromSSR: boolean) => {
       const actionsToSkip: Set<string> | undefined = Reflect.getMetadata(
         ACTION_TO_SKIP_KEY,
-        this.constructor,
+        this.constructor.prototype,
       )
-      const loadFromSSR = Reflect.getMetadata(SSR_LOADED_KEY, state)
       return merge(
         ...effects.map((effect) => {
           const effectActionType: string = (effect as any)[effectNameSymbol]
@@ -175,7 +165,7 @@ export abstract class Ayanami<S> {
             skip(skipCount),
             map(({ payload }) => payload),
           )
-          return effect(payload$, state$)
+          return effect(payload$)
         }),
       )
     }

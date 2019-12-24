@@ -30,8 +30,8 @@ export const Reducer: <S = any>() => DecoratorReturnType<
   (state: S, params: any) => S
 > = createActionDecorator(REDUCER_DECORATOR_SYMBOL)
 
-export const Effect: <A = any, S = any>() => DecoratorReturnType<
-  (action: Observable<A>, state$: Observable<S>) => Observable<Action<unknown>>
+export const Effect: <A = any>() => DecoratorReturnType<
+  (action: Observable<A>) => Observable<Action<unknown>>
 > = createActionDecorator(EFFECT_DECORATOR_SYMBOL)
 
 export const DefineAction: () => any = createActionDecorator(DEFINE_ACTION_DECORATOR_SYMBOL)

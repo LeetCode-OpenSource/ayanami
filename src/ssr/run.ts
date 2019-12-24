@@ -1,5 +1,5 @@
 import { from, race, timer, throwError, Subject, noop, Observable, Observer } from 'rxjs'
-import { flatMap, skip, take, filter } from 'rxjs/operators'
+import { flatMap, skip, take, filter, tap } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf } from '../core/types'
@@ -37,38 +37,44 @@ export const runSSREffects = <Context, Returned = any>(
     : race(
         from(modules).pipe(
           flatMap((constructor) => {
-            let cleanup = noop
-            const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype) || []
-            let ayanamiState: State<any>
-            let moduleName: string
-            if (sharedCtx) {
-              if (
-                SSRStateCacheInstance.has(sharedCtx) &&
-                SSRStateCacheInstance.get(sharedCtx, constructor)
-              ) {
-                ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
-                moduleName = constructor.prototype.scopeName
+            return new Observable((observer: Observer<Returned>) => {
+              let cleanup = noop
+              const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype) || []
+              let ayanamiState: State<any>
+              let moduleName: string
+              const middleware = (effect$: Observable<Action<unknown>>) =>
+                effect$.pipe(
+                  tap({
+                    error: (e) => {
+                      observer.error(e)
+                    },
+                  }),
+                )
+              if (sharedCtx) {
+                if (SSRStateCacheInstance.has(sharedCtx, constructor)) {
+                  ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
+                  moduleName = constructor.prototype.scopeName
+                } else {
+                  const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(
+                    constructor,
+                  )
+                  moduleName = ayanamiInstance.scopeName
+                  ayanamiState = ayanamiInstance.createState(middleware)
+                  SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
+                }
               } else {
                 const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
                 moduleName = ayanamiInstance.scopeName
-                ayanamiState = ayanamiInstance.createState()
-                SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
+                ayanamiState = ayanamiInstance.createState(middleware)
+                SSRStates.set(ctx, ayanamiState)
               }
-            } else {
-              const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
-              moduleName = ayanamiInstance.scopeName
-              ayanamiState = ayanamiInstance.createState()
-              SSRStates.set(ctx, ayanamiState)
-            }
-            let skipCount = metas.length - 1
-            let disposeFn = noop
-            cleanup = sharedCtx
-              ? () => disposeFn()
-              : () => {
-                  ayanamiState.action$.complete()
-                  ayanamiState.unsubscribe()
-                }
-            return new Observable((observer: Observer<Returned>) => {
+              let skipCount = metas.length - 1
+              let disposeFn = noop
+              cleanup = sharedCtx
+                ? () => disposeFn()
+                : () => {
+                    ayanamiState.unsubscribe()
+                  }
               async function runEffects() {
                 await Promise.all(
                   metas.map(async (meta: any) => {

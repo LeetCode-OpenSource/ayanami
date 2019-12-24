@@ -13,8 +13,8 @@ export class SSRStateCache {
     this.size = size
   }
 
-  has(ctx: any) {
-    return this.SSRStates.has(ctx)
+  has(ctx: any, constructor: ConstructorOf<Ayanami<any>>) {
+    return this.SSRStates.has(ctx) && this.SSRStates.get(ctx)!.has(constructor)
   }
 
   get(ctx: any, constructor: ConstructorOf<Ayanami<any>>) {
