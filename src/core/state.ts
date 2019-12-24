@@ -1,12 +1,10 @@
-import { Observable, Subject, noop, BehaviorSubject, Subscription } from 'rxjs'
+import { Observable, Subject, noop, BehaviorSubject, Subscription, identity } from 'rxjs'
 import { Reducer } from 'react'
 import { TERMINATE_ACTION } from '../ssr/terminate'
 
 export type State<S> = {
   getState: () => S
   dispatch: <T>(action: Action<T>) => void
-  // @internal
-  action$: Subject<Action<unknown>>
   // @internal
   state$: Subject<S>
   subscribeState: (observer: (value: S) => void) => () => void
@@ -15,7 +13,11 @@ export type State<S> = {
 }
 
 export type StateCreator<S> = {
-  (defaultState: S): State<S>
+  (
+    defaultState: S,
+    middleware?: (effect$: Observable<Action<unknown>>) => Observable<Action<unknown>>,
+    loadFromSSR?: boolean,
+  ): State<S>
 }
 
 export interface Action<T = unknown> {
@@ -27,23 +29,30 @@ export interface Action<T = unknown> {
 
 export type Option<T> = T | undefined
 
-export type Epic<T, S> = (
+export type Epic<T> = (
   action$: Observable<Action<T>>,
-  state$: Observable<S>,
-  state: State<S>,
+  loadFromSSR: boolean,
 ) => Observable<Action<unknown>>
 
 export function createState<S>(
   reducer: Reducer<S, Action<unknown>>,
-  effect: Epic<unknown, S>,
-): { stateCreator: StateCreator<S>; action$: Observable<Action<unknown>> } {
+  effect: Epic<unknown>,
+): {
+  stateCreator: StateCreator<S>
+  action$: Observable<Action<unknown>>
+  state$: BehaviorSubject<S>
+} {
   const action$ = new Subject<Action<unknown>>()
   const _action$ = new Subject<Action<unknown>>()
   const stateObservers = new Set<(s: S) => void>()
   const actionObservers = new Set<(action: Action<unknown>) => void>()
+  const state$ = new BehaviorSubject<S>(null as any) // first value will be skipped in Ayanami
 
-  function stateCreator(defaultState: S): State<S> {
-    const state$ = new BehaviorSubject<S>(defaultState)
+  function stateCreator(
+    defaultState: S,
+    middleware: (effect$: Observable<Action<unknown>>) => Observable<Action<unknown>> = identity,
+    loadFromSSR = false,
+  ): State<S> {
     const state: State<S> = Object.create(null)
 
     function dispatch<T>(action: Action<T>) {
@@ -60,14 +69,18 @@ export function createState<S>(
       _action$.next(action)
     }
 
-    const effect$: Observable<Action<unknown>> = effect(_action$, state$, state)
+    const effect$: Observable<Action<unknown>> = effect(_action$, loadFromSSR)
 
     const subscription = new Subscription()
 
     subscription.add(
-      effect$.subscribe(
+      middleware(effect$).subscribe(
         (action) => {
-          dispatch(action)
+          try {
+            dispatch(action)
+          } catch (e) {
+            action$.error(e)
+          }
         },
         (err) => {
           console.error(err)
@@ -99,9 +112,10 @@ export function createState<S>(
       }),
     )
 
+    state$.next(defaultState)
+
     Object.assign(state, {
       dispatch,
-      action$,
       state$,
       getState: () => state$.getValue(),
       subscribeState: (observer: (value: S) => void) => {
@@ -113,6 +127,8 @@ export function createState<S>(
         return () => actionObservers.delete(observer)
       },
       unsubscribe: () => {
+        action$.complete()
+        state$.complete()
         subscription.unsubscribe()
         state.dispatch = noop
         stateObservers.clear()
@@ -122,5 +138,5 @@ export function createState<S>(
 
     return state
   }
-  return { stateCreator, action$ }
+  return { stateCreator, action$, state$ }
 }

@@ -66,13 +66,10 @@ class Counter extends Ayanami<CounterState> {
   }
 
   @Effect()
-  asyncAddCountOne(
-    payload$: Observable<void>,
-    state$: Observable<CounterState>,
-  ): Observable<Action> {
+  asyncAddCountOne(payload$: Observable<void>): Observable<Action> {
     return payload$.pipe(
       delay(TIME_TO_DELAY),
-      withLatestFrom(state$),
+      withLatestFrom(this.state$),
       map(([, state]) => this.getActions().setCount(state.count + 1)),
     )
   }

@@ -1,9 +1,9 @@
 import 'reflect-metadata'
 import React, { useEffect } from 'react'
 import { useAyanami, useAyanamiState, useAyanamiDispatchers } from '../hooks'
-import { Ayanami, Effect, ImmerReducer, Action, Module } from '../core'
+import { Ayanami, Effect, ImmerReducer, Action, Module, Reducer } from '../core'
 import { Observable } from 'rxjs'
-import { map, withLatestFrom, delay } from 'rxjs/operators'
+import { map, withLatestFrom, delay, skipWhile, combineLatest, take } from 'rxjs/operators'
 import { Draft } from 'immer'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
 import { InjectableFactory } from '@asuka/di'
@@ -13,12 +13,40 @@ interface CountState {
   count: number
 }
 
+interface GlobalState {
+  user: string
+}
+
 const ASYNC_DELAY_TIME = 1000
+
+@Module('Global')
+class GlobalModule extends Ayanami<GlobalState> {
+  defaultState = {
+    user: '',
+  }
+
+  @ImmerReducer()
+  setUser(state: Draft<GlobalState>, payload: string) {
+    state.user = payload
+  }
+
+  @Effect()
+  fetchUser(payload$: Observable<void>): Observable<Action> {
+    return payload$.pipe(
+      delay(ASYNC_DELAY_TIME),
+      map(() => this.getActions().setUser('global')),
+    )
+  }
+}
 
 @Module('CountModule')
 class CountModule extends Ayanami<CountState> {
   defaultState = {
     count: 0,
+  }
+
+  constructor(private readonly globalModule: GlobalModule) {
+    super()
   }
 
   @ImmerReducer()
@@ -27,19 +55,33 @@ class CountModule extends Ayanami<CountState> {
   }
 
   @Effect()
-  addCount(payload$: Observable<void>, state$: Observable<CountState>): Observable<Action> {
+  addCount(payload$: Observable<void>): Observable<Action> {
     return payload$.pipe(
-      withLatestFrom(state$),
+      withLatestFrom(this.state$),
       map(([, state]) => this.getActions().setCount(state.count + 1)),
     )
   }
 
   @Effect()
-  addCountAsync(payload$: Observable<void>, state$: Observable<CountState>): Observable<Action> {
+  addCountAsync(payload$: Observable<void>): Observable<Action> {
     return payload$.pipe(
       delay(ASYNC_DELAY_TIME),
-      withLatestFrom(state$),
+      withLatestFrom(this.state$),
       map(([, state]) => this.getActions().setCount(state.count + 1)),
+    )
+  }
+
+  @Effect()
+  waitUserAddCount(payload$: Observable<void>): Observable<Action> {
+    return payload$.pipe(
+      combineLatest(
+        this.globalModule.state$.pipe(
+          skipWhile((v) => !v.user),
+          take(1),
+        ),
+        this.state$.pipe(take(1)),
+      ),
+      map(([, , state]) => this.getActions().setCount(state.count + 1)),
     )
   }
 }
@@ -78,7 +120,7 @@ describe('Hooks specs: useAyanami', () => {
   afterEach(() => {
     timer.restore()
     InjectableFactory.reset()
-    InjectableFactory.addProviders(CountModule)
+    InjectableFactory.addProviders(GlobalModule, CountModule)
   })
 
   it('should render correct state', () => {
@@ -142,6 +184,52 @@ describe('Hooks specs: useAyanami', () => {
     })
     expect(spyFn.mock.calls).toEqual([[0], [3]])
   })
+
+  it('should be able to use state$ from the other module', () => {
+    const TestComponent = () => {
+      const [state, actions] = useAyanami(CountModule)
+      const globalActions = useAyanamiDispatchers(GlobalModule)
+      useEffect(() => {
+        actions.waitUserAddCount()
+        globalActions.fetchUser()
+      }, [])
+      return <span>{state.count}</span>
+    }
+
+    const renderer = create(<TestComponent />)
+    act(() => {
+      renderer.update(<TestComponent />)
+    })
+    act(() => {
+      timer.tick(ASYNC_DELAY_TIME)
+      renderer.update(<TestComponent />)
+    })
+    expect(getCount()).toBe(1)
+  })
+
+  it('should be able to catch reducer error', () => {
+    const error = new TypeError('whatever')
+    @Module('ReducerError')
+    class ReducerErrorModule extends Ayanami<{}> {
+      defaultState = {}
+      @Reducer()
+      throw() {
+        throw error
+      }
+    }
+    const spy = Sinon.spy()
+    const Component = () => {
+      const actions = useAyanamiDispatchers(ReducerErrorModule)
+      try {
+        actions.throw()
+      } catch (e) {
+        spy(e)
+      }
+      return <div />
+    }
+    create(<Component />)
+    expect(spy.args).toStrictEqual([[error]])
+  })
 })
 
 describe('Hooks spec: useAyanami with config', () => {
@@ -174,7 +262,7 @@ describe('Hooks spec: useAyanami with config', () => {
 
   afterEach(() => {
     InjectableFactory.reset()
-    InjectableFactory.addProviders(CountModule)
+    InjectableFactory.addProviders(GlobalModule, CountModule)
   })
 
   it('should return selected state from store', () => {
@@ -215,7 +303,7 @@ describe('Hooks spec: useAyanamiState', () => {
 
   afterEach(() => {
     InjectableFactory.reset()
-    InjectableFactory.addProviders(CountModule)
+    InjectableFactory.addProviders(GlobalModule, CountModule)
   })
 
   it('should return selected state from store', () => {
@@ -249,7 +337,7 @@ describe('Hooks spec: useAyanamiDispatchers', () => {
 
   afterEach(() => {
     InjectableFactory.reset()
-    InjectableFactory.addProviders(CountModule)
+    InjectableFactory.addProviders(GlobalModule, CountModule)
   })
 
   it('should return selected state from store', () => {

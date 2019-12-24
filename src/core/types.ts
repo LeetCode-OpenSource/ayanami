@@ -22,11 +22,9 @@ export interface ConstructorOf<T> {
 
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 
-type UnpackEffectPayload<Func, S> = Func extends (
+type UnpackEffectPayload<Func> = Func extends (
   action$: Observable<infer Payload>,
 ) => Observable<Action>
-  ? Payload
-  : Func extends (action$: Observable<infer Payload>, state$: Observable<S>) => Observable<Action>
   ? Payload
   : never
 
@@ -44,7 +42,7 @@ type UnpackImmerReducerPayload<Func, S> = Func extends (state: Draft<S>) => void
 
 type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? P : never
 
-type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
+type UnpackPayload<F, S> = UnpackEffectPayload<F> extends never
   ? UnpackImmerReducerPayload<F, S> extends never
     ? UnpackReducerPayload<F, S> extends never
       ? UnpackDefineActionPayload<F> extends never
@@ -52,7 +50,7 @@ type UnpackPayload<F, S> = UnpackEffectPayload<F, S> extends never
         : UnpackDefineActionPayload<F>
       : UnpackReducerPayload<F, S>
     : UnpackImmerReducerPayload<F, S>
-  : UnpackEffectPayload<F, S>
+  : UnpackEffectPayload<F>
 
 export type ActionOfAyanami<M extends Ayanami<S>, S> = Omit<
   {

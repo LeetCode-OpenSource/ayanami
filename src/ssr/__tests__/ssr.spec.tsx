@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import React from 'react'
 import { Observable, timer } from 'rxjs'
-import { endWith, switchMap, map, mergeMap, flatMap } from 'rxjs/operators'
+import { endWith, switchMap, map, mergeMap, flatMap, withLatestFrom } from 'rxjs/operators'
 import { Draft } from 'immer'
 import { renderToString } from 'react-dom/server'
 import { create, act } from 'react-test-renderer'
@@ -11,7 +11,7 @@ import { InjectableFactory } from '@asuka/di'
 
 import { TERMINATE_ACTION, emitSSREffects, SSREffect } from '../index'
 
-import { Ayanami, ImmerReducer, Module, Action } from '../../core'
+import { Ayanami, ImmerReducer, Module, Action, Effect, Reducer } from '../../core'
 import { useAyanami, useAyanamiState } from '../../hooks'
 import { GLOBAL_KEY } from '../constants'
 import { SSRSharedContext, SSRContext } from '../ssr-context'
@@ -241,7 +241,25 @@ describe('SSR specs:', () => {
     // @ts-ignore
     global[GLOBAL_KEY] = {
       CountModel: {
-        count: 1,
+        count: 10,
+        name: '',
+      },
+    }
+    const testRenderer = create(<ComponentWithSelector />)
+    act(() => {
+      testRenderer.update(<ComponentWithSelector />)
+    })
+    expect(testRenderer.root.findByType('span').children[0]).toBe('10')
+    // @ts-ignore
+    delete global[GLOBAL_KEY]
+    testRenderer.unmount()
+  })
+
+  it('should not restore state from global if state is null', () => {
+    // @ts-ignore
+    global[GLOBAL_KEY] = {
+      OtherModule: {
+        count: 10,
         name: '',
       },
     }
@@ -250,6 +268,40 @@ describe('SSR specs:', () => {
       testRenderer.update(<ComponentWithSelector />)
     })
     expect(testRenderer.root.findByType('span').children[0]).toBe('1')
+    // @ts-ignore
+    delete global[GLOBAL_KEY]
+    testRenderer.unmount()
+  })
+
+  it('should restore and skip first action on client side', () => {
+    const Component = () => {
+      const [state, actions] = useAyanami(CountModel)
+      React.useEffect(() => {
+        actions.getCount()
+      }, [])
+
+      return (
+        <>
+          <span>{state.count}</span>
+        </>
+      )
+    }
+
+    // @ts-ignore
+    global[GLOBAL_KEY] = {
+      CountModel: {
+        count: 2,
+        name: '',
+      },
+    }
+
+    const testRenderer = create(<Component />)
+
+    act(() => {
+      testRenderer.update(<Component />)
+    })
+    expect(testRenderer.root.findByType('span').children[0]).toBe('2')
+
     // @ts-ignore
     delete global[GLOBAL_KEY]
     testRenderer.unmount()
@@ -275,6 +327,128 @@ describe('SSR specs:', () => {
     return emitSSREffects(req, [CountModel], reqContext, 0).catch((e: Error) => {
       expect(e.message).toBe('Terminate timeout')
     })
+  })
+
+  it('should resolve empty object if no modules provided', async () => {
+    const req = {}
+    const state = await emitSSREffects(req, [])
+    expect(state).toStrictEqual({})
+  })
+
+  it('should do nothing if Module contains no SSREffects', async () => {
+    const req = {}
+    @Module('WithoutSSR')
+    class WithoutSSRModule extends Ayanami<{ count: number }> {
+      defaultState = {
+        count: 0,
+      }
+
+      @ImmerReducer()
+      set(state: Draft<{ count: number }>, payload: number) {
+        state.count = payload
+      }
+
+      @Effect()
+      addOne(payload$: Observable<void>): Observable<Action> {
+        return payload$.pipe(
+          withLatestFrom(this.state$),
+          map(([, { count }]) => this.getActions().set(count + 1)),
+        )
+      }
+    }
+    const state = await emitSSREffects(req, [WithoutSSRModule])
+    expect(state).toStrictEqual({})
+  })
+
+  it('should throw error if runEffects error', async () => {
+    const req = {}
+    const error = new TypeError('whatever')
+    @Module('ErrorModule')
+    class SSRErrorModule extends Ayanami<{ count: number }> {
+      defaultState = {
+        count: 0,
+      }
+
+      @SSREffect()
+      addOne(payload$: Observable<void>): Observable<Action> {
+        return payload$.pipe(
+          withLatestFrom(this.state$),
+          map(() => {
+            throw error
+          }),
+        )
+      }
+    }
+    try {
+      await emitSSREffects(req, [SSRErrorModule])
+      throw new TypeError('Unreachable code path')
+    } catch (e) {
+      expect(e).toBe(error)
+    }
+  })
+
+  it('should throw error if reducer throw', async () => {
+    const req = {}
+    const error = new TypeError('whatever')
+    @Module('ErrorReducerModule')
+    class SSRErrorModule extends Ayanami<{ count: number }> {
+      defaultState = {
+        count: 0,
+      }
+
+      @Reducer()
+      set() {
+        throw error
+      }
+
+      @SSREffect()
+      addOne(payload$: Observable<void>): Observable<Action> {
+        return payload$.pipe(
+          withLatestFrom(this.state$),
+          map(() => this.getActions().set()),
+        )
+      }
+    }
+    try {
+      await emitSSREffects(req, [SSRErrorModule])
+      throw new TypeError('Unreachable code path')
+    } catch (e) {
+      expect(e).toBe(error)
+    }
+  })
+
+  it('should throw error if payloadGetter throw', async () => {
+    const req = {}
+    const error = new TypeError('whatever')
+    @Module('ErrorMiddlewareModule')
+    class SSRErrorModule extends Ayanami<{ count: number }> {
+      defaultState = {
+        count: 0,
+      }
+
+      @Reducer()
+      set(state: { count: number }, payload: number) {
+        return { ...state, count: payload }
+      }
+
+      @SSREffect({
+        payloadGetter: () => {
+          throw error
+        },
+      })
+      addOne(payload$: Observable<void>): Observable<Action> {
+        return payload$.pipe(
+          withLatestFrom(this.state$),
+          map(([, state]) => this.getActions().set(state.count + 1)),
+        )
+      }
+    }
+    try {
+      await emitSSREffects(req, [SSRErrorModule])
+      throw new TypeError('Unreachable code path')
+    } catch (e) {
+      expect(e).toBe(error)
+    }
   })
 
   it('should reuse state if provider context', async () => {

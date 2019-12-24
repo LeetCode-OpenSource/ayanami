@@ -156,7 +156,7 @@ function _useState<M extends Ayanami<S>, S = any>(
   const ssrContext = useContext(SSRContext)
   const ayanami = React.useMemo(() => InjectableFactory.getInstance(A), [A])
   const state = React.useMemo(() => {
-    return ssrSharedContext && SSRStateCacheInstance.has(ssrSharedContext)
+    return SSRStateCacheInstance.has(ssrSharedContext, A)
       ? SSRStateCacheInstance.get(ssrSharedContext, A)!
       : ssrContext
       ? SSRStates.get(ssrContext)!
