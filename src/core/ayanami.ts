@@ -63,7 +63,7 @@ export abstract class Ayanami<S> {
     const { stateCreator, action$, state$ } = createState(this.reducer, this.effect)
     this.stateCreator = stateCreator
     this.action$ = action$
-    this.state$ = state$.pipe(skip(1))
+    this.state$ = state$
 
     this.combineDefineActions()
 
