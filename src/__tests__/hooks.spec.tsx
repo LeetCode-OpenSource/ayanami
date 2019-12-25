@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { useAyanami, useAyanamiState, useAyanamiDispatchers } from '../hooks'
 import { Ayanami, Effect, ImmerReducer, Action, Module, Reducer } from '../core'
 import { Observable } from 'rxjs'
@@ -90,13 +90,21 @@ describe('Hooks specs: useAyanami', () => {
   const SimpleComponent = () => {
     const [state, actions] = useAyanami(CountModule)
 
+    const addCount = useCallback(() => {
+      actions.addCount()
+    }, [])
+
+    const addCountAsync = useCallback(() => {
+      actions.addCountAsync()
+    }, [])
+
     return (
       <div>
         <span>{state.count}</span>
-        <button id="add-count" onClick={actions.addCount}>
+        <button id="add-count" onClick={addCount}>
           +
         </button>
-        <button id="add-count-async" onClick={actions.addCountAsync}>
+        <button id="add-count-async" onClick={addCountAsync}>
           +
         </button>
         <button id="set-count" onClick={() => actions.setCount(10)}>
@@ -241,10 +249,14 @@ describe('Hooks spec: useAyanami with config', () => {
       },
     })
 
+    const addCount = useCallback(() => {
+      actions.addCount()
+    }, [])
+
     return (
       <div>
         <span>{count}</span>
-        <button id="add-count" onClick={actions.addCount}>
+        <button id="add-count" onClick={addCount}>
           +
         </button>
       </div>
@@ -316,10 +328,14 @@ describe('Hooks spec: useAyanamiDispatchers', () => {
     const state = useAyanamiState(CountModule)
     const actions = useAyanamiDispatchers(CountModule)
 
+    const addCount = useCallback(() => {
+      actions.addCount()
+    }, [])
+
     return (
       <div>
         <span>{state.count}</span>
-        <button id="add-count" onClick={actions.addCount}>
+        <button id="add-count" onClick={addCount}>
           +
         </button>
       </div>

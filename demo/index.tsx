@@ -1,18 +1,9 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 
-import {
-  Ayanami,
-  Effect,
-  Module,
-  Action,
-  Reducer,
-  useAyanami,
-  useAyanamiState,
-  initDevtool,
-} from '../src'
+import { Ayanami, Effect, Module, Reducer, useAyanami, useAyanamiState, initDevtool } from '../src'
 
 interface State {
   count: number
@@ -62,7 +53,7 @@ class Count extends Ayanami<State> {
   }
 
   @Effect()
-  minus(count$: Observable<number>): Observable<Action> {
+  minus(count$: Observable<number>) {
     return count$.pipe(
       mergeMap((subCount) =>
         of(
@@ -78,8 +69,11 @@ function CountComponent() {
   const [{ count }, actions] = useAyanami(Count)
   const { tips } = useAyanamiState(Tips)
 
-  const add = (count: number) => () => actions.add(count)
-  const minus = (count: number) => () => actions.minus(count)
+  const add = useCallback((count: number) => () => actions.add(count), [])
+  const minus = useCallback((count: number) => () => actions.minus(count), [])
+  const reset = useCallback(() => {
+    actions.reset()
+  }, [])
 
   return (
     <div>
@@ -87,7 +81,7 @@ function CountComponent() {
       <p>tips: {tips}</p>
       <button onClick={add(1)}>add one</button>
       <button onClick={minus(1)}>minus one</button>
-      <button onClick={actions.reset}>reset to zero</button>
+      <button onClick={reset}>reset to zero</button>
     </div>
   )
 }

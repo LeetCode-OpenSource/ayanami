@@ -4,18 +4,6 @@ import { Draft } from 'immer'
 import { Ayanami } from './ayanami'
 import { Action } from './state'
 
-export type InstanceActionMethod<T> = {
-  0: () => Action<void>
-  1: (payload: T) => Action<T>
-  2: never
-}[T extends never ? 2 : T extends void ? 0 : 1]
-
-export type ActionMethod<T> = {
-  0: () => void
-  1: (payload: T) => void
-  2: never
-}[T extends never ? 2 : T extends void ? 0 : 1]
-
 export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
@@ -54,14 +42,16 @@ type UnpackPayload<F, S> = UnpackEffectPayload<F> extends never
 
 export type ActionOfAyanami<M extends Ayanami<S>, S> = Omit<
   {
-    [key in keyof M]: ActionMethod<UnpackPayload<M[key], S>>
+    [key in keyof M]: UnpackPayload<M[key], S> extends void
+      ? () => void
+      : (payload: UnpackPayload<M[key], S>) => void
   },
   keyof Ayanami<S>
 >
 
 export type InstanceActionOfAyanami<M extends Ayanami<S>, S> = Omit<
   {
-    [key in keyof M]: InstanceActionMethod<UnpackPayload<M[key], S>>
+    [key in keyof M]: (payload: UnpackPayload<M[key], S>) => Action<UnpackPayload<M[key], S>>
   },
   keyof Ayanami<S>
 >
