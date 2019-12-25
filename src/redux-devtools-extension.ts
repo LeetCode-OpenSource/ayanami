@@ -8,10 +8,14 @@ interface GlobalState {
   [modelName: string]: object
 }
 
+let devtool = {
+  send: noop,
+  init: noop,
+}
+
 const FakeReduxDevTools = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  connect: () => ({ init: noop }),
-  send: noop,
+  connect: () => devtool,
 }
 
 export const INIT_ACTION_TYPE = 'INIT_AYANAMI_STATE'
@@ -35,7 +39,7 @@ export let logStateAction = (action: Action<unknown>) => {
   STATE[namespace] = action.state.getState()
 
   if (!(action.type as string)?.endsWith(INIT_ACTION_TYPE)) {
-    ReduxDevTools.send(_action, STATE)
+    devtool.send(_action, STATE)
   }
 }
 
@@ -45,7 +49,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 export const initDevtool = () => {
   if (process.env.NODE_ENV === 'development') {
-    const devtool = ReduxDevTools.connect({
+    devtool = ReduxDevTools.connect({
       name: `Ayanami`,
     })
     devtool.init(STATE)
