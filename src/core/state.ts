@@ -67,7 +67,6 @@ export function createState<S>(
       const newState = reducer(prevState, action)
       if (newState !== prevState) {
         state$.next(newState)
-        appState = newState
       }
       logStateAction(action)
       action$.next(action)
@@ -111,6 +110,7 @@ export function createState<S>(
 
     subscription.add(
       state$.subscribe((state) => {
+        appState = state
         for (const observer of stateObservers) {
           observer(state)
         }
