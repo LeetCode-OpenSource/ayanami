@@ -1,6 +1,7 @@
 import { Observable, Subject, noop, ReplaySubject, Subscription, identity } from 'rxjs'
 import { Reducer } from 'react'
 import { TERMINATE_ACTION } from '../ssr/terminate'
+import { logStateAction } from '../redux-devtools-extension'
 
 export type State<S> = {
   getState: () => S
@@ -17,7 +18,8 @@ export type StateCreator<S> = {
     defaultState: S,
     middleware?: (effect$: Observable<Action<unknown>>) => Observable<Action<unknown>>,
     loadFromSSR?: boolean,
-  ): State<S>
+  ): // @internal
+  State<S>
 }
 
 export interface Action<T = unknown> {
@@ -67,6 +69,7 @@ export function createState<S>(
         state$.next(newState)
         appState = newState
       }
+      logStateAction(action)
       action$.next(action)
       _action$.next(action)
     }
@@ -137,7 +140,6 @@ export function createState<S>(
         actionObservers.clear()
       },
     })
-
     return state
   }
   return { stateCreator, action$, state$ }
