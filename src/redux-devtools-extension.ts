@@ -2,6 +2,7 @@
 
 import noop from 'lodash/noop'
 import { Action } from './core'
+import { TERMINATE_ACTION } from './ssr/terminate'
 
 interface GlobalState {
   [modelName: string]: object
@@ -22,6 +23,9 @@ const ReduxDevTools =
 const STATE: GlobalState = {}
 
 export let logStateAction = (action: Action<unknown>) => {
+  if (action.type === TERMINATE_ACTION.type) {
+    return
+  }
   const namespace = (action.state as any).name
   const _action = {
     type: `${namespace}/${String(action.type)}`,
