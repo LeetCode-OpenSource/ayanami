@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
@@ -12,6 +12,7 @@ import {
   useAyanami,
   useAyanamiState,
   initDevtool,
+  AsyncGeneratorEffect,
 } from '../src'
 
 interface State {
@@ -61,6 +62,12 @@ class Count extends Ayanami<State> {
     return { count: 0 }
   }
 
+  @AsyncGeneratorEffect.Switch()
+  async *plus(count: number) {
+    await this.delay(300)
+    yield this.getActions().add(count)
+  }
+
   @Effect()
   minus(count$: Observable<number>): Observable<Action> {
     return count$.pipe(
@@ -72,22 +79,33 @@ class Count extends Ayanami<State> {
       ),
     )
   }
+
+  private delay(time: number) {
+    return new Promise((resolve) => setTimeout(resolve, time))
+  }
 }
 
 function CountComponent() {
   const [{ count }, actions] = useAyanami(Count)
   const { tips } = useAyanamiState(Tips)
 
-  const add = (count: number) => () => actions.add(count)
-  const minus = (count: number) => () => actions.minus(count)
+  const reset = useCallback(() => {
+    actions.reset()
+  }, [])
+  const add = useCallback((count: number) => () => actions.add(count), [])
+  const minus = useCallback((count: number) => () => actions.minus(count), [])
+  const plus = useCallback(() => {
+    actions.plus(1)
+  }, [])
 
   return (
     <div>
       <p>count: {count}</p>
       <p>tips: {tips}</p>
       <button onClick={add(1)}>add one</button>
+      <button onClick={plus}>async add one</button>
       <button onClick={minus(1)}>minus one</button>
-      <button onClick={actions.reset}>reset to zero</button>
+      <button onClick={reset}>reset to zero</button>
     </div>
   )
 }

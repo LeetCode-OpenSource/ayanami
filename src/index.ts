@@ -4,6 +4,7 @@ export {
   Ayanami,
   ImmerReducer,
   Reducer,
+  AsyncGeneratorEffect,
   Effect,
   DefineAction,
   Module,

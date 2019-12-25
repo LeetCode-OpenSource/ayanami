@@ -4,18 +4,6 @@ import { Draft } from 'immer'
 import { Ayanami } from './ayanami'
 import { Action } from './state'
 
-export type InstanceActionMethod<T> = {
-  0: () => Action<void>
-  1: (payload: T) => Action<T>
-  2: never
-}[T extends never ? 2 : T extends void ? 0 : 1]
-
-export type ActionMethod<T> = {
-  0: () => void
-  1: (payload: T) => void
-  2: never
-}[T extends never ? 2 : T extends void ? 0 : 1]
-
 export interface ConstructorOf<T> {
   new (...args: any[]): T
 }
@@ -25,6 +13,14 @@ export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
 type UnpackEffectPayload<Func> = Func extends (
   action$: Observable<infer Payload>,
 ) => Observable<Action>
+  ? Payload
+  : never
+
+type UnpackAsyncGeneratorEffectPayload<Func, S> = Func extends (
+  payload: infer Payload,
+) => AsyncGenerator<Action, void, unknown>
+  ? Payload
+  : Func extends (payload: infer Payload, state: S) => AsyncGenerator<Action, void, unknown>
   ? Payload
   : never
 
@@ -43,25 +39,27 @@ type UnpackImmerReducerPayload<Func, S> = Func extends (state: Draft<S>) => void
 type UnpackDefineActionPayload<OB> = OB extends Observable<infer P> ? P : never
 
 type UnpackPayload<F, S> = UnpackEffectPayload<F> extends never
-  ? UnpackImmerReducerPayload<F, S> extends never
-    ? UnpackReducerPayload<F, S> extends never
-      ? UnpackDefineActionPayload<F> extends never
-        ? never
-        : UnpackDefineActionPayload<F>
-      : UnpackReducerPayload<F, S>
-    : UnpackImmerReducerPayload<F, S>
+  ? UnpackAsyncGeneratorEffectPayload<F, S> extends never
+    ? UnpackImmerReducerPayload<F, S> extends never
+      ? UnpackReducerPayload<F, S> extends never
+        ? UnpackDefineActionPayload<F> extends never
+          ? never
+          : UnpackDefineActionPayload<F>
+        : UnpackReducerPayload<F, S>
+      : UnpackImmerReducerPayload<F, S>
+    : UnpackAsyncGeneratorEffectPayload<F, S>
   : UnpackEffectPayload<F>
 
 export type ActionOfAyanami<M extends Ayanami<S>, S> = Omit<
   {
-    [key in keyof M]: ActionMethod<UnpackPayload<M[key], S>>
+    [key in keyof M]: (payload: UnpackPayload<M[key], S>) => void
   },
   keyof Ayanami<S>
 >
 
 export type InstanceActionOfAyanami<M extends Ayanami<S>, S> = Omit<
   {
-    [key in keyof M]: InstanceActionMethod<UnpackPayload<M[key], S>>
+    [key in keyof M]: (payload: UnpackPayload<M[key], S>) => Action<UnpackPayload<M[key], S>>
   },
   keyof Ayanami<S>
 >
