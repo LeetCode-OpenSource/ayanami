@@ -12,6 +12,7 @@ import {
 } from './symbols'
 import { InstanceActionOfAyanami, ActionStreamOfAyanami } from './types'
 import { GLOBAL_KEY, ACTION_TO_SKIP_KEY, SSR_LOADED_KEY } from '../ssr/constants'
+import { logStateAction, INIT_ACTION_TYPE } from '../redux-devtools-extension'
 
 type Effect<T> = (payload$: Observable<T>) => Observable<Action<unknown>>
 
@@ -107,6 +108,19 @@ export abstract class Ayanami<S> {
     }
     this.state = this.stateCreator(preloadState ?? this.defaultState, middleware, loadFromSSR)
     Reflect.defineMetadata(SSR_LOADED_KEY, loadFromSSR, this.state)
+    if (process.env.NODE_ENV !== 'production') {
+      Object.defineProperty(this.state, 'name', {
+        value: this.scopeName,
+        configurable: false,
+        enumerable: false,
+        writable: false,
+      })
+      logStateAction({
+        type: INIT_ACTION_TYPE,
+        state: this.state,
+        payload: null,
+      })
+    }
     return this.state
   }
 

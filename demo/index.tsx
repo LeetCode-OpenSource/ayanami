@@ -3,7 +3,16 @@ import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 
-import { Ayanami, Effect, Module, Action, Reducer, useAyanami, useAyanamiState } from '../src'
+import {
+  Ayanami,
+  Effect,
+  Module,
+  Action,
+  Reducer,
+  useAyanami,
+  useAyanamiState,
+  initDevtool,
+} from '../src'
 
 interface State {
   count: number
@@ -84,3 +93,5 @@ function CountComponent() {
 }
 
 ReactDOM.render(<CountComponent />, document.querySelector('#app'))
+
+initDevtool()

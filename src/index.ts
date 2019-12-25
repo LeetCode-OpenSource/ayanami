@@ -13,5 +13,6 @@ export {
 } from './core'
 export * from './ssr'
 export * from './hooks'
+export { initDevtool } from './redux-devtools-extension'
 
 export * from '@asuka/di'
