@@ -34,7 +34,7 @@ export abstract class Ayanami<S> {
   abstract readonly defaultState: S
 
   // @internal
-  scopeName!: string
+  moduleName!: string
 
   // @internal
   readonly _actionKeys: string[] = []
@@ -102,15 +102,15 @@ export abstract class Ayanami<S> {
     const ssrCache = (_globalThis as any)[Symbol.for(Symbol.keyFor(GLOBAL_KEY)!)]
     let loadFromSSR = false
     let preloadState: S | undefined
-    if (ssrCache && ssrCache[this.scopeName]) {
-      preloadState = ssrCache[this.scopeName]
+    if (ssrCache && ssrCache[this.moduleName]) {
+      preloadState = ssrCache[this.moduleName]
       loadFromSSR = true
     }
     this.state = this.stateCreator(preloadState ?? this.defaultState, middleware, loadFromSSR)
     Reflect.defineMetadata(SSR_LOADED_KEY, loadFromSSR, this.state)
     if (process.env.NODE_ENV !== 'production') {
       Object.defineProperty(this.state, 'name', {
-        value: this.scopeName,
+        value: this.moduleName,
         configurable: false,
         enumerable: false,
         writable: false,

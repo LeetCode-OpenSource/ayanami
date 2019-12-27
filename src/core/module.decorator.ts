@@ -24,7 +24,7 @@ export const Module = (config: string | (InjectableConfig & { name: string })) =
   }
 
   return (target: any) => {
-    target.prototype['scopeName'] = name
+    target.prototype.moduleName = name
     return Injectable(injectableConfig)(target)
   }
 }

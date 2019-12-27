@@ -53,18 +53,18 @@ export const runSSREffects = <Context, Returned = any>(
               if (sharedCtx) {
                 if (SSRStateCacheInstance.has(sharedCtx, constructor)) {
                   ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
-                  moduleName = constructor.prototype.scopeName
+                  moduleName = constructor.prototype.moduleName
                 } else {
                   const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(
                     constructor,
                   )
-                  moduleName = ayanamiInstance.scopeName
+                  moduleName = ayanamiInstance.moduleName
                   ayanamiState = ayanamiInstance.createState(middleware)
                   SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
                 }
               } else {
                 const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
-                moduleName = ayanamiInstance.scopeName
+                moduleName = ayanamiInstance.moduleName
                 ayanamiState = ayanamiInstance.createState(middleware)
                 SSRStates.set(ctx, ayanamiState)
               }
