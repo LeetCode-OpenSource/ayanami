@@ -1,5 +1,5 @@
 import { from, race, timer, throwError, Subject, noop, Observable, Observer } from 'rxjs'
-import { flatMap, skip, take, filter, tap } from 'rxjs/operators'
+import { flatMap, bufferCount, take, filter, tap } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
 import { ConstructorOf } from '../core/types'
@@ -68,7 +68,7 @@ export const runSSREffects = <Context, Returned = any>(
                 ayanamiState = ayanamiInstance.createState(middleware)
                 SSRStates.set(ctx, ayanamiState)
               }
-              let skipCount = metas.length - 1
+              let effectsCount = metas.length
               let disposeFn = noop
               cleanup = sharedCtx
                 ? () => disposeFn()
@@ -87,7 +87,7 @@ export const runSSREffects = <Context, Returned = any>(
                           state: ayanamiState,
                         })
                       } else {
-                        skipCount -= 1
+                        effectsCount -= 1
                       }
                     } else {
                       ayanamiState.dispatch({
@@ -99,7 +99,7 @@ export const runSSREffects = <Context, Returned = any>(
                   }),
                 )
 
-                if (skipCount > -1) {
+                if (effectsCount > 0) {
                   const action$ = new Subject<Action<unknown>>()
                   disposeFn = ayanamiState.subscribeAction((action) => {
                     action$.next(action)
@@ -107,7 +107,7 @@ export const runSSREffects = <Context, Returned = any>(
                   await action$
                     .pipe(
                       filter((act) => act.type === TERMINATE_ACTION.type),
-                      skip(skipCount),
+                      bufferCount(effectsCount),
                       take(1),
                     )
                     .toPromise()
