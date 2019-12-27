@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "include": [
+    "src",
+    "demo",
+    "test",
+    "jest.config.js"
+  ]
+}

@@ -1,23 +1,17 @@
-import { Request } from 'express'
-import { from, race, timer, throwError } from 'rxjs'
-import { flatMap, skip, take, tap } from 'rxjs/operators'
+import { from, race, timer, throwError, Subject, noop, Observable, Observer } from 'rxjs'
+import { flatMap, bufferCount, take, filter, tap } from 'rxjs/operators'
 import { InjectableFactory } from '@asuka/di'
 
-import { combineWithIkari } from '../core/ikari'
 import { ConstructorOf } from '../core/types'
 import { Ayanami } from '../core/ayanami'
-import {
-  createOrGetInstanceInScope,
-  ayanamiInstances,
-  createScopeWithRequest,
-} from '../core/scope/utils'
-import { SSRSymbol, CleanupSymbol, DEFAULT_SCOPE_NAME } from './constants'
-import { moduleNameKey } from './ssr-module'
-import { SKIP_SYMBOL, reqMap } from './express'
+import { Action, State } from '../core/state'
+import { SSRSymbol } from './constants'
+import { SKIP_SYMBOL } from './ssr-effect'
+import { TERMINATE_ACTION } from './terminate'
+import { SSRStateCacheInstance } from './ssr-states'
+import { SSRStates } from './ssr-context'
 
-export type ModuleMeta =
-  | ConstructorOf<Ayanami<any>>
-  | { module: ConstructorOf<Ayanami<any>>; scope: string }
+export type ModuleMeta = ConstructorOf<Ayanami<any>>
 
 const skipFn = () => SKIP_SYMBOL
 
@@ -25,104 +19,115 @@ const skipFn = () => SKIP_SYMBOL
  * Run all @SSREffect decorated effects of given modules and extract latest states.
  * `cleanup` function returned must be called before end of responding
  *
- * @param req express request object
+ * @param ctx request context, which will be passed to payloadGetter in SSREffect decorator param
  * @param modules used ayanami modules
+ * @param uuid the same uuid would reuse the same state which was created before
  * @param timeout seconds to wait before all effects stream out TERMINATE_ACTION
  * @returns object contains ayanami state and cleanup function
  */
-export const emitSSREffects = (
-  req: Request,
+export const runSSREffects = <Context, Returned = any>(
+  ctx: Context,
   modules: ModuleMeta[],
+  sharedCtx?: string | symbol,
   timeout = 3,
-): Promise<{ state: any; cleanup: () => void }> => {
+): Promise<Returned> => {
   const stateToSerialize: any = {}
-  const cleanup = () => {
-    // non-scope ayanami
-    if (ayanamiInstances.has(req)) {
-      ayanamiInstances.get(req)!.forEach((instance) => {
-        instance[CleanupSymbol].call()
-      })
-      ayanamiInstances.delete(req)
-    }
-
-    // scoped ayanami
-    if (reqMap.has(req)) {
-      Array.from(reqMap.get(req)!.values()).forEach((s) => {
-        ayanamiInstances.get(s)!.forEach((instance) => {
-          instance[CleanupSymbol].call()
-        })
-        ayanamiInstances.delete(s)
-      })
-      reqMap.delete(req)
-    }
-  }
-
   return modules.length === 0
-    ? Promise.resolve({ state: stateToSerialize, cleanup })
+    ? Promise.resolve(stateToSerialize)
     : race(
         from(modules).pipe(
-          flatMap(async (m) => {
-            let constructor: ConstructorOf<Ayanami<any>>
-            let scope = DEFAULT_SCOPE_NAME
-            if ('scope' in m) {
-              constructor = m.module
-              scope = m.scope
-            } else {
-              constructor = m
-            }
-            const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype)
-            if (metas) {
-              const ayanamiInstance: any = InjectableFactory.initialize(constructor)
-              const moduleName = ayanamiInstance[moduleNameKey]
-              const ikari = combineWithIkari(ayanamiInstance)
-              let skipCount = metas.length - 1
-              for (const meta of metas) {
-                const dispatcher = ikari.triggerActions[meta.action]
-                if (meta.middleware) {
-                  const param = await meta.middleware(req, skipFn)
-                  if (param !== SKIP_SYMBOL) {
-                    dispatcher(param)
-                  } else {
-                    skipCount -= 1
-                  }
-                } else {
-                  dispatcher(void 0)
-                }
-              }
-
-              if (skipCount > -1) {
-                await ikari.terminate$
-                  .pipe(
-                    skip(skipCount),
-                    take(1),
-                  )
-                  .toPromise()
-
-                ikari.terminate$.next(null)
-                const state = ikari.state.getState()
-                if (stateToSerialize[moduleName]) {
-                  stateToSerialize[moduleName][scope] = state
-                } else {
-                  stateToSerialize[moduleName] = {
-                    [scope]: state,
-                  }
-                }
-                const existedAyanami = createOrGetInstanceInScope(
-                  constructor,
-                  createScopeWithRequest(req, scope === DEFAULT_SCOPE_NAME ? undefined : scope),
+          flatMap((constructor) => {
+            return new Observable((observer: Observer<Returned>) => {
+              let cleanup = noop
+              const metas = Reflect.getMetadata(SSRSymbol, constructor.prototype) || []
+              let ayanamiState: State<any>
+              let moduleName: string
+              const middleware = (effect$: Observable<Action<unknown>>) =>
+                effect$.pipe(
+                  tap({
+                    error: (e) => {
+                      observer.error(e)
+                    },
+                  }),
                 )
-                const existedIkari = combineWithIkari(existedAyanami)
-                existedIkari.state.setState(state)
-                ayanamiInstance.destroy()
+              if (sharedCtx) {
+                if (SSRStateCacheInstance.has(sharedCtx, constructor)) {
+                  ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
+                  moduleName = constructor.prototype.moduleName
+                } else {
+                  const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(
+                    constructor,
+                  )
+                  moduleName = ayanamiInstance.moduleName
+                  ayanamiState = ayanamiInstance.createState(middleware)
+                  SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
+                }
+              } else {
+                const ayanamiInstance: Ayanami<unknown> = InjectableFactory.initialize(constructor)
+                moduleName = ayanamiInstance.moduleName
+                ayanamiState = ayanamiInstance.createState(middleware)
+                SSRStates.set(ctx, ayanamiState)
               }
-            }
+              let effectsCount = metas.length
+              let disposeFn = noop
+              cleanup = sharedCtx
+                ? () => disposeFn()
+                : () => {
+                    ayanamiState.unsubscribe()
+                  }
+              async function runEffects() {
+                await Promise.all(
+                  metas.map(async (meta: any) => {
+                    if (meta.middleware) {
+                      const param = await meta.middleware(ctx, skipFn)
+                      if (param !== SKIP_SYMBOL) {
+                        ayanamiState.dispatch({
+                          type: meta.action,
+                          payload: param,
+                          state: ayanamiState,
+                        })
+                      } else {
+                        effectsCount -= 1
+                      }
+                    } else {
+                      ayanamiState.dispatch({
+                        type: meta.action,
+                        payload: undefined,
+                        state: ayanamiState,
+                      })
+                    }
+                  }),
+                )
 
-            return { state: stateToSerialize, cleanup }
+                if (effectsCount > 0) {
+                  const action$ = new Subject<Action<unknown>>()
+                  disposeFn = ayanamiState.subscribeAction((action) => {
+                    action$.next(action)
+                  })
+                  await action$
+                    .pipe(
+                      filter((act) => act.type === TERMINATE_ACTION.type),
+                      bufferCount(effectsCount),
+                      take(1),
+                    )
+                    .toPromise()
+
+                  const state = ayanamiState.getState()
+                  stateToSerialize[moduleName] = state
+                }
+              }
+              runEffects()
+                .then(() => {
+                  observer.next(stateToSerialize)
+                  observer.complete()
+                })
+                .catch((e) => {
+                  observer.error(e)
+                })
+              return cleanup
+            })
           }),
         ),
-        timer(timeout * 1000).pipe(
-          tap(cleanup),
-          flatMap(() => throwError(new Error('Terminate timeout'))),
-        ),
+        timer(timeout * 1000).pipe(flatMap(() => throwError(new Error('Terminate timeout')))),
       ).toPromise()
 }

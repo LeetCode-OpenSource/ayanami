@@ -1,18 +1,24 @@
-import noop from 'lodash/noop'
+/* istanbul ignore next */
 
-interface DevTools {
-  send(action: { type: string }, state?: Partial<GlobalState>): void
-  init(state: GlobalState): void
-}
+import noop from 'lodash/noop'
+import { Action } from './core'
+import { TERMINATE_ACTION } from './ssr/terminate'
 
 interface GlobalState {
   [modelName: string]: object
 }
 
+let devtool = {
+  send: noop,
+  init: noop,
+}
+
 const FakeReduxDevTools = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  connect: (_config: object) => ({ send: noop, init: noop }),
+  connect: () => devtool,
 }
+
+export const INIT_ACTION_TYPE = 'INIT_AYANAMI_STATE'
 
 const ReduxDevTools =
   (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) ||
@@ -20,43 +26,33 @@ const ReduxDevTools =
 
 const STATE: GlobalState = {}
 
-const getDevTools = (() => {
-  let devTools: DevTools
-
-  return (): DevTools => {
-    if (!devTools) {
-      devTools = ReduxDevTools.connect({ name: `Ayanami` })
-      devTools.init({})
-    }
-    return devTools
+export let logStateAction = (action: Action<unknown>) => {
+  if (action.type === TERMINATE_ACTION.type) {
+    return
   }
-})()
+  const namespace = (action.state as any).name
+  const _action = {
+    type: `${namespace}/${String(action.type)}`,
+    params: filterParams(action.payload),
+  }
 
-let isEnableLog = false
+  STATE[namespace] = action.state.getState()
 
-export function enableReduxLog() {
-  isEnableLog = true
+  if (!(action.type as string)?.endsWith(INIT_ACTION_TYPE)) {
+    devtool.send(_action, STATE)
+  }
 }
 
-export function disableReduxLog() {
-  isEnableLog = false
+if (process.env.NODE_ENV !== 'development') {
+  logStateAction = noop
 }
 
-export function logStateAction(
-  namespace: string,
-  infos: { actionName: string; params: string; state?: any },
-) {
-  if (isEnableLog) {
-    const action = {
-      type: `${namespace}/${infos.actionName}`,
-      params: filterParams(infos.params),
-    }
-
-    if (infos.state) {
-      STATE[namespace] = infos.state
-    }
-
-    getDevTools().send(action, STATE)
+export const initDevtool = () => {
+  if (process.env.NODE_ENV === 'development') {
+    devtool = ReduxDevTools.connect({
+      name: `Ayanami`,
+    })
+    devtool.init(STATE)
   }
 }
 

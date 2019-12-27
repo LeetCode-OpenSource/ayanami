@@ -1,10 +1,9 @@
-import { Injectable } from '@asuka/di'
-import React from 'react'
+import React, { useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Observable, of } from 'rxjs'
 import { mergeMap } from 'rxjs/operators'
 
-import { Ayanami, Effect, EffectAction, Reducer, useAyanami } from '../src'
+import { Ayanami, Effect, Module, Reducer, useAyanami, useAyanamiState, initDevtool } from '../src'
 
 interface State {
   count: number
@@ -14,7 +13,7 @@ interface TipsState {
   tips: string
 }
 
-@Injectable()
+@Module('Tips')
 class Tips extends Ayanami<TipsState> {
   defaultState = {
     tips: '',
@@ -26,7 +25,7 @@ class Tips extends Ayanami<TipsState> {
   }
 }
 
-@Injectable()
+@Module('Count')
 class Count extends Ayanami<State> {
   defaultState = {
     count: 0,
@@ -54,7 +53,7 @@ class Count extends Ayanami<State> {
   }
 
   @Effect()
-  minus(count$: Observable<number>): Observable<EffectAction> {
+  minus(count$: Observable<number>) {
     return count$.pipe(
       mergeMap((subCount) =>
         of(
@@ -68,10 +67,13 @@ class Count extends Ayanami<State> {
 
 function CountComponent() {
   const [{ count }, actions] = useAyanami(Count)
-  const [{ tips }] = useAyanami(Tips)
+  const { tips } = useAyanamiState(Tips)
 
-  const add = (count: number) => () => actions.add(count)
-  const minus = (count: number) => () => actions.minus(count)
+  const add = useCallback((count: number) => () => actions.add(count), [])
+  const minus = useCallback((count: number) => () => actions.minus(count), [])
+  const reset = useCallback(() => {
+    actions.reset()
+  }, [])
 
   return (
     <div>
@@ -79,9 +81,11 @@ function CountComponent() {
       <p>tips: {tips}</p>
       <button onClick={add(1)}>add one</button>
       <button onClick={minus(1)}>minus one</button>
-      <button onClick={actions.reset}>reset to zero</button>
+      <button onClick={reset}>reset to zero</button>
     </div>
   )
 }
 
 ReactDOM.render(<CountComponent />, document.querySelector('#app'))
+
+initDevtool()
