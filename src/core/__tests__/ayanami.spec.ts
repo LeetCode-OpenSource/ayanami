@@ -3,7 +3,7 @@ import 'reflect-metadata'
 import { Observable } from 'rxjs'
 import { delay, map, withLatestFrom, takeUntil, tap } from 'rxjs/operators'
 import { Draft } from 'immer'
-import { InjectableFactory } from '@asuka/di'
+import { rootInjectableFactory } from '@asuka/di'
 import * as Sinon from 'sinon'
 import { noop } from 'lodash'
 
@@ -87,12 +87,11 @@ describe('Ayanami Class', () => {
   let counter: Counter
 
   beforeEach(() => {
-    counter = InjectableFactory.getInstance(Counter)
-  })
-
-  afterEach(() => {
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(Counter)
+    rootInjectableFactory
+      .reset()
+      .addProviders(Counter)
+      .resolveProviders()
+    counter = rootInjectableFactory.getInstance(Counter)
   })
 
   describe('basic shape specs', () => {

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { InjectableFactory } from '@asuka/di'
+import { useInstance } from '@asuka/di'
 
 import { Ayanami, ConstructorOf, ActionOfAyanami, State } from './core'
 import { SSRSharedContext, SSRContext, SSRStates } from './ssr/ssr-context'
@@ -154,7 +154,7 @@ function _useState<M extends Ayanami<S>, S = any>(
 ): { ayanami: M; state: State<S> } {
   const ssrSharedContext = useContext(SSRSharedContext)
   const ssrContext = useContext(SSRContext)
-  const ayanami = React.useMemo(() => InjectableFactory.getInstance(A), [A])
+  const ayanami = useInstance(A)
   const state = React.useMemo(() => {
     return SSRStateCacheInstance.has(ssrSharedContext, A)
       ? SSRStateCacheInstance.get(ssrSharedContext, A)!

@@ -7,7 +7,7 @@ import { Draft } from 'immer'
 import { renderToString } from 'react-dom/server'
 import { create, act } from 'react-test-renderer'
 import uniqueId from 'lodash/uniqueId'
-import { InjectableFactory } from '@asuka/di'
+import { rootInjectableFactory } from '@asuka/di'
 
 import { TERMINATE_ACTION, emitSSREffects, SSREffect } from '../index'
 
@@ -122,9 +122,11 @@ const ComponentWithSelector = () => {
 
 describe('SSR specs:', () => {
   beforeEach(() => {
-    const providers = Array.from(InjectableFactory.providers)
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(...providers)
+    const providers = Array.from(rootInjectableFactory.providers)
+    rootInjectableFactory
+      .reset()
+      .addProviders(...providers)
+      .resolveProviders()
     SSRStateCacheInstance.setPoolSize(100)
   })
 

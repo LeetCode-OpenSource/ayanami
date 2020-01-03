@@ -6,7 +6,7 @@ import { Observable } from 'rxjs'
 import { map, withLatestFrom, delay, skipWhile, combineLatest, take } from 'rxjs/operators'
 import { Draft } from 'immer'
 import { act, create, ReactTestRenderer } from 'react-test-renderer'
-import { InjectableFactory } from '@asuka/di'
+import { rootInjectableFactory, InjectableContext } from '@asuka/di'
 import Sinon from 'sinon'
 
 interface CountState {
@@ -120,15 +120,21 @@ describe('Hooks specs: useAyanami', () => {
 
   beforeEach(() => {
     timer = Sinon.useFakeTimers()
-    testRenderer = create(<SimpleComponent />)
+    testRenderer = create(
+      <InjectableContext>
+        <SimpleComponent />
+      </InjectableContext>,
+    )
     getCount = () =>
       parseInt(testRenderer.root.find((instance) => instance.type === 'span').children[0] as string)
   })
 
   afterEach(() => {
     timer.restore()
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(GlobalModule, CountModule)
+    rootInjectableFactory
+      .reset()
+      .addProviders(GlobalModule, CountModule)
+      .resolveProviders()
   })
 
   it('should render correct state', () => {
@@ -235,7 +241,11 @@ describe('Hooks specs: useAyanami', () => {
       }
       return <div />
     }
-    create(<Component />)
+    create(
+      <InjectableContext>
+        <Component />
+      </InjectableContext>,
+    )
     expect(spy.args).toStrictEqual([[error]])
   })
 })
@@ -273,8 +283,10 @@ describe('Hooks spec: useAyanami with config', () => {
   })
 
   afterEach(() => {
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(GlobalModule, CountModule)
+    rootInjectableFactory
+      .reset()
+      .addProviders(GlobalModule, CountModule)
+      .resolveProviders()
   })
 
   it('should return selected state from store', () => {
@@ -314,8 +326,10 @@ describe('Hooks spec: useAyanamiState', () => {
   })
 
   afterEach(() => {
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(GlobalModule, CountModule)
+    rootInjectableFactory
+      .reset()
+      .addProviders(GlobalModule, CountModule)
+      .resolveProviders()
   })
 
   it('should return selected state from store', () => {
@@ -352,8 +366,10 @@ describe('Hooks spec: useAyanamiDispatchers', () => {
   })
 
   afterEach(() => {
-    InjectableFactory.reset()
-    InjectableFactory.addProviders(GlobalModule, CountModule)
+    rootInjectableFactory
+      .reset()
+      .addProviders(GlobalModule, CountModule)
+      .resolveProviders()
   })
 
   it('should return selected state from store', () => {
