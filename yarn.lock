@@ -3,9 +3,9 @@
 
 
 "@asuka/di@^0.3.0":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.3.2.tgz#182e51f055737f05cd4c4793fc15b3b76ca89054"
-  integrity sha512-6NQtyLX/525Fl0tWYY7TMnK7yuBtJDBN5J+n1pvTjib66D3Gqt5tX08e7nxweBjzSdQr8EJShfJKmTCOI3EzXA==
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.3.3.tgz#6a4e1c5b1e79f605fdbcaf9c5fadcae4d91be1a9"
+  integrity sha512-+ra0G/Loq8m9nCA8lYntNtPXcjFWHYtC0IQ5ToGccWLWCnJB0UcCHYQELGzSOFcUkAtNwkzQ+zL+3PZ5Wzdlsg==
   dependencies:
     injection-js "^2.2.2"
     tslib "^1.10.0"
