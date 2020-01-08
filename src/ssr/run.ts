@@ -1,6 +1,6 @@
 import { from, race, timer, throwError, Subject, noop, Observable, Observer } from 'rxjs'
 import { flatMap, bufferCount, take, filter, tap } from 'rxjs/operators'
-import { rootInjectableFactory } from '@asuka/di'
+import { rootInjector } from '@asuka/di'
 
 import { ConstructorOf } from '../core/types'
 import { Ayanami } from '../core/ayanami'
@@ -55,7 +55,7 @@ export const runSSREffects = <Context, Returned = any>(
                   ayanamiState = SSRStateCacheInstance.get(sharedCtx, constructor)!
                   moduleName = constructor.prototype.moduleName
                 } else {
-                  const ayanamiInstance: Ayanami<unknown> = rootInjectableFactory.initialize(
+                  const ayanamiInstance: Ayanami<unknown> = rootInjector.resolveAndInstantiate(
                     constructor,
                   )
                   moduleName = ayanamiInstance.moduleName
@@ -63,7 +63,7 @@ export const runSSREffects = <Context, Returned = any>(
                   SSRStateCacheInstance.set(sharedCtx, constructor, ayanamiState)
                 }
               } else {
-                const ayanamiInstance: Ayanami<unknown> = rootInjectableFactory.initialize(
+                const ayanamiInstance: Ayanami<unknown> = rootInjector.resolveAndInstantiate(
                   constructor,
                 )
                 moduleName = ayanamiInstance.moduleName

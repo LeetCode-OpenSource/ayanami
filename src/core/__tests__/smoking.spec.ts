@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { rootInjectableFactory } from '@asuka/di'
+import { rootInjector } from '@asuka/di'
 import * as Sinon from 'sinon'
 import { empty, Observable } from 'rxjs'
 import { delay, map } from 'rxjs/operators'
@@ -63,10 +63,8 @@ describe('Smoking tests', () => {
       }
     }
 
-    rootInjectableFactory.resolveProviders()
-
-    const fooModuleState = rootInjectableFactory.getInstance(FooModule)
-    const barModuleState = rootInjectableFactory.getInstance(BarModule)
+    const fooModuleState = rootInjector.getInstance(FooModule)
+    const barModuleState = rootInjector.getInstance(BarModule)
     const fooState = fooModuleState.createState()
     const barState = barModuleState.createState()
 
@@ -77,6 +75,6 @@ describe('Smoking tests', () => {
     timer.tick(asyncTimeToDelay)
     expect(fooState.getState().foo).toBe(payload)
     timer.restore()
-    rootInjectableFactory.reset()
+    rootInjector.reset()
   })
 })

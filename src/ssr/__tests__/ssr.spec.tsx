@@ -4,10 +4,10 @@ import React from 'react'
 import { Observable, timer } from 'rxjs'
 import { endWith, switchMap, map, mergeMap, flatMap, withLatestFrom } from 'rxjs/operators'
 import { Draft } from 'immer'
+import { rootInjector } from '@asuka/di'
 import { renderToString } from 'react-dom/server'
 import { create, act } from 'react-test-renderer'
 import uniqueId from 'lodash/uniqueId'
-import { rootInjectableFactory } from '@asuka/di'
 
 import { TERMINATE_ACTION, emitSSREffects, SSREffect } from '../index'
 
@@ -122,16 +122,13 @@ const ComponentWithSelector = () => {
 
 describe('SSR specs:', () => {
   beforeEach(() => {
-    const providers = Array.from(rootInjectableFactory.providers)
-    rootInjectableFactory
-      .reset()
-      .addProviders(...providers)
-      .resolveProviders()
     SSRStateCacheInstance.setPoolSize(100)
+    rootInjector.addProviders([CountModel, TipModel])
   })
 
   afterEach(() => {
     SSRStateCacheInstance.setPoolSize(0)
+    rootInjector.reset()
   })
 
   it('should throw if module name not given', () => {
@@ -153,7 +150,7 @@ describe('SSR specs:', () => {
       defaultState = {}
     }
 
-    @Module({ name: '2', providers: [] })
+    @Module('2')
     class Model2 extends Ayanami<any> {
       defaultState = {}
     }
@@ -168,7 +165,7 @@ describe('SSR specs:', () => {
     }
 
     function generateException2() {
-      @Module({ name: '1', providers: [] })
+      @Module('1')
       class ErrorModel2 extends Ayanami<any> {
         defaultState = {}
       }
