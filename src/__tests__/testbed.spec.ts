@@ -96,8 +96,8 @@ describe('AyanamiTestModule specs', () => {
       providers: [GlobalModule, CountModule],
     }).compile()
 
-    globalStub = testModule.getDispatcher(GlobalModule)
-    countStub = testModule.getDispatcher(CountModule)
+    globalStub = testModule.getAyanamiTestingStub(GlobalModule)
+    countStub = testModule.getAyanamiTestingStub(CountModule)
     fakeTimer = useFakeTimers()
   })
 

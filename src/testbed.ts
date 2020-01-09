@@ -4,7 +4,9 @@ import { ActionOfAyanami } from './core/types'
 import { State } from './core/state'
 
 export class AyanamiTestModule extends TestModule {
-  getDispatcher<M extends Ayanami<S>, S = any>(ayanamiModule: Type<M>): AyanamiTestStub<M, S> {
+  getAyanamiTestingStub<M extends Ayanami<S>, S = any>(
+    ayanamiModule: Type<M>,
+  ): AyanamiTestStub<M, S> {
     const moduleInstance = this.getInstance(ayanamiModule)
     const state = moduleInstance.createState()
     const actionsCreator: any = moduleInstance.getActions()
