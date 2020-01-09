@@ -1,6 +1,6 @@
 {
   "name": "ayanami",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "A better way to react with state",
   "main": "./dist/index.js",
   "module": "./esm/index.js",
