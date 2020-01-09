@@ -107,3 +107,4 @@ public/
 Adding pattern(s) to: .gitignore
 ... adding 'node'
 node
+.docz

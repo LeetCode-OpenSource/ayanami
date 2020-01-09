@@ -1,3 +1,9 @@
+---
+name: Effects
+route: /zh/basic/effects
+menu: 基本概念
+---
+
 # Effects
 
 >##### 不熟悉 Observables/RxJS v6?
@@ -27,9 +33,6 @@ something(payload$: Observable<void>) {
 ## 在 **Effect** 中访问 **AppState**
 在 ayanami 实例中，可以通过 `state$` 属性获取最新的状态，这个 `state$` 是一个永远拥有最新状态值的 `Observable`。
 我们没有提供任何直接在 **Effect** 中访问**状态**的方法，因为直接访问而不是通过响应式的方法访问状态在一些场景下会引起非常不易察觉的 bug。思考一下下面这个例子:
-
-<details>
-<summary>示例代码</summary>
 
 ```ts
 @Module('B')
@@ -66,14 +69,10 @@ class ModuleB extends Ayanami<BState> {
   }
 }
 ```
-</details>
 
 如果我们在第一个 `mergeMap` 中使用 `getState` 直接访问状态并且在后面的 `map` 中复用这个状态，那在这个状态真正被使用的时候可能已经过期了(不是最新的值)。虽然我们可以很简单的通过在 `map` 操作符中再次获取状态来修复这个 bug，但是这种类似的问题真的 ***非常难 debug***。
 
 所以，永远通过 `响应式` 的方法访问状态是更好的实践方式:
-
-<details>
-<summary><code>示例代码</code></summary>
 
 ```ts
 @Module('B')
@@ -110,4 +109,3 @@ class ModuleB extends Ayanami<BState> {
   }
 }
 ```
-</details>

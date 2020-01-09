@@ -1,3 +1,9 @@
+---
+name: Effects
+route: /en/basic/effects
+menu: Basic
+---
+
 # Effects
 
 >##### Not familiar with Observables/RxJS v6?
@@ -31,9 +37,6 @@ something(payload$: Observable<void>) {
 In ayanami instances, we could access the `state$` property, which is a `Observable` represent the **latest** state.
 We do not provide any way to access state directly in **Effect**, because access state directly rather than the reactive way would cause problems in many scenarios, and many of these problems are hard to debug.
 Think about the code snippets below:
-
-<details>
-<summary><code>Example codes</code></summary>
 
 ```ts
 @Module('B')
@@ -71,14 +74,9 @@ class ModuleB extends Ayanami<BState> {
 }
 ```
 
-</details>
-
 If we access state in first `mergeMap` by `getState` directly, and reuse it in the `map` operator then, the state may already stated when we really use it. It could simply fix by `getState` in the `map` operator, but it's truly hard to debug.
 
 So, always access state in `reactive` way is a better practice:
-
-<details>
-<summary><code>Example codes</code></summary>
 
 ```ts
 @Module('B')
@@ -115,4 +113,3 @@ class ModuleB extends Ayanami<BState> {
   }
 }
 ```
-</details>
