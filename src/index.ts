@@ -9,6 +9,7 @@ export {
   Module,
   State,
   Action,
+  InstanceActionOfAyanami,
   ActionOfAyanami,
 } from './core'
 export * from './ssr'
