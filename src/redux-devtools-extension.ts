@@ -1,6 +1,6 @@
 /* istanbul ignore next */
 
-import noop from 'lodash/noop'
+import { noop } from 'rxjs'
 import { Action } from './core'
 import { TERMINATE_ACTION } from './ssr/terminate'
 
@@ -8,7 +8,7 @@ interface GlobalState {
   [modelName: string]: object
 }
 
-let devtool = {
+let devtool: { send: Function; init: Function } = {
   send: noop,
   init: noop,
 }

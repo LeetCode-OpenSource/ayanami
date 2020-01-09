@@ -5,7 +5,7 @@ import { delay, map, withLatestFrom, takeUntil, tap } from 'rxjs/operators'
 import { Draft } from 'immer'
 import { rootInjector } from '@asuka/di'
 import * as Sinon from 'sinon'
-import { noop } from 'lodash'
+import { noop } from 'rxjs'
 
 import { Ayanami } from '../ayanami'
 import { Module } from '../module.decorator'

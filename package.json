@@ -57,11 +57,7 @@
   ],
   "author": "LeetCode front-end team",
   "license": "MIT",
-  "dependencies": {
-    "shallowequal": "^1.1.0"
-  },
   "devDependencies": {
-    "@asuka/di": "^0.3.4",
     "@types/express": "^4.17.2",
     "@types/jest": "^24.0.25",
     "@types/lodash": "^4.14.149",
@@ -69,7 +65,6 @@
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
     "@types/react-test-renderer": "^16.9.1",
-    "@types/shallowequal": "^1.1.1",
     "@types/sinon": "^7.5.1",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
@@ -98,11 +93,12 @@
     "typescript": "^3.7.4"
   },
   "peerDependencies": {
-    "@asuka/di": "^0.3.4",
     "immer": "^5.1.0",
-    "lodash": "^4.17.15",
-    "react": "^16.12.0",
+    "react": "^16.8.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.4"
+  },
+  "dependencies": {
+    "@asuka/di": "^0.3.4"
   }
 }
