@@ -1,0 +1,118 @@
+# Effects
+
+>##### Not familiar with Observables/RxJS v6?
+> Ayanami requires an understanding of Observables with RxJS v6. If you're new to Reactive Programming with RxJS v6, head over to [http://reactivex.io/rxjs/](http://reactivex.io/rxjs/) to familiarize yourself first.
+>
+
+An **Effect** is the core primitive of ayanami.
+
+It is a method in ayanami class which takes a stream of `Payloads` and returns a stream of actions. **Payloads in, actions out.**
+
+It has roughly this type signature:
+
+```ts
+<Payload>(action$: Observable<Payload>): Observable<Action>;
+```
+
+While you'll most commonly produce actions out in response to some `Payload` you received in, that's not actually a requirement! Once you're inside your **Effect**, use any Observable patterns you desire as long as any output from the final, returned stream, is an action.
+
+The actions you emit will be immediately dispatched to their `Module`.
+
+If emmit action which actually assosiated with an **Effect** itself, it may create an infinite loop:
+
+```typescript
+// DO NOT DO THIS
+something(payload$: Observable<void>) {
+  return payload$.map(() => this.getActions().something())
+}
+```
+
+## Access **AppState** in **Effect**
+In ayanami instances, we could access the `state$` property, which is a `Observable` represent the **latest** state.
+We do not provide any way to access state directly in **Effect**, because access state directly rather than the reactive way would cause problems in many scenarios, and many of these problems are hard to debug.
+Think about the code snippets below:
+
+<details>
+<summary><code>Example codes</code></summary>
+
+```ts
+@Module('B')
+class ModuleB extends Ayanami<BState> {
+  defaultState = {}
+
+  constructor(private readonly httpClient: HttpClient) {
+    super()
+  }
+
+  @Effect()
+  addAndSync(payload$: Observable<number>) {
+    return payload$.pipe(
+      mergeMap((payload) => {
+        const state = this.getState()
+        return this.httpClient.get(`/api/something`, {
+          body: {
+            query: payload
+          }
+        }).pipe(
+          map((response) => {
+            if (state.expireIn < Date.now()) { // state here is staled
+              return this.getActions().setResponse(response.body)
+            } else {
+              return this.getActions().setExpired(response.body)
+            }
+          }),
+          catchError(...),
+          startWith(this.getActions().setLoading(true)),
+          endWith(this.getActions().setLoading(false)),
+        )
+      })
+    )
+  }
+}
+```
+
+</details>
+
+If we access state in first `mergeMap` by `getState` directly, and reuse it in the `map` operator then, the state may already stated when we really use it. It could simply fix by `getState` in the `map` operator, but it's truly hard to debug.
+
+So, always access state in `reactive` way is a better practice:
+
+<details>
+<summary><code>Example codes</code></summary>
+
+```ts
+@Module('B')
+class ModuleB extends Ayanami<BState> {
+  defaultState = {}
+
+  constructor(private readonly httpClient: HttpClient) {
+    super()
+  }
+
+  @Effect()
+  addAndSync(payload$: Observable<number>) {
+    return payload$.pipe(
+      mergeMap((payload) => {
+        return this.httpClient.get(`/api/something`, {
+          body: {
+            query: payload
+          }
+        }).pipe(
+          withLatestFrom(this.state$),
+          map(([response, state]) => {
+            if (state.expireIn < Date.now()) { // always latest state here
+              return this.getActions().setResponse(response.body)
+            } else {
+              return this.getActions().setExpired(response.body)
+            }
+          }),
+          catchError(...),
+          startWith(this.getActions().setLoading(true)),
+          endWith(this.getActions().setLoading(false)),
+        )
+      })
+    )
+  }
+}
+```
+</details>

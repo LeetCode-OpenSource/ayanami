@@ -48,11 +48,5 @@ yarn add ayanami @asuka/di reflect-metadata rxjs immer
 npm install ayanami @asuka/di reflect-metadata rxjs immer
 ```
 
-## Examples
-
-- [Reducer example](https://codesandbox.io/s/py5o3ojo7x)
-- [ImmerReducer example](https://codesandbox.io/s/ayanamiimmerreducerexample-r07kk)
-- [Effect example](https://codesandbox.io/s/nnko0rxjv4)
-- [Scope example](https://codesandbox.io/s/jlz44wrymw)
-- [Interact with other Ayanami example](https://codesandbox.io/s/ly5ol8xrqz)
-- [SameScope example](https://codesandbox.io/s/k97lqxwvn5)
+## Docs
+[Docs](docs/README.md/)

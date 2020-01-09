@@ -1,0 +1,113 @@
+# Effects
+
+>##### 不熟悉 Observables/RxJS v6?
+> 使用 Ayanami 需要你对 Observables/RxJS v6 有一定的了解。如果你是第一次接触 `RxJS v6`，可以先到 [http://reactivex.io/rxjs/](http://reactivex.io/rxjs/) 了解一下。
+
+**Effect** 是 ayanami 的核心原语。它是 ayanami 类上的一个方法，接收一个 `Payload` 流，返回一个 `Action` 流。**流入 Payload，流出 Action**
+
+它的函数签名是这样:
+
+```ts
+<Payload>(action$: Observable<Payload>): Observable<Action>;
+```
+
+虽然通常你是接收到 `Payload` 然后产生 `Action`, 但在 **Effect** 中并不需要时时刻刻遵守这一点。在 **Effect** 内部，你可以用 `RxJS` 做任何事情，只要你保证最后流出的是 `Action` 就行了。
+
+这些在 **Effect** 中流出的 `Action` 会被立刻 `Dispatch` 给它们的 **Module**。
+
+如果在 **Effect** 中流出的 `Action` 与 **Effect** 自身是对应的，就***可能***会出现无限循环的情况:
+
+```typescript
+// 不要这样做
+something(payload$: Observable<void>) {
+  return payload$.map(() => this.getActions().something())
+}
+```
+
+## 在 **Effect** 中访问 **AppState**
+在 ayanami 实例中，可以通过 `state$` 属性获取最新的状态，这个 `state$` 是一个永远拥有最新状态值的 `Observable`。
+我们没有提供任何直接在 **Effect** 中访问**状态**的方法，因为直接访问而不是通过响应式的方法访问状态在一些场景下会引起非常不易察觉的 bug。思考一下下面这个例子:
+
+<details>
+<summary>示例代码</summary>
+
+```ts
+@Module('B')
+class ModuleB extends Ayanami<BState> {
+  defaultState = {}
+
+  constructor(private readonly httpClient: HttpClient) {
+    super()
+  }
+
+  @Effect()
+  addAndSync(payload$: Observable<number>) {
+    return payload$.pipe(
+      mergeMap((payload) => {
+        const state = this.getState()
+        return this.httpClient.get(`/api/something`, {
+          body: {
+            query: payload
+          }
+        }).pipe(
+          map((response) => {
+            if (state.expireIn < Date.now()) { // state here is staled
+              return this.getActions().setResponse(response.body)
+            } else {
+              return this.getActions().setExpired(response.body)
+            }
+          }),
+          catchError(...),
+          startWith(this.getActions().setLoading(true)),
+          endWith(this.getActions().setLoading(false)),
+        )
+      })
+    )
+  }
+}
+```
+</details>
+
+如果我们在第一个 `mergeMap` 中使用 `getState` 直接访问状态并且在后面的 `map` 中复用这个状态，那在这个状态真正被使用的时候可能已经过期了(不是最新的值)。虽然我们可以很简单的通过在 `map` 操作符中再次获取状态来修复这个 bug，但是这种类似的问题真的 ***非常难 debug***。
+
+所以，永远通过 `响应式` 的方法访问状态是更好的实践方式:
+
+<details>
+<summary><code>示例代码</code></summary>
+
+```ts
+@Module('B')
+class ModuleB extends Ayanami<BState> {
+  defaultState = {}
+
+  constructor(private readonly httpClient: HttpClient) {
+    super()
+  }
+
+  @Effect()
+  addAndSync(payload$: Observable<number>) {
+    return payload$.pipe(
+      mergeMap((payload) => {
+        return this.httpClient.get(`/api/something`, {
+          body: {
+            query: payload
+          }
+        }).pipe(
+          withLatestFrom(this.state$),
+          map(([response, state]) => {
+            if (state.expireIn < Date.now()) { // always latest state here
+              return this.getActions().setResponse(response.body)
+            } else {
+              return this.getActions().setExpired(response.body)
+            }
+          }),
+          catchError(...),
+          startWith(this.getActions().setLoading(true)),
+          endWith(this.getActions().setLoading(false)),
+        )
+      })
+    )
+  }
+}
+```
+</details>
