@@ -3976,9 +3976,9 @@ ignore@^5.1.1:
   integrity sha512-MzbUSahkTW1u7JpKKjY7LCARd1fU5W2rLdxlM4kdkayuCwZImjkpluF9CM1aLewYJguPDqewLam18Y6AU69A8A==
 
 immer@^5.1.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-5.2.0.tgz#d5bc1850b9cce3bbf9c809c91b5d60f11c415462"
-  integrity sha512-fstQQo9692Y7ET02wKp5iq5HoHAty+3jouMzVvjloQYHtIs6STzNHXvxLPCRprRcGrJ1DYq5gyLv6+KEf3VGgw==
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-5.2.1.tgz#7d4f74c242178e87151d595f48db1b5c51580485"
+  integrity sha512-9U1GEbJuH6nVoyuFRgTQDGMzcBuNBPfXM3M7Pp/sdmYKTKYOBUZGgeUb9H57GfLK/xC1DMLarWX2FrhMBfUJ8g==
 
 import-fresh@^2.0.0:
   version "2.0.0"
