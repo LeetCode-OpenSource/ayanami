@@ -8,7 +8,6 @@ export type State<S> = {
   dispatch: <T>(action: Action<T>) => void
   // @internal
   state$: Subject<S>
-  subscribeState: (observer: (value: S) => void) => () => void
   subscribeAction: (observer: (action: Action<unknown>) => void) => () => void
   unsubscribe: () => void
 }
@@ -46,7 +45,6 @@ export function createState<S>(
 } {
   const action$ = new Subject<Action<unknown>>()
   const _action$ = new Subject<Action<unknown>>()
-  const stateObservers = new Set<(s: S) => void>()
   const actionObservers = new Set<(action: Action<unknown>) => void>()
   const state$ = new ReplaySubject<S>(1)
 
@@ -111,9 +109,6 @@ export function createState<S>(
     subscription.add(
       state$.subscribe((state) => {
         appState = state
-        for (const observer of stateObservers) {
-          observer(state)
-        }
       }),
     )
 
@@ -123,10 +118,6 @@ export function createState<S>(
       dispatch,
       state$,
       getState: () => appState,
-      subscribeState: (observer: (value: S) => void) => {
-        stateObservers.add(observer)
-        return () => stateObservers.delete(observer)
-      },
       subscribeAction: (observer: (action: Action<unknown>) => void) => {
         actionObservers.add(observer)
         return () => actionObservers.delete(observer)
@@ -136,7 +127,6 @@ export function createState<S>(
         state$.complete()
         subscription.unsubscribe()
         state.dispatch = noop
-        stateObservers.clear()
         actionObservers.clear()
       },
     })

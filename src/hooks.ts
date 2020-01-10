@@ -1,11 +1,12 @@
 import React, { useContext } from 'react'
 import { useInstance } from '@asuka/di'
+import produce, { Draft } from 'immer'
+import { map, distinctUntilChanged, skip } from 'rxjs/operators'
 
 import { Ayanami, ConstructorOf, ActionOfAyanami, State } from './core'
 import { SSRSharedContext, SSRContext, SSRStates } from './ssr/ssr-context'
 import { SSRStateCacheInstance } from './ssr/ssr-states'
 import { SSR_LOADED_KEY } from './ssr/constants'
-import produce, { Draft } from 'immer'
 export type StateSelector<S, U> = {
   (state: S): U
 }
@@ -54,24 +55,27 @@ function _useAyanamiState<S, U = S>(
       : initialState
   })
 
-  const stateObserver = React.useCallback((s: S) => {
-    if (Reflect.getMetadata(SSR_LOADED_KEY, state)) {
-      Reflect.deleteMetadata(SSR_LOADED_KEY, state)
-    } else {
-      setState(selector ? selector(s) : s)
-    }
-  }, [])
-
   // https://reactjs.org/docs/hooks-faq.html#how-do-i-implement-getderivedstatefromprops
   // do not put subscribe in useEffect
 
-  const subscribeFn = React.useCallback(() => state.subscribeState(stateObserver), [state])
-
-  const disposeFn = subscribeFn()
-
-  React.useEffect(() => {
-    return () => disposeFn()
+  const subscription = React.useMemo(() => {
+    return state.state$
+      .pipe(
+        skip(1),
+        map((s) => {
+          if (Reflect.getMetadata(SSR_LOADED_KEY, state)) {
+            Reflect.deleteMetadata(SSR_LOADED_KEY, state)
+            return s
+          } else {
+            return selector ? selector(s) : s
+          }
+        }),
+        distinctUntilChanged(),
+      )
+      .subscribe(setState)
   }, [state])
+
+  React.useEffect(() => () => subscription.unsubscribe(), [state])
 
   return appState
 }

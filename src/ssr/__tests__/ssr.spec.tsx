@@ -236,7 +236,7 @@ describe('SSR specs:', () => {
     testRenderer.unmount()
   })
 
-  it('should restore state from global #with config', () => {
+  it('should restore state from global #with selector', () => {
     // @ts-ignore
     global[GLOBAL_KEY] = {
       CountModel: {
