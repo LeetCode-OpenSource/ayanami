@@ -1,0 +1,17 @@
+---
+name: StateSelector
+route: /en/recipes/state-selector
+menu: Recipes
+---
+
+# StateSelector
+When sharing **Module** cross muti components, select a partial **state** from the whole **AppState** in **Module** to avoid useless rendering is a common requirement.
+Ayanami provide **selector** API in `useAyanami` hook and `useAyanamiState` hook to meet this requirement. Component can select the states they care about through this API, and every other parts of the **AppState** changes would be ignored and won't trigger rerender.
+
+<iframe
+  src="https://codesandbox.io/embed/ayanami-recipes-state-selector-qrcnx?expanddevtools=1&fontsize=14&hidenavigation=1&module=%2Fsrc%2Findex.tsx&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-recipes-state-selector"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
