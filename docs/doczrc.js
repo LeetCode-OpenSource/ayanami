@@ -28,6 +28,7 @@ export default {
       menu: [
         'Cancellation',
         'Loading/Error states handling',
+        'StateSelector',
         'Dependencies Replacement',
         'Adding new module asynchronously',
         'Writting tests',
@@ -60,6 +61,7 @@ export default {
       menu: [
         '取消',
         '处理 Loading/Error 状态',
+        'StateSelector',
         '依赖替换',
         'Module 异步加载',
         '测试',

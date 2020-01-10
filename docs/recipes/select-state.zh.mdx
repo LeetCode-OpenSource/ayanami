@@ -1,0 +1,17 @@
+---
+name: StateSelector
+route: /zh/recipes/state-selector
+menu: 深入
+---
+
+# StateSelector
+在多个组件间共享 **Module** 时，通常会需要从整个 **AppState** 上选择一部分出来给组件使用从而避免无效渲染。
+Ayanami 在 `useAyanami` 和 `useAyanamiState` hook 中提供了 **selector** API 来实现这个需求。组件可以从 **Module** 对应的 **AppState** 上选择自己关心的那部分状态，**AppState** 上其它部分的更新会被该组件忽略掉，也不会引起该组件的渲染。
+
+<iframe
+  src="https://codesandbox.io/embed/ayanami-recipes-state-selector-qrcnx?expanddevtools=1&fontsize=14&hidenavigation=1&module=%2Fsrc%2Findex.tsx&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-recipes-state-selector"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
