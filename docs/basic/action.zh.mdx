@@ -1,3 +1,9 @@
+---
+name: Action
+route: /zh/basic/action
+menu: 基本概念
+---
+
 # Action
 Ayanami 的 `Module` 底层由一个名为 `State` 的对象实现。`State` 对象和 `Redux` 的 `Store` 非常类似。它总是接收从 `Dispatcher` 和 `Effect` 发送过来的 `Action`, 并且将它们传递给 `Reducer` 和 `Effect`。
 
@@ -19,9 +25,6 @@ Ayanami 的 `Module` 底层由一个名为 `State` 的对象实现。`State` 对
 
 下面的例子展示了在 `Redux` 应用中使用和不使用 `Redux-Actions` 的区别:
 
-<details>
-<summary><code>不使用 redux-actions</code></summary>
-
 ```typescript
 // raw dispatcher
 connect(mapStateToProps, (dispatch) => bindActionCreators({
@@ -40,11 +43,6 @@ export const reducer = (state, action) => { // losing type information here
       return { count: 0 }
 }
 ```
-
-</details>
-
-<details>
-<summary><code>使用 redux-actions</code></summary>
 
 ```typescript
 const ADD_COUNT = createAction<number>('ADD_COUNT')
@@ -70,16 +68,11 @@ export const reducer = handleActions({
 }, { count: 0 })
 ```
 
-</details>
-
 ### Ayanami Dispatcher
 Ayanami 的 `Dispatcher` 借鉴了 `Redux-Actions` 的优势，让你不需要手动创建 `Action`，在 `Component` 中有两个 API 可以访问与 `Module` 类对应的 `Dispatcher`:
 
 #### useAyanamiDispatchers
 这个 `hook` 接收一个 **Module** 类，返回与这个 **Module** 对应的 **Dispatcher**
-
-<details>
-<summary><code>示例代码</code></summary>
 
 ```ts
 interface State {}
@@ -121,7 +114,6 @@ const SomeComponent = memo(() => {
   )
 })
 ```
-</details>
 
 #### useAyanami
 这个 `hook` 与 `useAyanamiDispatchers` 几乎一样，但它即返回与 **Module** 类对应的 **AppState** 也返回 **Dispatcer**.
@@ -132,8 +124,6 @@ const SomeComponent = memo(() => {
 
 返回的 `Action` 只能由 `Module` 类上的 **ActionsCreator** 生成，**ActionsCreator** 只能通过 `Module` 类上的 `getActions` 方法访问。
 
-<details>
-<summary><code>示例代码</code></summary>
 
 ```ts
 interface State {
@@ -157,6 +147,5 @@ class CountModule extends Ayanami<State> {
   }
 }
 ```
-</details>
 
 在上面这个例子中，`this.getActions().add(payload)` 会创建一个与被 **Reducer** 装饰的 `add` 方法对应的 `Action`。在组件中调用 `dispatcher.payloadPassThrough(payload)` 会最终触发 `add` **Reducer**。在这个例子中从组件中直接调用 `dispatcher.add(payload)` 可以达到同样的效果。

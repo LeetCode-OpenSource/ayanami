@@ -1,0 +1,25 @@
+{
+  "name": "ayanami-doc",
+  "version": "1.0.0",
+  "description": "document for ayanami",
+  "main": "index.mdx",
+  "repository": "https://github.com/LeetCode-OpenSource/ayanami",
+  "author": "lynweklm@gmail.com",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "docz": "^2.2.0",
+    "eslint": "^6.8.0",
+    "eslint-loader": "^3.0.3",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.5"
+  },
+  "scripts": {
+    "build": "docz build"
+  }
+}

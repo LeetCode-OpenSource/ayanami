@@ -1,12 +1,23 @@
+---
+name: 取消
+route: /zh/recipes/cancellation
+menu: 深入
+---
+
 # Cancellation
-Cancelling some async side effects is a common requirement of **Effect**. While there are several ways of doing this depending on your requirements, the most common way is to have your application dispatch a cancellation action and listen for it inside your **Effect**.
+在 **Effect** 中取消异步副作用是非常常见的需求。取决于需求有不同的几种方式来达到这个效果，其中最常见的就是在组件中 `Dispatch` 一个用于取消副作用的 `Action` 并在 **Effect** 中监听这个 `Action`:
 
-[Example in Codesandbox](https://codesandbox.io/s/ayanami-recipes-cancellation-4vrst)
+[Codesandbox](https://codesandbox.io/s/ayanami-recipes-cancellation-4vrst)
 
-If you click the *cancel* button before `loading text` disappear, the `fetchList` **Effect** would be cancelled, and there won't be `Got response` message in Console.
+<iframe
+  src="https://codesandbox.io/embed/ayanami-recipes-cancellation-4vrst?expanddevtools=1&fontsize=14&hidenavigation=1&module=%2Fsrc%2Findex.tsx&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-recipes-cancellation"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
 
-<details>
-<summary><code>Example codes</code></summary>
+如果你在 `loading text` 消失之前点击了 *cancel* 按钮，`fetchList` **Effect** 会被取消，并且你也不会在控制台中看到 `Got response` 信息。
 
 ```tsx
 import { Module, Ayanami, Reducer, Effect, Action } from "ayanami";
@@ -110,4 +121,3 @@ const rootElement = document.getElementById("app");
 render(<App />, rootElement);
 
 ```
-</detail>

@@ -1,8 +1,14 @@
-# 依赖注入
-如果你用过 [Angular](https://angular.io) 或者 [NestJS](https://nestjs.com/), 你可能已经对 **依赖注入** 这个概念比较熟悉了。
+---
+name: Dependencies Injection
+route: /en/basic/dependencies-injection
+menu: Basic
+---
+
+# Dependencies Injection
+If you are familiar with [Angular](https://angular.io) or [NestJS](https://nestjs.com/), you may already be familiar with **Dependencies Injection**.
 
 ## Module
-在 ayanami 程序中，所有的 **Module** 都是可**依赖注入**的。所以你可以通过将一个 **Module** 注入到另一个 **Module** 里面来达到组合它们的目的。
+In ayanami world, every **Module** is **Injectable**. So you can easily combine modules by **Inject** one to the others.
 
 ```ts
 @Module('A')
@@ -20,12 +26,9 @@ class ModuleB extends Ayanami<BState> {
 }
 ```
 
-### 访问其它 **Module** 的 `AppState`
-跟 **Redux** 不一样的是，Ayanami 没有 **全局唯一 Store** 来存储所有的状态。
-但是在 **依赖注入** 的帮助下，我们依然可以在一个 **Module** 中访问其它 **Module** 的状态。
-
-<details>
-<summary><code>示例代码</code></summary>
+### Access `AppState` from the other **Module**
+Unlike **Redux**, Ayanami does not have **Global Store** object to store the whole state in application.
+But with **Dependencies Injection**, we still can access state from the other parts in our application:
 
 ```ts
 @Module('A')
@@ -53,13 +56,8 @@ class ModuleB extends Ayanami<BState> {
 }
 ```
 
-</details>
-
-### 触发其它 **Module** 的 `Action`
-跟触发自己的 `Action` 一样，我们可以通过其它 **Module** 的 **ActionsCreator** 来触发它们的 `Action`:
-
-<details>
-<summary><code>示例代码</code></summary>
+### Trigger actions of the other modules
+Just be similar with [Emit actions in Effect using ActionsCreator](./action.md#emit-actions-in-effect-using-actionscreator), we can create `Action` using **ActionsCreator** in the other `Module class`.
 
 ```ts
 @Module('A')
@@ -92,13 +90,8 @@ class ModuleB extends Ayanami<BState> {
 }
 ```
 
-</details>
-
 ## Service
-如果你想创建一个纯(不包含状态)的 *Service*, 你可以用 **Injectable** 装饰这个 *Service* 类，这样你就可以将它注入到 ayanami **Module** 里面了。
-
-<details>
-<summary><code>示例代码</code></summary>
+If you want create a pure *Service* which seperated from `Module class`, you can just decorate it by `Injectable` decorator from ayanami.
 
 ```ts
 
@@ -188,5 +181,3 @@ export class Tracer {
   private generateTraceId(): TraceId {}
 }
 ```
-
-</details>

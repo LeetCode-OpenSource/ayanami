@@ -1,8 +1,21 @@
+---
+name: 常见问题
+route: /zh/faq
+---
+
 # FAQ
-## Type Infer
-When you are writting `Effect/SSREffect` logic, if the `Effect` emmit an `Action` which infer from itself, or some `Effects` circular dependents the others, `Type infer` in TypeScript may fail.
+## 类型推断
+在编写 `Effect/SSREffect` 逻辑的时候，如果这个 `Effect` 包含触发自身的逻辑或者多个 `Effect` 互相依赖, 则会出现类型推断失败的情况:
 
 [Example in CodeSandbox](https://codesandbox.io/s/ayanami-faq-type-infer-jf2xd)
+
+<iframe
+  src="https://codesandbox.io/embed/ayanami-faq-type-infer-jf2xd?fontsize=14&hidenavigation=1&module=%2Fsrc%2Fapp.module.ts&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-faq-type-infer"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
 
 ```typescript
 import { Ayanami, Module, ImmerReducer, Effect } from 'ayanami'
@@ -32,7 +45,7 @@ export class CountModule extends Ayanami<CountState> {
 }
 ```
 
-In this scenario, you need give the `Effect` a `Return Type` **explicit**:
+此时需要显示标注 `Effect` 的返回值:
 
 ```diff
 - import { Ayanami, Module, ImmerReducer, Effect } from 'ayanami'
@@ -42,17 +55,21 @@ In this scenario, you need give the `Effect` a `Return Type` **explicit**:
 + addLeastFive(payload$: Observable<number>): Observable<Action> {
 ```
 
-## **Effect** end callback
+## Effect 结束回调
+有几种常见的业务场景需要在 **Effect** 结束后执行 ***回调***:
 
-There are some cases you may need run `callback` after **Effect** end:
-
-### Show message after Success/Failure
-Depends on the API which show message, we could use **Data driven**/**Side effect** ways to implment this requirement: 
+### 成功/失败后展示消息
+取决于展示消息的 API，我们可以用**数据驱动**/**副作用**两种方式来实现这个需求:
 
 [Codesandbox effects callback](https://codesandbox.io/s/ayanami-faq-effects-callback-s0tzr)
 
-<details>
-<summary>Side effect way</summary>
+<iframe
+  src="https://codesandbox.io/embed/ayanami-faq-effects-callback-s0tzr?fontsize=14&hidenavigation=1&module=%2Fsrc%2Fapp.module.ts&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-faq-effects-callback"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
 
 ```ts
 import { Module, Ayanami, Reducer, Effect, Action } from "ayanami";
@@ -113,12 +130,8 @@ export class AppModule extends Ayanami<AppState> {
   }
 }
 ```
-</summary>
 
 [Codesandbox demo](https://codesandbox.io/s/ayanami-faq-effects-pure-state-i0hcb)
-
-<details>
-<summary>State driven way</summary>
 
 ```tsx
 import "reflect-metadata";
@@ -178,5 +191,3 @@ const rootElement = document.getElementById("app");
 render(<App />, rootElement);
 
 ```
-
-</summary>

@@ -39,14 +39,15 @@
 ##### Using [yarn](https://yarnpkg.com/en/package/ayanami):
 
 ```bash
-yarn add ayanami @asuka/di reflect-metadata rxjs immer
+yarn add ayanami reflect-metadata rxjs immer
 ```
 
 ##### Or via [npm](https://www.npmjs.com/package/ayanami):
 
 ```bash
-npm install ayanami @asuka/di reflect-metadata rxjs immer
+npm install ayanami reflect-metadata rxjs immer
 ```
 
 ## Docs
-[Docs](docs/README.md/)
+[Click to read Documents](https://ayanami.observer)
+[阅读文档](https://ayanami.observer/zh/basic)

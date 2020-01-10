@@ -1,13 +1,25 @@
-# Loading/Error states handling
-Handling loading and error state inside **Effect** like AJAX calls is a common requirement of **Effect**. While there are several ways of doing this depending on your requirements.
+---
+name: 处理 Loading/Error 状态
+route: /zh/recipes/loading-error-states-handling
+menu: 深入
+---
 
-## Store all possible states in signle value
-Split all possible states with mutiple values in **State** is bordering. The more elegant way is store all posible states in single value, TypeScript will ensure you always rendering with the right state:
+# 处理 Loading/Error 状态
 
-[Error/Loading states handling Example](https://codesandbox.io/s/ayanami-recipes-error-loading-handling-hyd3n)
+处理 **Effect** 中类似 AJAX 请求的 `loading` 和 `error` 状态是非常常见的需求。在这里我们推荐以下方式实现这个需求:
 
-<details>
-<summary><code>Example codes</code></summary>
+## 在 **AppState** 的一个值中存储所有可能的状态
+通常来说，将所有状态拆分存储在 **State** 里是比较常见的处理方式，但是也是最繁琐的方式。更优雅的方法是将这些可能的状态都存储在一个值里面，`TypeScript` 的类型系统会保证你在各种状态下都能正确的渲染对应的组件:
+
+[Error/Loading 状态管理例子](https://codesandbox.io/s/ayanami-recipes-error-loading-handling-hyd3n)
+
+<iframe
+  src="https://codesandbox.io/embed/ayanami-recipes-error-loading-handling-hyd3n?fontsize=14&hidenavigation=1&module=%2Fsrc%2Fapp.module.ts&theme=dark"
+  style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+  title="ayanami-recipes-error-loading-handling"
+  allow="geolocation; microphone; camera; midi; vr; accelerometer; gyroscope; payment; ambient-light-sensor; encrypted-media; usb"
+  sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
+></iframe>
 
 ```ts
 import { Module, Ayanami, Reducer, Effect, Action } from "ayanami";
@@ -119,5 +131,3 @@ const rootElement = document.getElementById("app");
 render(<App />, rootElement);
 
 ```
-
-</details>

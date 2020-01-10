@@ -1,3 +1,9 @@
+---
+name: Action
+route: /en/basic/action
+menu: Basic
+---
+
 # Action
 Ayanami `Module` was implmented by `State` object under the hood. `State` object is very similar with redux `Store` object. It **Dispatch** actions to `reducers` and `effects`, and receive actions from `Dispatcher` and `Effect`.
 
@@ -19,10 +25,7 @@ You may have used [Redux-Actions](https://github.com/redux-utilities/redux-actio
 - Provide type informations
 - Reduce boilerplate codes
 
-<details>
-<summary><code>Without redux-actions</code></summary>
-
-```typescript
+```ts
 // raw dispatcher
 connect(mapStateToProps, (dispatch) => bindActionCreators({
   addCount: (count: number) => dispatch({ // losing type information here
@@ -40,11 +43,6 @@ export const reducer = (state, action) => { // losing type information here
       return { count: 0 }
 }
 ```
-
-</details>
-
-<details>
-<summary><code>With redux-actions</code></summary>
 
 ```typescript
 const ADD_COUNT = createAction<number>('ADD_COUNT')
@@ -70,17 +68,12 @@ export const reducer = handleActions({
 }, { count: 0 })
 ```
 
-</details>
-
 ### Ayanami Dispatcher
 Ayanami dispatcher api borrows all the advantages from `Redux-Actions`.
 There are two different APIs to access `Dispatcher` which matched with `Moudle class` in `Component`:
 
 #### useAyanamiDispatchers
 This hook receive a **Module** class and produce a dispatcher referred to this **Module**.
-
-<details>
-<summary><code>Example codes</code></summary>
 
 ```ts
 interface State {}
@@ -122,7 +115,6 @@ const SomeComponent = memo(() => {
   )
 })
 ```
-</details>
 
 #### useAyanami
 Almost same with `useAyanamiDispatchers`, but produce both **AppState** and **Dispatcher**
@@ -133,8 +125,6 @@ The type signature of [Effect](./effects.md) is `<Payload>(action$: Observable<P
 
 The output actions can be created by built-in **ActionsCreator** in `Module class`, and the **ActionsCreator** could be accessed by `getActions` method.
 
-<details>
-<summary><code>Example codes</code></summary>
 
 ```ts
 interface State {
@@ -158,6 +148,5 @@ class CountModule extends Ayanami<State> {
   }
 }
 ```
-</details>
 
 In the example upon, `this.getActions().add(payload)` will create an action which match the `add` method which decorated by **Reducer** . Call the `diapatcher.payloadPassThrough(payload)` will finally trigger the `add` reducer and change the state. You can also call the `dispatcher.add(payload)` in `Component` directly, they are equally in this example.
