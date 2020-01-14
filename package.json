@@ -99,6 +99,7 @@
     "rxjs": "^6.5.4"
   },
   "dependencies": {
-    "@asuka/di": "^0.3.4"
+    "@asuka/di": "^0.3.4",
+    "@emotion/core": "^10.0.27"
   }
 }

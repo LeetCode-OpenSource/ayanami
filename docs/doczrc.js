@@ -3,6 +3,18 @@ export default {
   files: './**/*.mdx',
   title: 'Ayanami document',
   dest: 'public',
+  themeConfig: {
+    colors: {
+      header: {
+        bg: 'tomato',
+      },
+    },
+    styles: {
+      inlineCode: {
+        color: 'hotpink',
+      }
+    },
+  },
   menu: [
     'Introduction',
     {
