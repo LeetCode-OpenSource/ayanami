@@ -9,7 +9,7 @@ import { SSRSymbol } from './constants'
 import { SKIP_SYMBOL } from './ssr-effect'
 import { TERMINATE_ACTION } from './terminate'
 import { SSRStateCacheInstance } from './ssr-states'
-import { SSRStates } from './ssr-context'
+import { oneShotCache } from './ssr-oneshot-cache'
 
 export type ModuleMeta = ConstructorOf<Ayanami<any>>
 
@@ -68,7 +68,7 @@ export const runSSREffects = <Context, Returned = any>(
                 )
                 moduleName = ayanamiInstance.moduleName
                 ayanamiState = ayanamiInstance.createState(middleware)
-                SSRStates.set(ctx, ayanamiState)
+                oneShotCache.store(ctx, constructor, ayanamiState)
               }
               let effectsCount = metas.length
               let disposeFn = noop

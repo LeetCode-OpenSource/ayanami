@@ -4,8 +4,9 @@ import produce, { Draft } from 'immer'
 import { map, distinctUntilChanged, skip } from 'rxjs/operators'
 
 import { Ayanami, ConstructorOf, ActionOfAyanami, State } from './core'
-import { SSRSharedContext, SSRContext, SSRStates } from './ssr/ssr-context'
+import { SSRSharedContext, SSRContext } from './ssr/ssr-context'
 import { SSRStateCacheInstance } from './ssr/ssr-states'
+import { oneShotCache } from './ssr/ssr-oneshot-cache'
 import { SSR_LOADED_KEY } from './ssr/constants'
 export type StateSelector<S, U> = {
   (state: S): U
@@ -163,7 +164,7 @@ function _useState<M extends Ayanami<S>, S = any>(
     return SSRStateCacheInstance.has(ssrSharedContext, A)
       ? SSRStateCacheInstance.get(ssrSharedContext, A)!
       : ssrContext
-      ? SSRStates.get(ssrContext)!
+      ? oneShotCache.consume(ssrContext, A)!
       : ayanami.createState()
   }, [ayanami, ssrContext, ssrSharedContext])
 

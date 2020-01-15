@@ -2,6 +2,7 @@ import { Observable, Subject, noop, ReplaySubject, Subscription, identity } from
 import { Reducer } from 'react'
 import { TERMINATE_ACTION } from '../ssr/terminate'
 import { logStateAction } from '../redux-devtools-extension'
+import { StateInterface } from './symbols'
 
 export type State<S> = {
   getState: () => S
@@ -115,6 +116,7 @@ export function createState<S>(
     state$.next(defaultState)
 
     Object.assign(state, {
+      [StateInterface]: state,
       dispatch,
       state$,
       getState: () => appState,
