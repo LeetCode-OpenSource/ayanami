@@ -16,3 +16,5 @@ yarn.lock
 jest.config.js
 .git/
 .circleci/
+docs
+.github
