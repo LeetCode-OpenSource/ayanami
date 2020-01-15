@@ -164,7 +164,7 @@ function _useState<M extends Ayanami<S>, S = any>(
     return SSRStateCacheInstance.has(ssrSharedContext, A)
       ? SSRStateCacheInstance.get(ssrSharedContext, A)!
       : ssrContext
-      ? oneShotCache.consume(ssrContext, A)!
+      ? oneShotCache.consume(ssrContext, A) ?? ayanami.createState()
       : ayanami.createState()
   }, [ayanami, ssrContext, ssrSharedContext])
 
