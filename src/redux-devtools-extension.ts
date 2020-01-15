@@ -21,7 +21,7 @@ const FakeReduxDevTools = {
 export const INIT_ACTION_TYPE = 'INIT_AYANAMI_STATE'
 
 const ReduxDevTools =
-  (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) ||
+  (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) ??
   FakeReduxDevTools
 
 const STATE: GlobalState = {}
@@ -57,7 +57,7 @@ export const initDevtool = () => {
 }
 
 function filterParams(params: any): any {
-  if (params && typeof params === 'object') {
+  if (params && typeof params === 'object' && typeof Event !== 'undefined') {
     if (params instanceof Event) {
       return `<<Event:${params.type}>>`
     } else if (params.nativeEvent instanceof Event) {
