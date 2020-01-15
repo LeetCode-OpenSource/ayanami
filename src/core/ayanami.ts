@@ -203,7 +203,7 @@ export abstract class Ayanami<S> {
         if (reducers[type]) {
           return reducers[type](prevState, action.payload)
         } else if (immerReducers[type]) {
-          return produce(prevState, (draft) => immerReducers[type](draft, action.payload))
+          return produce(prevState, (draft: Draft<S>) => immerReducers[type](draft, action.payload))
         }
       }
       return prevState
