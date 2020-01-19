@@ -219,6 +219,7 @@ export abstract class Ayanami<S> {
     for (const actionType of this._defineActionKeys) {
       ;(this as any)[actionType] = this.action$.pipe(
         filter(({ type }) => type === actionType),
+        map(({ payload }) => payload),
         publish(),
         refCount(),
       )
