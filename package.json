@@ -87,7 +87,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.4",
     "shx": "^0.3.2",
-    "sinon": "^8.0.4",
+    "sinon": "^9.0.0",
     "ts-jest": "^25.0.0",
     "tslib": "^1.10.0",
     "typescript": "^3.7.4"
