@@ -73,7 +73,7 @@
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-react": "^7.17.0",
     "husky": "^4.0.1",
-    "immer": "^5.1.0",
+    "immer": "^6.0.0",
     "jest": "^25.1.0",
     "lint-staged": "^10.0.1",
     "lodash": "^4.17.15",
@@ -93,7 +93,7 @@
     "typescript": "^3.7.4"
   },
   "peerDependencies": {
-    "immer": "^5.1.0",
+    "immer": "^6.0.0",
     "react": "^16.8.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.4"
