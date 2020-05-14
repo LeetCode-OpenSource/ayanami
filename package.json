@@ -89,7 +89,7 @@
     "shx": "^0.3.2",
     "sinon": "^9.0.0",
     "ts-jest": "^25.0.0",
-    "tslib": "^1.10.0",
+    "tslib": "^2.0.0",
     "typescript": "^3.7.4"
   },
   "peerDependencies": {
