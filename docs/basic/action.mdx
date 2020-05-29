@@ -5,7 +5,7 @@ menu: Basic
 ---
 
 # Action
-Ayanami `Module` was implmented by `State` object under the hood. `State` object is very similar with redux `Store` object. It **Dispatch** actions to `reducers` and `effects`, and receive actions from `Dispatcher` and `Effect`.
+Ayanami `Module` was implemented by `State` object under the hood. `State` object is very similar with redux `Store` object. It **Dispatch** actions to `reducers` and `effects`, and receive actions from `Dispatcher` and `Effect`.
 
 In ayanami application, you will never need to create an `Action` by hand, so we do not expose the `Dispatch` function.
 In replacement, there are two ways to dispatch action:
@@ -22,7 +22,7 @@ Every method in ayanami `Module class` decorated by  **Reducer**, **ImmerReducer
 You may have used [Redux-Actions](https://github.com/redux-utilities/redux-actions) in **Redux** application. **ActionsCreator** in ayanami is very similar with **ActionsCreator** in `Redux-Actions`.And there are few advantages for create **ActionsCreator** using `Redux-Actions`:
 
 - Avoid [Magic string](https://en.wikipedia.org/wiki/Magic_number_(programming))
-- Provide type informations
+- Provide type information
 - Reduce boilerplate codes
 
 ```ts
@@ -70,7 +70,7 @@ export const reducer = handleActions({
 
 ### Ayanami Dispatcher
 Ayanami dispatcher api borrows all the advantages from `Redux-Actions`.
-There are two different APIs to access `Dispatcher` which matched with `Moudle class` in `Component`:
+There are two different APIs to access `Dispatcher` which matched with `Module class` in `Component`:
 
 #### useAyanamiDispatchers
 This hook receive a **Module** class and produce a dispatcher referred to this **Module**.
@@ -103,7 +103,7 @@ const SomeComponent = memo(() => {
 
   const onClickAdd = useCallback(() => {
     // ts will perform typecheck in the payload part
-    // and you can also perform **Jump to defination** in code editor
+    // and you can also perform **Jump to definition** in code editor
     dispatcher.addAndSync(parseInt(inputRef.current!.value, 10))
   }, [dispatcher, inputRef])
 
@@ -149,4 +149,4 @@ class CountModule extends Ayanami<State> {
 }
 ```
 
-In the example upon, `this.getActions().add(payload)` will create an action which match the `add` method which decorated by **Reducer** . Call the `diapatcher.payloadPassThrough(payload)` will finally trigger the `add` reducer and change the state. You can also call the `dispatcher.add(payload)` in `Component` directly, they are equally in this example.
+In the example upon, `this.getActions().add(payload)` will create an action which match the `add` method which decorated by **Reducer** . Call the `dispatcher.payloadPassThrough(payload)` will finally trigger the `add` reducer and change the state. You can also call the `dispatcher.add(payload)` in `Component` directly, they are equally in this example.

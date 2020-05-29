@@ -5,7 +5,7 @@ route: /en/faq
 
 # FAQ
 ## Type Infer
-When you are writting `Effect/SSREffect` logic, if the `Effect` emmit an `Action` which infer from itself, or some `Effects` circular dependents the others, `Type infer` in TypeScript may fail.
+When you are writing `Effect/SSREffect` logic, if the `Effect` emmit an `Action` which infer from itself, or some `Effects` circular dependents the others, `Type infer` in TypeScript may fail.
 
 [Example in CodeSandbox](https://codesandbox.io/s/ayanami-faq-type-infer-jf2xd)
 
@@ -60,7 +60,7 @@ In this scenario, you need give the `Effect` a `Return Type` **explicit**:
 There are some cases you may need run `callback` after **Effect** end:
 
 ### Show message after Success/Failure
-Depends on the API which show message, we could use **Data driven**/**Side effect** ways to implment this requirement: 
+Depends on the API which show message, we could use **Data driven**/**Side effect** ways to implement this requirement: 
 
 [Codesandbox effects callback](https://codesandbox.io/s/ayanami-faq-effects-callback-s0tzr)
 
