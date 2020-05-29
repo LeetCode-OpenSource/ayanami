@@ -43,7 +43,7 @@ export default {
         'StateSelector',
         'Dependencies Replacement',
         'Adding new module asynchronously',
-        'Writting tests',
+        'Writing tests',
       ],
     },
     {
