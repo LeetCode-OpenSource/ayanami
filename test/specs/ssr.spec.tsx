@@ -107,11 +107,13 @@ describe('SSR specs:', () => {
   beforeAll(() => {
     // @ts-ignore
     process.env.ENABLE_AYANAMI_SSR = 'true'
+    process.env.NODE_ENV = 'production'
   })
 
   afterAll(() => {
     // @ts-ignore
     process.env.ENABLE_AYANAMI_SSR = 'false'
+    delete process.env.NODE_ENV
   })
 
   it('should throw if module name not given', () => {
@@ -172,6 +174,9 @@ describe('SSR specs:', () => {
     expect(generateException1).toThrow()
     expect(generateException2).toThrow()
     expect(generateException3).toThrow()
+    process.env.NODE_ENV = 'development'
+    expect(generateException1).not.toThrow()
+    expect(generateException2).not.toThrow()
   })
 
   it('should run ssr effects', async () => {
