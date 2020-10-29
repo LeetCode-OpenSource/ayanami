@@ -11,13 +11,13 @@ export const SSRModule = (config: string | InjectableConfig & { name: string }) 
   let name: string
   if (typeof config === 'string') {
     if (configSets.has(config)) {
-      throw new Error(`Duplicated Module name: ${config}`)
+      reportDuplicated(config)
     }
     name = config
     configSets.add(config)
   } else if (config && typeof config.name === 'string') {
     if (configSets.has(config.name)) {
-      throw new Error(`Duplicated Module name: ${config.name}`)
+      reportDuplicated(config.name)
     }
     configSets.add(config.name)
     name = config.name
@@ -32,4 +32,12 @@ export const SSRModule = (config: string | InjectableConfig & { name: string }) 
     target.prototype[moduleNameKey] = name
     return Injectable(injectableConfig)(target)
   }
+}
+
+function reportDuplicated(moduleName: string) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`Duplicated Module name: ${moduleName}`)
+  }
+  // avoid to throw error after HMR
+  console.warn(`Duplicated Module name: ${moduleName}`)
 }
