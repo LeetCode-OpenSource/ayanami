@@ -15,23 +15,28 @@ import { SSRContext } from '../ssr/ssr-context'
 
 import {
   useAyanamiInstance,
-  UseAyanamiInstanceResult,
+  UseAyanamiInstanceResult as Result,
   UseAyanamiInstanceConfig,
 } from './use-ayanami-instance'
 
-export function useAyanami<M extends Ayanami<S>, S>(
+interface Config<S, U> extends Partial<ScopeConfig> {
+  selector?: (state: S) => U
+}
+
+export function useAyanami<M extends Ayanami<S>, S, U = M extends Ayanami<infer SS> ? SS : S>(
   A: ConstructorOf<M>,
-  config?: ScopeConfig,
-): M extends Ayanami<infer SS> ? UseAyanamiInstanceResult<M, SS> : UseAyanamiInstanceResult<M, S> {
+  config?: M extends Ayanami<infer SS> ? Config<SS, U> : Config<S, U>,
+): M extends Ayanami<infer SS> ? Result<M, SS, U> : Result<M, S, U> {
   const scope = get(config, 'scope')
+  const selector = get(config, 'selector')
   const req = isSSREnabled() ? React.useContext(SSRContext) : null
   const reqScope = req ? createScopeWithRequest(req, scope) : scope
   const ayanami = React.useMemo(() => getInstanceWithScope(A, reqScope), [reqScope])
   ayanami.scopeName = scope || DEFAULT_SCOPE_NAME
 
-  const useAyanamiInstanceConfig = React.useMemo((): UseAyanamiInstanceConfig => {
-    return { destroyWhenUnmount: scope === TransientScope }
+  const useAyanamiInstanceConfig = React.useMemo((): UseAyanamiInstanceConfig<S, U> => {
+    return { destroyWhenUnmount: scope === TransientScope, selector }
   }, [reqScope])
 
-  return useAyanamiInstance<M, S>(ayanami, useAyanamiInstanceConfig) as any
+  return useAyanamiInstance<M, S, U>(ayanami, useAyanamiInstanceConfig) as any
 }
