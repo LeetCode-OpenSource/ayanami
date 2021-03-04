@@ -111,9 +111,9 @@ describe('Hooks spec:', () => {
       })
 
       const OuterComponent = () => {
-        const [state, actions] = useAyanami(Count, { scope: TransientScope })
+        const [{ count }, actions] = useAyanami(Count, { scope: TransientScope })
         const addOne = useCallback(() => actions.add(1), [])
-        outerRenderSpy(state.count)
+        outerRenderSpy(count)
         return (
           <div>
             <button onClick={addOne}>add one</button>
