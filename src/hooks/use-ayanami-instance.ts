@@ -4,25 +4,19 @@ import get from 'lodash/get'
 import { ActionMethodOfAyanami, Ayanami, combineWithIkari } from '../core'
 import { useSubscribeAyanamiState } from './use-subscribe-ayanami-state'
 
-export interface UseAyanamiInstanceConfig {
+export interface UseAyanamiInstanceConfig<S, U> {
   destroyWhenUnmount?: boolean
+  selector?: (state: S) => U
 }
 
-export type UseAyanamiInstanceResult<M extends Ayanami<S>, S> = [
-  Readonly<S>,
-  ActionMethodOfAyanami<M, S>,
-]
+export type UseAyanamiInstanceResult<M extends Ayanami<S>, S, U> = [U, ActionMethodOfAyanami<M, S>]
 
-type Config = UseAyanamiInstanceConfig
-
-type Result<M extends Ayanami<S>, S> = UseAyanamiInstanceResult<M, S>
-
-export function useAyanamiInstance<M extends Ayanami<S>, S>(
+export function useAyanamiInstance<M extends Ayanami<S>, S, U>(
   ayanami: M,
-  config?: Config,
-): Result<M, S> {
+  config?: UseAyanamiInstanceConfig<S, U>,
+): UseAyanamiInstanceResult<M, S, U> {
   const ikari = React.useMemo(() => combineWithIkari(ayanami), [ayanami])
-  const state = useSubscribeAyanamiState(ayanami)
+  const state = useSubscribeAyanamiState(ayanami, config ? config.selector : undefined)
 
   React.useEffect(
     () => () => {
@@ -35,5 +29,5 @@ export function useAyanamiInstance<M extends Ayanami<S>, S>(
     [ayanami, config],
   )
 
-  return [state, ikari.triggerActions] as Result<M, S>
+  return [state, ikari.triggerActions] as UseAyanamiInstanceResult<M, S, U>
 }

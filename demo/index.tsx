@@ -8,6 +8,7 @@ import { Ayanami, Effect, EffectAction, Reducer, useAyanami } from '../src'
 
 interface State {
   count: number
+  input: string
 }
 
 interface TipsState {
@@ -30,6 +31,7 @@ class Tips extends Ayanami<TipsState> {
 class Count extends Ayanami<State> {
   defaultState = {
     count: 0,
+    input: '',
   }
 
   otherProps = ''
@@ -40,17 +42,22 @@ class Count extends Ayanami<State> {
 
   @Reducer()
   add(state: State, count: number): State {
-    return { count: state.count + count }
+    return { ...state, count: state.count + count }
   }
 
   @Reducer()
   addOne(state: State): State {
-    return { count: state.count + 1 }
+    return { ...state, count: state.count + 1 }
   }
 
   @Reducer()
   reset(): State {
-    return { count: 0 }
+    return { count: 0, input: '' }
+  }
+
+  @Reducer()
+  changeInput(state: State, value: string): State {
+    return { ...state, input: value }
   }
 
   @Effect()
@@ -67,7 +74,7 @@ class Count extends Ayanami<State> {
 }
 
 function CountComponent() {
-  const [{ count }, actions] = useAyanami(Count)
+  const [{ count, input }, actions] = useAyanami(Count)
   const [{ tips }] = useAyanami(Tips)
 
   const add = (count: number) => () => actions.add(count)
@@ -76,12 +83,26 @@ function CountComponent() {
   return (
     <div>
       <p>count: {count}</p>
+      <p>input: {input}</p>
       <p>tips: {tips}</p>
       <button onClick={add(1)}>add one</button>
       <button onClick={minus(1)}>minus one</button>
-      <button onClick={actions.reset}>reset to zero</button>
+      <button onClick={actions.reset}>reset</button>
+      <InputComponent />
     </div>
   )
 }
+
+const InputComponent = React.memo(() => {
+  const [input, actions] = useAyanami(Count, { selector: (state) => state.input })
+
+  return (
+    <div>
+      <h3>{input}</h3>
+      <input value={input} onChange={(e) => actions.changeInput(e.target.value)} />
+    </div>
+  )
+})
+InputComponent.displayName = 'InputComponent'
 
 ReactDOM.render(<CountComponent />, document.querySelector('#app'))

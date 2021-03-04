@@ -9,6 +9,7 @@ import { useCallback, useEffect } from 'react'
 
 interface State {
   count: number
+  anotherCount: number
 }
 
 enum CountAction {
@@ -27,6 +28,7 @@ const numberProvider: ValueProvider = {
 class Count extends Ayanami<State> {
   defaultState = {
     count: -1,
+    anotherCount: 0,
   }
 
   constructor(@Inject(numberProvider.provide) number: number) {
@@ -96,6 +98,33 @@ describe('Hooks spec:', () => {
     it('Effect action work properly', () => {
       click(CountAction.MINUS)
       expect(count()).toBe('0')
+    })
+
+    it('State selector work properly', () => {
+      const innerRenderSpy = jest.fn()
+      const outerRenderSpy = jest.fn()
+
+      const InnerComponent = React.memo(({ scope }: { scope?: any }) => {
+        const [anotherCount] = useAyanami(Count, { selector: (state) => state.anotherCount, scope })
+        innerRenderSpy(anotherCount)
+        return <div />
+      })
+
+      const OuterComponent = () => {
+        const [state, actions] = useAyanami(Count, { scope: TransientScope })
+        const addOne = useCallback(() => actions.add(1), [])
+        outerRenderSpy(state.count)
+        return (
+          <div>
+            <button onClick={addOne}>add one</button>
+            <InnerComponent />
+          </div>
+        )
+      }
+      const renderer = create(<OuterComponent />)
+      act(() => renderer.root.findByType('button').props.onClick())
+      expect(innerRenderSpy.mock.calls).toEqual([[0]])
+      expect(outerRenderSpy.mock.calls).toEqual([[0], [1]])
     })
 
     it('should only render once when update the state right during rendering', () => {

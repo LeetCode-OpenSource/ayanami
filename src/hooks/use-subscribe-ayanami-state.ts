@@ -1,13 +1,20 @@
 import * as React from 'react'
 import { Subscription } from 'rxjs'
-
+import identity from 'lodash/identity'
+import { shallowEqual } from './shallow-equal'
 import { Ayanami } from '../core'
 
-export function useSubscribeAyanamiState<M extends Ayanami<S>, S>(ayanami: M): S {
+export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U>(
+  ayanami: M,
+  selector: (state: S) => U = identity,
+): unknown {
+  const state = ayanami.getState()
+
   const ayanamiRef = React.useRef<Ayanami<S> | null>(null)
   const subscriptionRef = React.useRef<Subscription | null>(null)
+  const stateRef = React.useRef<S>(state)
 
-  const [state, setState] = React.useState<S>(() => ayanami.getState())
+  const [, forceUpdate] = React.useState({})
 
   if (ayanamiRef.current !== ayanami) {
     ayanamiRef.current = ayanami
@@ -18,7 +25,12 @@ export function useSubscribeAyanamiState<M extends Ayanami<S>, S>(ayanami: M): S
     }
 
     if (ayanami) {
-      subscriptionRef.current = ayanami.getState$().subscribe(setState)
+      subscriptionRef.current = ayanami.getState$().subscribe((state) => {
+        const before = selector(stateRef.current)
+        const after = selector(state)
+        if (!shallowEqual(before, after)) forceUpdate({})
+        stateRef.current = state
+      })
     }
   }
 
@@ -31,5 +43,5 @@ export function useSubscribeAyanamiState<M extends Ayanami<S>, S>(ayanami: M): S
     [subscriptionRef],
   )
 
-  return state
+  return selector(state)
 }
