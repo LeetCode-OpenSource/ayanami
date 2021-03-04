@@ -4,7 +4,7 @@ import get from 'lodash/get'
 import { ActionMethodOfAyanami, Ayanami, combineWithIkari } from '../core'
 import { useSubscribeAyanamiState } from './use-subscribe-ayanami-state'
 
-export interface UseAyanamiInstanceConfig<S, U> {
+export interface UseAyanamiInstanceConfig<S = unknown, U = unknown> {
   destroyWhenUnmount?: boolean
   selector?: (state: S) => U
 }
