@@ -23,7 +23,7 @@ interface Config<S, U> extends Partial<ScopeConfig> {
   selector?: (state: S) => U
 }
 
-export function useAyanami<M extends Ayanami<any>, U = M extends Ayanami<infer S> ? S : never>(
+export function useAyanami<M extends Ayanami<S>, S, U = M extends Ayanami<infer SS> ? SS : never>(
   A: ConstructorOf<M>,
   config?: M extends Ayanami<infer S> ? Config<S, U> : never,
 ): M extends Ayanami<infer S>
@@ -38,7 +38,7 @@ export function useAyanami<M extends Ayanami<any>, U = M extends Ayanami<infer S
   const ayanami = React.useMemo(() => getInstanceWithScope(A, reqScope), [reqScope])
   ayanami.scopeName = scope || DEFAULT_SCOPE_NAME
 
-  const useAyanamiInstanceConfig = React.useMemo<UseAyanamiInstanceConfig>(() => {
+  const useAyanamiInstanceConfig = React.useMemo<UseAyanamiInstanceConfig<S>>(() => {
     return { destroyWhenUnmount: scope === TransientScope, selector }
   }, [reqScope])
 
