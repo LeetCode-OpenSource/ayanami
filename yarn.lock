@@ -4201,9 +4201,9 @@ ignore@^5.1.1, ignore@^5.1.4:
   integrity sha512-BMpfD7PpiETpBl/A6S498BaIJ6Y/ABT93ETbby2fP00v4EbvPBXWEoaR1UBPKs3iR53pJY7EtZk5KACI57i1Uw==
 
 immer@^8.0.1:
-  version "8.0.3"
-  resolved "https://npm.lingkou.xyz/immer/-/immer-8.0.3.tgz#26b360596e091eb26370d15db86bad3d5eb73972"
-  integrity sha1-JrNgWW4JHrJjcNFduGutPV63OXI=
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-8.0.4.tgz#3a21605a4e2dded852fb2afd208ad50969737b7a"
+  integrity sha512-jMfL18P+/6P6epANRvRk6q8t+3gGhqsJ9EuJ25AXE+9bNTYtssvzeYbEd0mXRYWCmmXSIbnlpz6vd6iJlmGGGQ==
 
 import-fresh@^2.0.0:
   version "2.0.0"
