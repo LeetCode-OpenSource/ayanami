@@ -14,12 +14,14 @@ import { effectSymbols, reducerSymbols, immerReducerSymbols, defineActionSymbols
 const getOriginalFunctionNames = (ayanami: Ayanami<any>) => ({
   effects: getActionNames(effectSymbols, ayanami.constructor as ConstructorOf<Ayanami<any>>),
   reducers: getActionNames(reducerSymbols, ayanami.constructor as ConstructorOf<Ayanami<any>>),
-  defineActions: getActionNames(defineActionSymbols, ayanami.constructor as ConstructorOf<
-    Ayanami<any>
-  >),
-  immerReducers: getActionNames(immerReducerSymbols, ayanami.constructor as ConstructorOf<
-    Ayanami<any>
-  >),
+  defineActions: getActionNames(
+    defineActionSymbols,
+    ayanami.constructor as ConstructorOf<Ayanami<any>>,
+  ),
+  immerReducers: getActionNames(
+    immerReducerSymbols,
+    ayanami.constructor as ConstructorOf<Ayanami<any>>,
+  ),
 })
 
 const transformDefineActions = (actionNames: string[]): OriginalDefineActions => {
@@ -37,6 +39,7 @@ const transformDefineActions = (actionNames: string[]): OriginalDefineActions =>
   return result
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getOriginalFunctions = (ayanami: Ayanami<any>) => {
   const { effects, reducers, immerReducers, defineActions } = getOriginalFunctionNames(ayanami)
 

@@ -4,8 +4,7 @@
   "extends": [
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "prettier/@typescript-eslint"
+    "prettier"
   ],
   "globals": {
     "Atomics": "readonly",
@@ -27,7 +26,7 @@
     "@typescript-eslint/no-use-before-define": ["error", { "functions": false, "classes": false }],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "no-console": ["error", { "allow": ["warn", "error"] }]
   },
   "settings": {

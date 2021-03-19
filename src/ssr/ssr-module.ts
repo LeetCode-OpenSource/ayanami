@@ -6,7 +6,8 @@ const configSets = new Set<string>()
 export const moduleNameKey = Symbol.for('__MODULE__NAME__')
 export const globalKey = Symbol.for('__GLOBAL_MODULE_CACHE__')
 
-export const SSRModule = (config: string | InjectableConfig & { name: string }) => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const SSRModule = (config: string | (InjectableConfig & { name: string })) => {
   const injectableConfig: InjectableConfig = { providers: [] }
   let name: string
   if (typeof config === 'string') {

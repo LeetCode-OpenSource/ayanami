@@ -73,6 +73,18 @@ class Count extends Ayanami<State> {
   }
 }
 
+const InputComponent = React.memo(() => {
+  const [input, actions] = useAyanami(Count, { selector: (state) => state.input })
+
+  return (
+    <div>
+      <h3>{input}</h3>
+      <input value={input} onChange={(e) => actions.changeInput(e.target.value)} />
+    </div>
+  )
+})
+InputComponent.displayName = 'InputComponent'
+
 function CountComponent() {
   const [{ count, input }, actions] = useAyanami(Count)
   const [{ tips }] = useAyanami(Tips)
@@ -92,17 +104,5 @@ function CountComponent() {
     </div>
   )
 }
-
-const InputComponent = React.memo(() => {
-  const [input, actions] = useAyanami(Count, { selector: (state) => state.input })
-
-  return (
-    <div>
-      <h3>{input}</h3>
-      <input value={input} onChange={(e) => actions.changeInput(e.target.value)} />
-    </div>
-  )
-})
-InputComponent.displayName = 'InputComponent'
 
 ReactDOM.render(<CountComponent />, document.querySelector('#app'))

@@ -6,12 +6,12 @@ interface DevTools {
 }
 
 interface GlobalState {
-  [modelName: string]: object
+  [modelName: string]: Record<string, unknown>
 }
 
 const FakeReduxDevTools = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  connect: (_config: object) => ({ send: noop, init: noop }),
+  connect: (_config: Record<string, unknown>) => ({ send: noop, init: noop }),
 }
 
 const ReduxDevTools =
@@ -34,18 +34,18 @@ const getDevTools = (() => {
 
 let isEnableLog = false
 
-export function enableReduxLog() {
+export function enableReduxLog(): void {
   isEnableLog = true
 }
 
-export function disableReduxLog() {
+export function disableReduxLog(): void {
   isEnableLog = false
 }
 
 export function logStateAction(
   namespace: string,
   infos: { actionName: string; params: string; state?: any },
-) {
+): void {
   if (isEnableLog) {
     const action = {
       type: `${namespace}/${infos.actionName}`,

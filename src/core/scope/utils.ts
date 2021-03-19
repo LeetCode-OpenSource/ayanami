@@ -77,6 +77,7 @@ function getInstanceFrom<T>(constructor: ConstructorOf<T>, scope: Scope): T | un
   return scopeMap && scopeMap.get(scope)
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createScopeWithRequest(req: Request, scope: any | undefined) {
   if (!scope) {
     return req

@@ -4,7 +4,7 @@ import { Draft } from 'immer'
 import { Ayanami } from './ayanami'
 
 // https://stackoverflow.com/questions/55541275/typescript-check-for-the-any-type
-type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
+type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N
 
 type IsAny<T> = IfAny<T, true, false>
 
@@ -12,6 +12,7 @@ type IsAny<T> = IfAny<T, true, false>
 type IsVoid<T> = IsAny<T> extends true ? false : [T] extends [void] ? true : false
 
 // using class type to avoid conflict with user defined params
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class ArgumentsType<_Arguments extends any[]> {}
 
 export type ActionMethod<
@@ -43,6 +44,7 @@ export interface ReducerAction<State> {
   readonly nextState: State
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type UnpackEffectFunctionArguments<T extends Function> = T extends (
   ...payload: infer Arguments
 ) => Observable<EffectAction>
@@ -61,6 +63,7 @@ type UnpackEffectPayload<Func, State> = Func extends () => Observable<EffectActi
   ? UnpackEffectFunctionArguments<Func>
   : never
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type UnpackReducerFunctionArguments<T extends Function> = T extends (
   state: any,
   ...payload: infer Arguments

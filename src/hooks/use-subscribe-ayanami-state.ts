@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Subscription } from 'rxjs'
 import identity from 'lodash/identity'
-import { shallowEqual } from './shallow-equal'
+import shallowEqual from 'shallowequal'
 import { Ayanami } from '../core'
 
 export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U = S>(

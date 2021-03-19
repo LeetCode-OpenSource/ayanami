@@ -42,6 +42,7 @@ interface SSREffectOptions<Payload> {
   skipFirstClientDispatch?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function SSREffect<T, Payload>(options?: SSREffectOptions<Payload>) {
   const { payloadGetter, skipFirstClientDispatch } = {
     payloadGetter: undefined,
@@ -53,7 +54,7 @@ export function SSREffect<T, Payload>(options?: SSREffectOptions<Payload>) {
     addDecorator(target, method, payloadGetter)
     if (!isSSREnabled() && skipFirstClientDispatch) {
       const originalValue = descriptor.value
-      descriptor.value = function(
+      descriptor.value = function (
         this: any,
         action$: Observable<Payload>,
         state$?: Observable<any>,

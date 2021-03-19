@@ -8,9 +8,9 @@ type ConnectedComponent<P, S, A> = React.FunctionComponent<Omit<P, keyof S | key
 type ConnectComponent<S, A> = <P>(Component: React.ComponentType<P>) => ConnectedComponent<P, S, A>
 
 export interface ComponentConnectedWithAyanami<M extends Ayanami<S>, S> {
-  (): ConnectComponent<{}, {}>
+  (): ConnectComponent<Record<string, unknown>, Record<string, unknown>>
 
-  <MS>(mapStateToProps: (state: S) => MS): ConnectComponent<MS, {}>
+  <MS>(mapStateToProps: (state: S) => MS): ConnectComponent<MS, Record<string, unknown>>
 
   <MS, MA>(
     mapStateToProps: (state: S) => MS,
@@ -20,7 +20,7 @@ export interface ComponentConnectedWithAyanami<M extends Ayanami<S>, S> {
   <MA>(
     mapStateToProps: null,
     mapActionsToProps: (actions: ActionMethodOfAyanami<M, S>) => MA,
-  ): ConnectComponent<{}, MA>
+  ): ConnectComponent<Record<string, unknown>, MA>
 }
 
 export function connectAyanami<M extends Ayanami<S>, S>(

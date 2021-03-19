@@ -35,6 +35,7 @@ class Count extends Ayanami<CountState> {
     count: 0,
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   constructor(readonly tips: Tips) {
     super()
   }
@@ -105,7 +106,7 @@ describe('Effect spec:', () => {
 
   describe('Error handles', () => {
     it(`Error won't affect the main state$`, () => {
-      const errorLog = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const errorLog = jest.spyOn(console, 'error').mockImplementation(() => void 0)
       countActions.error()
       expect(errorLog.mock.calls.length).toBe(1)
       errorLog.mockRestore()

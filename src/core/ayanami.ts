@@ -45,7 +45,7 @@ export abstract class Ayanami<State> {
     }
   }
 
-  destroy() {
+  destroy(): void {
     destroyIkariFrom(this)
   }
 
