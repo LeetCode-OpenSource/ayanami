@@ -4,17 +4,16 @@ import identity from 'lodash/identity'
 import { shallowEqual } from './shallow-equal'
 import { Ayanami } from '../core'
 
-export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U>(
+export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U = S>(
   ayanami: M,
   selector: (state: S) => U = identity,
 ): unknown {
-  const state = ayanami.getState()
+  const [state, setState] = React.useState<U>(() => selector(ayanami.getState()))
 
   const ayanamiRef = React.useRef<Ayanami<S> | null>(null)
   const subscriptionRef = React.useRef<Subscription | null>(null)
-  const stateRef = React.useRef<S>(state)
-
-  const [, forceUpdate] = React.useState({})
+  const stateRef = React.useRef<U>(state)
+  const isFirstRenderRef = React.useRef(true)
 
   if (ayanamiRef.current !== ayanami) {
     ayanamiRef.current = ayanami
@@ -25,11 +24,17 @@ export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U>(
     }
 
     if (ayanami) {
-      subscriptionRef.current = ayanami.getState$().subscribe((state) => {
-        const before = selector(stateRef.current)
-        const after = selector(state)
-        if (!shallowEqual(before, after)) forceUpdate({})
-        stateRef.current = state
+      subscriptionRef.current = ayanami.getState$().subscribe((moduleState) => {
+        if (isFirstRenderRef.current) return
+        if (selector === identity) {
+          setState(selector(moduleState))
+          stateRef.current = selector(moduleState)
+        } else {
+          const before = stateRef.current
+          const after = selector(moduleState)
+          if (!shallowEqual(before, after)) setState(after)
+          stateRef.current = after
+        }
       })
     }
   }
@@ -43,5 +48,6 @@ export function useSubscribeAyanamiState<M extends Ayanami<S>, S, U>(
     [subscriptionRef],
   )
 
-  return selector(state)
+  isFirstRenderRef.current = false
+  return state
 }
