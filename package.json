@@ -26,7 +26,8 @@
     "lint": "yarn lint:eslint && yarn lint:tsc",
     "lint:eslint": "eslint . --ext .ts,.tsx --fix --max-warnings 0",
     "lint:tsc": "tsc -p ./tsconfig.json --noEmit",
-    "test": "jest --collectCoverage"
+    "test": "jest --collectCoverage",
+    "prepare": "husky install"
   },
   "husky": {
     "hooks": {
@@ -78,7 +79,7 @@
     "eslint-plugin-react": "^7.21.5",
     "husky": "^5.2.0",
     "immer": "^9.0.1",
-    "jest": "^24.8.0",
+    "jest": "^26.6.3",
     "lint-staged": "^10.5.4",
     "lodash": "^4.17.15",
     "madge": "^4.0.1",
@@ -91,7 +92,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.2",
     "shx": "^0.3.2",
-    "ts-jest": "^24.0.2",
+    "ts-jest": "^26.5.4",
     "tslib": "^2.1.0",
     "typescript": "^4.2.3"
   },
