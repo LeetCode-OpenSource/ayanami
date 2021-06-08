@@ -2,12 +2,11 @@
 # yarn lockfile v1
 
 
-"@asuka/di@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.2.0.tgz#bcb9d0625c491b35be14dac8a0c345aa84735626"
-  integrity sha512-Hs/KGqn7Gad97eSnnY6DUT+jm9TYG9/XX/1QItui1Avk7b+YEyIndgKMNC3wHiqtmpQ8FbJQugH/ebJjtQKEvA==
+"@asuka/di@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@asuka/di/-/di-0.3.4.tgz#04c8b2994aed05509d819636c567de8ca29a8265"
+  integrity sha512-xiNMRJDDmsbfCK3LIyu9xwLEA75wKWovQ+hQslavlvZAvrWdKnPJbps+MBm4tOmfCMbUZmmVpEAMbHpRzi9oZQ==
   dependencies:
-    injection-js "^2.2.1"
     tslib "^1.10.0"
   optionalDependencies:
     reflect-metadata "^0.1.13"
@@ -4357,13 +4356,6 @@ ini@~1.3.0:
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.8.tgz#a29da425b48806f34767a4efce397269af28432c"
   integrity sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
 
-injection-js@^2.2.1:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/injection-js/-/injection-js-2.4.0.tgz#ebe8871b1a349f23294eaa751bbd8209a636e754"
-  integrity sha512-6jiJt0tCAo9zjHbcwLiPL+IuNe9SQ6a9g0PEzafThW3fOQi0mrmiJGBJvDD6tmhPh8cQHIQtCOrJuBfQME4kPA==
-  dependencies:
-    tslib "^2.0.0"
-
 internal-slot@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/internal-slot/-/internal-slot-1.0.3.tgz#7347e307deeea2faac2ac6205d4bc7d34967f59c"
@@ -8320,7 +8312,7 @@ tslib@^1.10.0, tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.0.0, tslib@^2.1.0:
+tslib@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
   integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
