@@ -67,7 +67,7 @@
     "@types/jest": "^26.0.21",
     "@types/lodash": "^4.14.136",
     "@types/node": "^15.0.1",
-    "@types/react": "^17.0.3",
+    "@types/react": "^18.0.3",
     "@types/react-dom": "^17.0.2",
     "@types/react-test-renderer": "^17.0.1",
     "@types/shallowequal": "^1.1.1",
