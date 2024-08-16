@@ -9,7 +9,9 @@ interface GlobalState {
   [modelName: string]: Record<string, unknown>
 }
 
+// Connect to Redux DevTools if available, otherwise use a fake implementation
 const FakeReduxDevTools = {
+   // Connect method returns a mock object with `send` and `init` functions that do nothing
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   connect: (_config: Record<string, unknown>) => ({ send: noop, init: noop }),
 }
